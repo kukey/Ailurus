@@ -101,7 +101,7 @@ class PBC:
     def remove(self):
         APT.remove('libpbc0', 'libpbc-dev')
    
-class Build_Essential(_apt_install):
+class Build_Essential(apt_install):
     'Build-essential'
     detail = _('By installing build-essential, you will get g++, make, gdb and libc.\n'
                'Command: sudo apt-get install build-essential')
@@ -111,7 +111,7 @@ class Build_Essential(_apt_install):
     def __init__(self):
         self.pkgs = 'build-essential'
 
-class ManPages(_apt_install):
+class ManPages(apt_install):
     'ManPages'
     detail = _('Install manual pages about Linux system calls, library calls, using POSIX, and POSIX library files.\n'
               'Command: sudo apt-get install manpages-dev manpages-posix manpages-posix-dev')      
@@ -121,7 +121,7 @@ class ManPages(_apt_install):
     def __init__(self):
         self.pkgs = 'manpages-dev manpages-posix manpages-posix-dev'
 
-class Ctags(_apt_install):
+class Ctags(apt_install):
     'Exuberant-ctags'
     detail = _('This is a source code parser. It allows moving to the definition of a symbol. It is used in vi and emacs.\n'
                'Command: sudo apt-get install exuberant-ctags')
@@ -131,7 +131,7 @@ class Ctags(_apt_install):
     def __init__(self):
         self.pkgs = 'exuberant-ctags'
 
-class GMP(_apt_install):
+class GMP(apt_install):
     __doc__ = _('GNU multiprecision arithmetic library')
     detail = _('Command: sudo apt-get install libgmp3-dev')
     category = 'dev'
@@ -140,7 +140,7 @@ class GMP(_apt_install):
     def __init__(self):
         self.pkgs = 'libgmp3-dev'
 
-class Ncurses_and_qt3mt(_apt_install):
+class Ncurses_and_qt3mt(apt_install):
     __doc__ = _('Ncurses5 and QT3')
     detail = _('libncurses5 is a library controlling writing to the console screen.\n'
                'libqt3-mt is Trolltech Qt library, version 3.\n' 
@@ -151,7 +151,7 @@ class Ncurses_and_qt3mt(_apt_install):
     def __init__(self):
         self.pkgs = 'libncurses5-dev libqt3-mt-dev'
         
-class Svn_Git_bzr(_apt_install):
+class Svn_Git_bzr(apt_install):
     __doc__ = _('Subversion, git, and bzr')
     detail = _('subversion, git and bzr are popular version control systems.\n'
                'Command: sudo apt-get install subversion git-core bzr')
@@ -161,7 +161,7 @@ class Svn_Git_bzr(_apt_install):
     def __init__(self):
         self.pkgs = 'subversion git-core bzr'
         
-class AutoTools(_apt_install):
+class AutoTools(apt_install):
     __doc__ = _('Autotools')
     detail = _('autoconf can produce shell scripts to automatically configure software source code packages.\n'
                'automake is a tool for automatically generating Makefile.\n'
@@ -172,7 +172,7 @@ class AutoTools(_apt_install):
     def __init__(self):
         self.pkgs = 'autotool autoconf automake'
         
-class FreeGLut3(_apt_install):
+class FreeGLut3(apt_install):
     __doc__ = _('OpenGL library')  
     detail = _('This is a library for writing OpenGL programs.\n'
                 'Command: sudo apt-get install freeglut3-dev') 
@@ -182,7 +182,7 @@ class FreeGLut3(_apt_install):
     def __init__(self):
         self.pkgs = 'freeglut3-dev'
         
-class Boost(_apt_install):
+class Boost(apt_install):
     __doc__ = _('Boost library')
     detail = _('Command: sudo apt-get install libboost-dev')
     license = 'GNU General Public License (GPL)'
@@ -191,7 +191,7 @@ class Boost(_apt_install):
     def __init__(self):
         self.pkgs = 'libboost-dev'
 
-class SDL(_apt_install):
+class SDL(apt_install):
     __doc__ = _('SDL library')
     detail = _('This is a library for writing SDL programs.\n'
                'SDL is a cross-platform multimedia library designed to provide low level access to audio'
@@ -203,7 +203,7 @@ class SDL(_apt_install):
     def __init__(self):
         self.pkgs = 'libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev'
     
-class PipeViewer(_apt_install):
+class PipeViewer(apt_install):
     __doc__ = _('pv: a pipe viewer')
     detail = _('A terminal-based tool for monitoring the progress of data through a pipeline.\n'
                'Command: sudo apt-get install pv')
@@ -212,7 +212,7 @@ class PipeViewer(_apt_install):
     def __init__(self):
         self.pkgs = 'pv'
           
-class AutoApt(_apt_install):
+class AutoApt(apt_install):
     'Auto-apt'
     detail = _('"auto-apt run ./configure" can help you install the packages which are not installed.\n'
                'Command: sudo apt-get install auto-apt')
@@ -220,7 +220,7 @@ class AutoApt(_apt_install):
     def __init__(self):
         self.pkgs = 'auto-apt'
 
-class CheckInstall(_apt_install):
+class CheckInstall(apt_install):
     'CheckInstall'
     detail = _('Checkinstall help you build deb package. '
                'Command: sudo apt-get install checkinstall')
@@ -228,7 +228,7 @@ class CheckInstall(_apt_install):
     def __init__(self):
         self.pkgs = 'checkinstall'
         
-class Umbrello(_apt_install):
+class Umbrello(apt_install):
     __doc__ = _('Umbrello: UML modelling')
     detail = _('Umbrello help you do UML modelling.\n'
                'Command: sudo apt-get install umbrello')
@@ -238,14 +238,14 @@ class Umbrello(_apt_install):
     def __init__(self):
         self.pkgs = 'umbrello'
 
-class Ubuntu_Studio_Theme(_apt_install):
+class Ubuntu_Studio_Theme(apt_install):
     __doc__ = _('Ubuntu Studio Theme')
     detail = _('Command: sudo apt-get install ubuntustudio-theme ubuntustudio-icon-theme ubuntustudio-wallpapers ubuntustudio-gdm-theme')
     license = 'GNU General Public License (GPL)'
     def __init__(self):
         self.pkgs = 'ubuntustudio-theme ubuntustudio-icon-theme ubuntustudio-wallpapers ubuntustudio-gdm-theme'
     
-class MiniCom_Ckermit(_apt_install):
+class MiniCom_Ckermit(apt_install):
     __doc__ = _('Minicom and ckermit')
     detail = _('Command: sudo apt-get install minicom ckermit')
     license = 'GNU General Public License (GPL)'
@@ -332,7 +332,7 @@ class GNOMEArtNextGen:
     def support(self):
         return Config.get_Ubuntu_version() in ['hardy', 'intrepid', 'jaunty', 'karmic']
 
-class QtiPlot(_apt_install) :
+class QtiPlot(apt_install) :
     __doc__ = _('QtiPlot: The equivalence of "Origin" plotting application in Linux')
     detail = _('It is the indispensable plotting application for writing Physics experiments reports.\n'
        'Command: sudo apt-get install qtiplot')
@@ -343,7 +343,7 @@ class QtiPlot(_apt_install) :
     def __init__(self):
         self.pkgs = 'qtiplot'
 
-class Extcalc(_apt_install):
+class Extcalc(apt_install):
     'Extcalc'
     detail = _('This is a multifunctional graphic calculator.\n'
         'Command: sudo apt-get install extcalc')
@@ -353,7 +353,7 @@ class Extcalc(_apt_install):
     def __init__(self):
         self.pkgs = 'extcalc'
         
-class StartupManager(_apt_install):
+class StartupManager(apt_install):
     __doc__ = _('Satartup Manager')   
     detail = _('Satartup manager helps you change GRUB settings and themes.\n'
                'Command: sudo apt-get install startupmanager')
@@ -361,7 +361,7 @@ class StartupManager(_apt_install):
     def __init__(self):
         self.pkgs = 'startupmanager'
         
-class Zhcon(_apt_install):
+class Zhcon(apt_install):
     __doc__ = _('Zhcon')
     detail = _('Zhcon helps you display Chinese characters in TTY terminal.\n'
                'You can launch it by "zhcon --utf8".\n'
@@ -370,7 +370,7 @@ class Zhcon(_apt_install):
     def __init__(self):
         self.pkgs = 'zhcon'
         
-class PowerTop(_apt_install):
+class PowerTop(apt_install):
     'PowerTop'
     detail = _('Powertop helps you save power for your laptop.\n'
                'Command: sudo apt-get install powertop')

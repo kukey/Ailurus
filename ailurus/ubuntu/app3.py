@@ -24,7 +24,7 @@ import sys, os
 from lib import *
 from libapp import *
 
-class Varkon(_apt_install, _path_lists):
+class Varkon(apt_install, path_lists):
     __doc__ = _('Varkon: A concise CAD software')
     detail = ( _('Be good at geometric modeling. '
                  'Please study the documentation '
@@ -40,7 +40,7 @@ class Varkon(_apt_install, _path_lists):
         self.shortcut = '/usr/share/applications/varkon.desktop'
         self.paths = [ self.shortcut ]
     def install(self):
-        _apt_install.install(self)
+        apt_install.install(self)
         create_file(self.shortcut, '''[Desktop Entry]
 Name=Varkon
 Exec=/usr/bin/varkon
@@ -50,12 +50,12 @@ Terminal=false
 Type=Application
 Categories=Science;Engineering;''')
     def installed(self):
-        return _apt_install.installed(self)
+        return apt_install.installed(self)
     def remove(self):
-        _apt_install.remove(self)
+        apt_install.remove(self)
         gksudo('rm -f %s'%self.shortcut)
 
-class FreeCAD(_apt_install):
+class FreeCAD(apt_install):
     __doc__ = _('FreeCAD: A CAD software based on OpenCasCade')
     detail = _('Be good at three-dimensional solid design. Official site: <span color="blue"><u>http://sourceforge.net/projects/free-cad/</u></span>')
     category = 'em'
@@ -110,7 +110,7 @@ class FreeCAD(_apt_install):
         if ver in ['hardy', 'intrepid'] and get_arch()==32: return True 
         return False
 
-class QCad(_apt_install):
+class QCad(apt_install):
     'QCad'
     detail = _('A CAD software which supports DXF-format. ')
     category = 'em'
@@ -120,7 +120,7 @@ class QCad(_apt_install):
     def __init__(self):
         self.pkgs = 'qcad'
 
-class Moonlight(_apt_install):
+class Moonlight(apt_install):
     __doc__ = _(u'Moonlight: an open source implementation of Microsoft® Silverlight')
     detail = _(u'Moonlight provides Windows® media codecs. '
        u'By this application, you can enjoy Windows® video/audio in webpages.\n'
@@ -284,7 +284,7 @@ class DisableGettyKarmic(DisableGetty):
 #    def remove(self):
 #        gksudo('dpkg --purge linuxqq')
 
-class Octave(_apt_install):
+class Octave(apt_install):
     __doc__ = 'Octave'
     detail = _(u'A Matlab® compatible numerical computation appliation.\n'
        'Command: sudo apt-get install qtoctave')
@@ -296,7 +296,7 @@ class Octave(_apt_install):
     def __init__(self):
         self.pkgs = 'qtoctave'
     def remove(self):
-        _apt_install.remove(self)
+        apt_install.remove(self)
         gksudo('apt-get remove octave* -qq')
 
 class Generic_Genome_Browser:
@@ -336,7 +336,7 @@ class Realplayer32:
     def remove(self):
         gksudo('dpkg --purge realplay')
 
-class Screenlets(_apt_install):
+class Screenlets(apt_install):
     __doc__ = _('Screenlets')
     detail = _('Screenlets is able to add eye candy gadgets on desktop, '
        'such as sticky notes, clocks, weather forecasts, calendars and so on, '
@@ -349,7 +349,7 @@ class Screenlets(_apt_install):
     def __init__(self):
         self.pkgs = 'screenlets'
 
-class CompizSettingManager(_apt_install):
+class CompizSettingManager(apt_install):
     __doc__ = _('Compiz settings manager')
     detail = _('Compiz Fusion is the unification of the Beryl project and the community around the Compiz Window Manager. '
        'Compiz settings manager is the configuration application for Compiz Fusion. '
@@ -362,7 +362,7 @@ class CompizSettingManager(_apt_install):
     def __init__(self):
         self.pkgs = 'compizconfig-settings-manager'
 
-class CompizSettingManagerSimple(_apt_install):
+class CompizSettingManagerSimple(apt_install):
     __doc__ = _('A simple Compiz settings manager')
     detail = _('Command: sudo apt-get install simple-ccsm')
     category = 'appearance'
@@ -395,7 +395,7 @@ class GoogleChrome:
             print >>f, _('"google-chrome-beta" is not installed. '
                          'However, you have installed "google-chrome-unstable".'),
 
-class ScienceBiology(_apt_install):
+class ScienceBiology(apt_install):
     __doc__= _('Micro-biology software')
     detail = _('This software is for molecular biology, structural biology and bioinformatics.\n' 
                'Command: sudo apt-get install med-bio med-bio-dev')
@@ -405,10 +405,10 @@ class ScienceBiology(_apt_install):
     def __init__(self):
         self.pkgs='med-bio med-bio-dev'
     def remove(self):
-        _apt_install.remove(self)
+        apt_install.remove(self)
         run('sudo apt-get autoremove')
 
-class TuxPaint(_apt_install):
+class TuxPaint(apt_install):
     __doc__ = _('Tux Paint')
     detail = _('This is a drawing program for young children three years and up.\n' 
                     'Command: sudo apt-get install tuxpaint')
@@ -418,7 +418,7 @@ class TuxPaint(_apt_install):
     def __init__(self):
         self.pkgs='tuxpaint'
 
-class CodeBlocks(_apt_install):
+class CodeBlocks(apt_install):
     __doc__ = _('Code::Blocks - C/C++ IDE')
     license = 'GNU General Public License (GPL)'
     category = 'dev'
@@ -426,7 +426,7 @@ class CodeBlocks(_apt_install):
     def __init__(self):
         self.pkgs = 'codeblocks'
 
-class ChildsPlay(_apt_install):
+class ChildsPlay(apt_install):
     __doc__ = 'ChildsPlay'
     detail = _('This is a suite of educational games for young children.\n'
                     'Command: sudo apt-get install childsplay')
@@ -448,7 +448,7 @@ class ChildsPlay(_apt_install):
     def get_reason(self, f):
         self._get_reason(f)
         
-class GCompris(_apt_install):
+class GCompris(apt_install):
     __doc__ = 'GCompris'
     detail = _('GCompris provides educational games for children aged 2 to 10.\n'
                     'Command: sudo apt-get install gcompris')
@@ -466,7 +466,7 @@ class GCompris(_apt_install):
     def get_reason(self, f):
         self._get_reason(f)
  
-class QT_Creator(_apt_install):
+class QT_Creator(apt_install):
     'Qt Creator'
     detail = _('This is an IDE for Qt.\n'
                'Command: sudo apt-get install qtcreator qt-4-dev-tools qt4-doc qt4-qtconfig')
@@ -476,7 +476,7 @@ class QT_Creator(_apt_install):
     def __init__(self):
         self.pkgs = 'qtcreator qt4-dev-tools qt4-doc qt4-qtconfig'
 
-class Kadu(_apt_install):
+class Kadu(apt_install):
     __doc__ = 'Kadu'
     detail = _('Kadu is an instant messenger, which is very popular in Poland.\n'
                'Command : sudo apt-get install kadu')
@@ -486,7 +486,7 @@ class Kadu(_apt_install):
     def support(self):
         return Config.is_Poland_locale()
 
-class Qnapi(_apt_install):
+class Qnapi(apt_install):
     __doc__ = 'Qnapi'
     detail = _('QNapi is unofficial free clone of NAPI-PROJEKT program. '
                 'Its purpose is to find and download subtitles for given video file. Currently only Polish subtitles are available.\n'
@@ -498,30 +498,7 @@ class Qnapi(_apt_install):
     def support(self):
         return Config.is_Poland_locale()
 
-#class Audacious(_apt_install):
-#    __doc__ = 'Audacious'
-#    detail = _('Audacious is a media player which supports many media formats and third-party plugins.\n'
-#                   'Command: sudo apt-get install audacious')
-#    category = 'media'
-#    def __init__(self):
-#        self.pkgs = 'audacious'    
-
-#class Miro(_apt_install):
-#    __doc__ = 'Miro'
-#    detail = _("Miro is a free and Internet TV application.\n"
-#                    "Command: sudo apt-get install miro")
-#    category = 'media'
-#    def __init__(self):
-#        self.pkgs = 'miro'
-
-#class VLC(_apt_install):
-#    __doc__ = 'VLC'
-#    detail = _("VLC is a media player which supports many media formats.")
-#    category = 'media'
-#    def __init__(self):
-#        self.pkgs = 'vlc'
-
-class Parcellite(_apt_install):
+class Parcellite(apt_install):
     __doc__ = _('Parcellite: clipboard manager')
     detail = _('This is a powerful clipboard manager. '
                'It can preserve 25 strings concurrently.')
@@ -532,7 +509,7 @@ class Parcellite(_apt_install):
     def support(self):
         return not ( Config.get_Ubuntu_version() in ['hardy'] )
 
-class R_Language_Basic(_apt_install):
+class R_Language_Basic(apt_install):
     __doc__ = _('R language (basic development environment)')
     detail = _('A powerful statistical computation language and a graphics system.\n'
                'If you want to use the latest version of R language, please read http://cran.r-project.org/\n'
@@ -543,7 +520,7 @@ class R_Language_Basic(_apt_install):
     def __init__(self):
         self.pkgs = 'r-base r-base-dev'
 
-class R_Language_Full(_apt_install):
+class R_Language_Full(apt_install):
     __doc__ = _('R language (full development environment and all plugins)')
     detail = _('A powerful statistical computation language and a graphics system.\n'
                'If you want to use the latest version of R language, please read http://cran.r-project.org/\n'
@@ -559,7 +536,7 @@ class R_Language_Full(_apt_install):
             if p.startswith('r-cran-'): print >>value, p,
         self.pkgs = value.getvalue()
 
-class Bluefish(_apt_install):
+class Bluefish(apt_install):
     __doc__ = _('Bluefish: Edit HTML web-pages')
     detail = _('Command: sudo apt-get install bluefish')
     license = 'GNU General Public License' 
@@ -568,7 +545,7 @@ class Bluefish(_apt_install):
     def __init__(self):
         self.pkgs = 'bluefish'
 
-class Native_64bit_Flash(_path_lists):
+class Native_64bit_Flash(path_lists):
     __doc__ = _('Adobe native 64bit Flash plugin for Firefox')
     category = 'media'
     logo = 'flash.png'
@@ -590,7 +567,7 @@ class Native_64bit_Flash(_path_lists):
     def support(self):
         return get_arch() == 64
 
-class Wallpaper_Tray(_apt_install):
+class Wallpaper_Tray(apt_install):
     __doc__ = _('WallpaperTray: Randomly change GNOME desktop background')
     category = 'appearance'
     detail = _('Command: sudo apt-get install wallpaper-tray\n'
@@ -760,7 +737,7 @@ class Fctix:
     def remove(self):
         APT.remove('fcitx-svn')
         
-class XBMC(_apt_install):
+class XBMC(apt_install):
     'XBMC'
     category = 'media'
     license = 'GNU General Public License (GPL)'
@@ -769,11 +746,11 @@ class XBMC(_apt_install):
         xbmc_obj=Repo_XBMC()
         if not xbmc_obj.installed():
             xbmc_obj.install()
-        _apt_install.install(self)
+        apt_install.install(self)
     def __init__(self):
         self.pkgs = 'xbmc'
 
-class Songbird(_apt_install):
+class Songbird(apt_install):
     'Songbird'
     category = 'media'
     license = 'GNU General Public License (GPL)'
@@ -782,11 +759,11 @@ class Songbird(_apt_install):
         song_obj = Repo_Songbird()
         if not song_obj.installed():
             song_obj.install()
-        _apt_install.install(self)
+        apt_install.install(self)
     def __init__(self):
         self.pkgs = 'songbird'
         
-class DropBox(_apt_install):
+class DropBox(apt_install):
     'Dropbox'
     category = 'internet'
     license = 'free for Linux'
@@ -795,11 +772,11 @@ class DropBox(_apt_install):
         drop_obj = Repo_Dropbox()
         if not drop_obj.installed():
             drop_obj.install()
-        _apt_install.install(self)
+        apt_install.install(self)
     def __init__(self):
         self.pkgs = 'nautilus-dropbox'
 
-class Skype(_apt_install):
+class Skype(apt_install):
     'Skype'
     category = 'internet'
     license = 'proprietary'
@@ -808,13 +785,13 @@ class Skype(_apt_install):
         sky_obj = Repo_Skype()
         if not sky_obj.installed():
             sky_obj.install()
-        _apt_install.install(self)
+        apt_install.install(self)
     def __init__(self):
         self.pkgs = 'skype'
     def support(self):
         return get_arch() == 32
 
-class Vuze_Karmic(_apt_install):
+class Vuze_Karmic(apt_install):
     # Latest Vuze is in 9.10 repository.
     'Vuze'
     category = 'internet'

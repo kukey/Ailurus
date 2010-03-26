@@ -24,7 +24,7 @@ import sys, os
 from lib import *
 from libapp import *
 
-class Alice(_path_lists):
+class Alice(path_lists):
     __doc__ = _('Alice: A new way to learn programming')
     detail = (
               _('A storytelling application, especially appropriate for middle school students.') +'\n' + 
@@ -110,7 +110,7 @@ class AliPayFirefoxPlugin:
         import os
         return os.path.exists('/usr/bin/firefox')
 
-class AstroMenace(_path_lists):
+class AstroMenace(path_lists):
     'AstroMenace'
     detail = _('Drive a spaceship and battle against invaders! Collect money during the combat. Upgrade armaments and weapons. '
        'This is a full 3d style space shooter game. '
@@ -191,7 +191,7 @@ Categories=Game;''')
 #        if os.path.exists('/usr/bin/rmeio'):
 #            gksudo('/usr/bin/rmeio')
 
-class ChineseAcademyofSciencesTeXTemplate(_download_one_file) :
+class ChineseAcademyofSciencesTeXTemplate(download_one_file) :
     # cannot find out which license it is released under
     __doc__ = _('LaTeX Thesis Templates by Chinese Academy of Sciences')
     import os
@@ -208,7 +208,7 @@ class ChineseAcademyofSciencesTeXTemplate(_download_one_file) :
         import os
         self.file = os.path.expanduser('~/CASthesis.zip')
 
-class XJTUTeXTemplate(_download_one_file) :
+class XJTUTeXTemplate(download_one_file) :
     # cannot find out which license it is released under
     __doc__ = _("LaTeX Thesis Templates by Xi\'an Jiaotong University, China")
     import os
@@ -225,7 +225,7 @@ class XJTUTeXTemplate(_download_one_file) :
         import os
         self.file = os.path.expanduser('~/XJTUthesis.rar')
 
-class HITTeXTemplate(_download_one_file) :
+class HITTeXTemplate(download_one_file) :
     # cannot find out which license it is released under
     __doc__ = _('LaTeX Thesis Templates by Harbin Institute of Technology, China')
     import os
@@ -243,7 +243,7 @@ class HITTeXTemplate(_download_one_file) :
         import os
         self.file = os.path.expanduser('~/HITthesis.rar')
 
-class Vuze(_path_lists): 
+class Vuze(path_lists): 
     # The core engine is released under GPL. 
     # However, parts of Vuze carry more restricted licensing terms.
     #
@@ -284,7 +284,7 @@ Type=Application''')
     def support(self):
         return Config.get_Ubuntu_version() in ['hardy', 'intrepid', 'jaunty']
             
-class FFJavaScriptDebugger(_ff_extension): # cannot find out which license it is released under
+class FFJavaScriptDebugger(ff_extension): # cannot find out which license it is released under
     __doc__ = _('JavaScript Debugger: a powerful JavaScript debugger')
     category = 'firefoxdev'
     size = 907935
@@ -295,9 +295,9 @@ class FFJavaScriptDebugger(_ff_extension): # cannot find out which license it is
         self.name = u'JavaScript Debugger'
         self.R = R(['http://releases.mozilla.org/pub/mozilla.org/addons/216/javascript_debugger-0.9.87.4-fx+tb+sb+sm.xpi'],
                       217578,'3369de2b98b747c4d1c79803819b2d727b9083f6')
-        _ff_extension.__init__(self)
+        ff_extension.__init__(self)
 
-class FFMacOSXTheme(_ff_extension): # cannot find out which license it is released under
+class FFMacOSXTheme(ff_extension): # cannot find out which license it is released under
     __doc__ = _('Mac OS X Theme')
     logo = 'ff_macosxtheme.png'
     size = 1026679
@@ -309,9 +309,9 @@ class FFMacOSXTheme(_ff_extension): # cannot find out which license it is releas
         self.R = R(['http://tdt.sjtu.edu.cn/S/FirefoxExt/macosx_theme-0.6.8-fx.jar',
                     'http://releases.mozilla.org/pub/mozilla.org/addons/7172/macosx_theme-0.6.8-fx.jar'],
     689344, '4b58d1c49ae123e50a76cb41bc6a1162d1bcaaf8')
-        _ff_extension.__init__(self)
+        ff_extension.__init__(self)
 
-class FFNetVideoHunter(_ff_extension): # cannot find out which license it is released under
+class FFNetVideoHunter(ff_extension): # cannot find out which license it is released under
     __doc__ = _('NetVideoHunter: Download videoclips from video-sharing web sites')
     logo = 'ff_netvideohunter.png'
     size = 104411
@@ -323,9 +323,9 @@ class FFNetVideoHunter(_ff_extension): # cannot find out which license it is rel
         self.R = R(['http://tdt.sjtu.edu.cn/S/FirefoxExt/netvideohunter-0.4.3-fx.xpi',
                     'http://releases.mozilla.org/pub/mozilla.org/addons/7447/netvideohunter-0.4.3-fx.xpi'],
                     44541, '3d47e726587743758097a069358ed306df63bc3a')
-        _ff_extension.__init__(self)
+        ff_extension.__init__(self)
 
-class FFPersonas(_ff_extension): # cannot find out which license it is released under
+class FFPersonas(ff_extension): # cannot find out which license it is released under
     __doc__ = _('Personas: One-click changing Firefox skin')
     logo = 'ff_personas.png'
     size = 383371
@@ -337,5 +337,5 @@ class FFPersonas(_ff_extension): # cannot find out which license it is released 
         self.R = R(['http://tdt.sjtu.edu.cn/S/FirefoxExt/personas-1.4-fx+tb.xpi',
                     'http://releases.mozilla.org/pub/mozilla.org/addons/10900/personas-1.4-fx+tb.xpi'],
     275501, 'ac6de4e93270e0650fc06a88cf5fe639e8a879fb')
-        _ff_extension.__init__(self)
+        ff_extension.__init__(self)
 

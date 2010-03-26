@@ -24,7 +24,7 @@ import sys, os
 from lib import *
 from libapp import *
 
-class GEdit_Suitable_For_Programmer(_set_gconf, _apt_install) :
+class GEdit_Suitable_For_Programmer(gconf_key, apt_install) :
     __doc__ = _('Make GEdit more suitable for programmers')
     detail = _('Change GEdit settings as follows. '
        'Automatically indent current line. '
@@ -59,38 +59,15 @@ class GEdit_Suitable_For_Programmer(_set_gconf, _apt_install) :
                     )
         self.pkgs = 'gedit-plugins'
     def install(self):
-        _set_gconf.install(self)
-        _apt_install.install(self)
+        gconf_key.install(self)
+        apt_install.install(self)
     def installed(self):
-        return _set_gconf.installed(self) and _apt_install.installed(self)
+        return gconf_key.installed(self) and apt_install.installed(self)
     def remove(self):
-        _set_gconf.remove(self)
-        _apt_install.remove(self)
+        gconf_key.remove(self)
+        apt_install.remove(self)
 
-#class Full_Chinese_Language_Pack(_apt_install):
-#    __doc__ = _('Install full Chinese language support')
-#    detail = _('Because of live CD capacity limitation, the Ubuntu system does not have full Simplified Chinese language support.\n')
-#    Chinese = True
-#    size = 42156 * 1000
-#    time = 38
-#    logo = 'language.png'
-#    def __init__(self):
-#        if Config.get_Ubuntu_version()=='hardy':
-#            self.pkgs='language-pack-gnome-zh-base language-pack-gnome-zh language-pack-zh-base language-pack-zh openoffice.org-l10n-zh-tw openoffice.org-help-zh-tw ttf-arphic-ukai ttf-wqy-zenhei xfonts-wqy language-support-fonts-zh libchewing3-data libchewing3 scim-chewing scim-pinyin scim-modules-table scim-tables-zh language-support-input-zh language-support-zh thunderbird-locale-zh-cn thunderbird-locale-zh-tw language-support-translations-zh openoffice.org-l10n-zh-cn openoffice.org-help-zh-cn'
-#        elif Config.get_Ubuntu_version()=='intrepid':
-#            self.pkgs='language-pack-gnome-zh-base language-pack-gnome-zh language-pack-zh-base language-pack-zh openoffice.org-l10n-common openoffice.org-l10n-zh-cn thunderbird-locale-zh-cn openoffice.org-l10n-zh-tw openoffice.org-help-zh-tw thunderbird-locale-zh-tw language-support-translations-zh openoffice.org-help-zh-cn ttf-arphic-ukai ttf-wqy-zenhei language-support-extra-zh xfonts-wqy language-support-fonts-zh libchewing3-data libchewing3 scim-chewing scim-pinyin scim-modules-table scim-tables-zh language-support-input-zh ttf-arphic-bsmi00lp ttf-arphic-gbsn00lp'
-#        elif Config.get_Ubuntu_version()=='jaunty':
-#            self.pkgs='language-pack-zh language-pack-gnome-zh language-support-input-zh language-support-fonts-zh language-support-translations-zh language-support-extra-zh'
-#        elif Config.get_Ubuntu_version()=='karmic':
-#            self.pkgs='language-pack-zh-hans language-pack-gnome-zh-hans openoffice.org-help-zh-cn gnome-user-guide-zh openoffice.org-l10n-zh-cn language-support-input-zh-hans language-support-fonts-zh-hans language-pack-zh-hans'
-#        
-#        if not getattr(self.__class__, 'appended', False) and hasattr(self, 'pkgs'):
-#            self.__class__.appended = True
-#            self.__class__.detail += _('Command: ')+'sudo apt-get install '+self.pkgs
-#    def get_reason(self, f):
-#        self._get_reason(f)
-
-class Full_Language_Pack(_apt_install):
+class Full_Language_Pack(apt_install):
     __doc__ = _('Full language support and input method')
     detail = _('Because of live CD capacity limitation, the Ubuntu system does not have full language support.\n')
     logo = 'language.png'
@@ -127,17 +104,7 @@ class Full_Language_Pack(_apt_install):
     def get_reason(self, f):
         self._get_reason(f)
 
-#class Eliminate_SCIM_Crash_Bug(_apt_install):
-#    __doc__ = _('Eliminate bug: SCIM suddenly crashes without reason')
-#    size = 172 * 1000
-#    time = 3
-#    logo = 'scim.png'
-#    def __init__(self):
-#        self.pkgs='scim-bridge-client-qt'
-#    def support(self):
-#        return Config.get_Ubuntu_version() in ['hardy', 'intrepid', 'jaunty'] and APT.installed('scim')
-
-class Decompression_Capability(_apt_install) :
+class Decompression_Capability(apt_install) :
     __doc__ = _('Decompression software: 7z, rar, cab, ace')
     detail = _('Command: sudo apt-get install rar unrar p7zip p7zip-rar p7zip-full cabextract unace')
     size = 5824 * 1000
@@ -148,7 +115,7 @@ class Decompression_Capability(_apt_install) :
     def get_reason(self, f):
         self._get_reason(f)
 
-class Typespeed(_apt_install) :
+class Typespeed(apt_install) :
     'Typespeed'
     detail= _('Typespeed is a typing practise. It only runs in terminal.')
     size = 356 * 1000
@@ -158,7 +125,7 @@ class Typespeed(_apt_install) :
     def __init__(self):
         self.pkgs = "typespeed"
 
-class Evince_Read_Chinese_PDF(_apt_install) :
+class Evince_Read_Chinese_PDF(apt_install) :
     __doc__ = _('Make Evince be able to reveal Chinese pdf')
     detail = _('Command: sudo apt-get install poppler-data')
     category='office'
@@ -169,42 +136,7 @@ class Evince_Read_Chinese_PDF(_apt_install) :
     def __init__(self):
         self.pkgs = 'poppler-data'
 
-#class IA32_Libs(_apt_install) :
-#    __doc__ = _('ia32 shared libraries for x86-64 systems')
-#    detail = _('This is the ia32/i386 architecture runtime libraries for x86-64 Linux system.\n'
-#       'Command: sudo apt-get install ia32-libs')
-#    size = 125044 * 1000
-#    time = 8
-#    inconsistent = True
-#    logo = 'ia32-libs.png'
-#    def support(self):
-#        return get_arch()==64
-#    def __init__(self):
-#        self.pkgs = 'ia32-libs'
-#    def install(self):
-#        if get_arch()!=32:
-#            _apt_install.install(self)
-#    def installed(self):
-#        if get_arch()==32:
-#            return True
-#        return _apt_install.installed(self)
-#    def remove(self):
-#        if get_arch()!=32:
-#            _apt_install.remove(self)
-
-#class NTFS3G(_apt_install) :
-#    __doc__ = 'NTFS-3g'
-#    detail = _('This is the NTFS driver for Linux. '
-#       'It supports operations on Windows XP/2000/2003/Vista/7 NTFS file system. '
-#       'It supports most POSIX operations.\n'
-#       'Command: sudo apt-get install ntfs-3g')
-#    size = 152 * 1000
-#    time = 16
-#    logo = 'ntfs-3g.png'
-#    def __init__(self):
-#        self.pkgs = 'ntfs-3g'
-
-class CHMSee_Read_CHM_Documents(_apt_install) :
+class CHMSee_Read_CHM_Documents(apt_install) :
     __doc__ = _('ChmSee: A CHM file viewer')
     detail = _('Command: sudo apt-get install chmsee')
     license = ('GNU General Public License (GPL), '
@@ -216,7 +148,7 @@ class CHMSee_Read_CHM_Documents(_apt_install) :
     def __init__(self):
         self.pkgs = 'chmsee'
 
-class Workrave_And_Auto_Start_It(_apt_install) :
+class Workrave_And_Auto_Start_It(apt_install) :
     __doc__ = 'Workrave'
     detail = _('The program frequently alerts you to leave computers, take micro-pauses, rest breaks and restricts you to your daily limit of using computers.\n'
        'Command: sudo apt-get install workrave')
@@ -245,12 +177,12 @@ X-GNOME-Autostart-enabled=true
 '''
             )
     def install(self):
-        _apt_install.install(self)
+        apt_install.install(self)
         self.__workraveautostart()
     def installed(self):
         import os
         if not os.path.exists(self.file): return False
-        return _apt_install.installed(self)
+        return apt_install.installed(self)
     def get_reason(self, f):
         import os
         if not APT.installed('workrave'):
@@ -258,12 +190,12 @@ X-GNOME-Autostart-enabled=true
         if not os.path.exists(self.file):
             print >>f, _('The file "%s" does not exist.')%self.file,
     def remove(self):
-        _apt_install.remove(self)
+        apt_install.remove(self)
         import os
         if os.path.exists(self.file):
             os.remove(self.file)
 
-class VIM_and_VIMRC(_apt_install) :
+class VIM_and_VIMRC(apt_install) :
     __doc__ = _('VIM')
     detail = _('Install VIM and make it more suitable for programming. '
        'The installation process is as follows. '
@@ -285,12 +217,12 @@ class VIM_and_VIMRC(_apt_install) :
         self.vimrc = os.path.expanduser("~/.vimrc")
         self.lines = [ 'syntax on', 'set autoindent', 'set number', 'set mouse=a' ]
     def install(self):
-        _apt_install.install(self)
+        apt_install.install(self)
         self.__vimrc_install()
     def installed(self):
-        return _apt_install.installed(self)
+        return apt_install.installed(self)
     def remove(self):
-        _apt_install.remove(self)
+        apt_install.remove(self)
         file_remove ( self.vimrc, *self.lines )
 
 class ColorfulBashPromptSymbols :
@@ -314,7 +246,7 @@ class ColorfulBashPromptSymbols :
     def remove(self):
         file_remove ( self.bashrc, self.line )
         
-class Multimedia_Codecs (_apt_install) :
+class Multimedia_Codecs (apt_install) :
     __doc__ = _('Multi-media codec')
     detail = _(
        'Command: sudo apt-get install gstreamer0.10-fluendo-mp3 gstreamer0.10-ffmpeg gstreamer0.10-plugins-bad '
@@ -330,7 +262,7 @@ class Multimedia_Codecs (_apt_install) :
     def get_reason(self, f):
         self._get_reason(f)
 
-class Eliminate_CUPS_Cannot_Print_Bug(_apt_install):
+class Eliminate_CUPS_Cannot_Print_Bug(apt_install):
     __doc__ = _('Enable "Print to pdf" capability and eliminate "Cannot print" bug')
     detail = _('The installation process is as follows. Firstly, the command "sudo apt-get install cups-pdf" is launched. '
        'Then a bug in "/etc/apparmor.d/usr.sbin.cupsd" file is eliminated.')
@@ -344,7 +276,7 @@ class Eliminate_CUPS_Cannot_Print_Bug(_apt_install):
     def __init__(self):
         self.pkgs = 'cups-pdf'
     def install(self):
-        _apt_install.install(self)
+        apt_install.install(self)
         gksudo("chmod 4755 /usr/lib/cups/backend/cups-pdf") #rwsr-xr-x
         with TempOwn( self.__file ) as o:
             with open( self.__file , "r") as f:
@@ -357,11 +289,11 @@ class Eliminate_CUPS_Cannot_Print_Bug(_apt_install):
                 for c in content:
                     f.write(c)
     def installed(self):
-        return _apt_install.installed(self) and file_contain(self.__file, self.__line)
+        return apt_install.installed(self) and file_contain(self.__file, self.__line)
     def support(self):
         return Config.get_Ubuntu_version() in ['hardy', 'intrepid', 'jaunty']
 
-class CUPS(_apt_install):
+class CUPS(apt_install):
     __doc__ = _('Enable "Print to pdf" capability')
     detail = _('Command: sudo apt-get install cpus-pdf')
     license = 'GNU Lesser General Public License'
@@ -372,7 +304,7 @@ class CUPS(_apt_install):
     def support(self):
         return Config.get_Ubuntu_version() not in ['hardy', 'intrepid', 'jaunty']
         
-class Flash_Player(_apt_install):
+class Flash_Player(apt_install):
     __doc__ = _(u'Adobe® Flash plugin for web browser')
     detail = _('Command: sudo apt-get install flashplugin-installer')
     time = 271
@@ -434,7 +366,7 @@ class AdobeReader:
         if APT.installed('acroread'):
             APT.remove('acroread')
 
-class StardictAndDictionaries(_apt_install):
+class StardictAndDictionaries(apt_install):
     __doc__ = _('Stardict and four dictionaries')
     category = 'office'
     detail = _('Install Stardict. '
@@ -453,7 +385,7 @@ class StardictAndDictionaries(_apt_install):
         import os
         self.conf_file = os.path.expanduser('~/.stardict/stardict.cfg')
     def install(self):
-        _apt_install.install(self)
+        apt_install.install(self)
         FileServer.chdir_local()
         try:
             for file in [
@@ -502,7 +434,7 @@ class StardictAndDictionaries(_apt_install):
 use_custom_font=true
 custom_font=FreeSerif 13''')
     def installed(self):
-        if not _apt_install.installed(self):
+        if not apt_install.installed(self):
             return False
         for path in [ 'stardict-cedict-gb-2.4.2', 'stardict-langdao-ec-gb-2.4.2',
 'stardict-langdao-ce-gb-2.4.2', 'stardict-oxford-gb-2.4.2' ] :
@@ -522,7 +454,7 @@ custom_font=FreeSerif 13''')
         if not_in:
             print >>f, _('"%s" does not exist.')%' '.join(not_in),
         
-class Liferea(_apt_install):
+class Liferea(apt_install):
     __doc__ = _('Liferea: a RSS feed reader')
     detail = _('This is a simple and easy used RSS feed reader.\n'
        'Command: sudo apt-get install liferea')
@@ -534,7 +466,7 @@ class Liferea(_apt_install):
     def __init__(self):
         self.pkgs = 'liferea'
 
-class FireWall(_apt_install):
+class FireWall(apt_install):
     __doc__ = _('Firestarter')
     detail = _('Linux system comes up with a firewall "iptables". '
        'Firestarter is the graphical frontend of "iptables".\n'
@@ -620,7 +552,7 @@ class InstallFreshLinuxKernel:
                       'linux-image-%s-generic'%self.version )
         APT.cache_changed()
         
-class MACChanger(_apt_install):
+class MACChanger(apt_install):
     __doc__ = _('MACChanger: change MAC address')
     detail = _('MACChanger is a utility for viewing/manipulating the MAC address of network interfaces.\n'
                'Command: sudo apt-get install macchanger')
@@ -628,7 +560,7 @@ class MACChanger(_apt_install):
     def __init__(self):
         self.pkgs = 'macchanger'
 
-class Bluetooth(_apt_install):
+class Bluetooth(apt_install):
     __doc__ = _('Bluetooth support')
     detail = _('Command: sudo apt-get install bluetooth bluez-alsa bluez-cups bluez-gnome bluez-utils python-bluez gnome-bluetooth gnome-phone-manager')
     license = 'GNU General Public License (GPL)'

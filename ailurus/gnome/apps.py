@@ -23,7 +23,7 @@ import sys, os
 from libapp import *
 from lib import *
 
-class ChangeTerminalColor(_set_gconf):
+class ChangeTerminalColor(gconf_key):
     __doc__ = _('Change background color of GNOME terminal to black.')
     detail = _('Set background color to black. Set foreground color to white.\n'
        'The trick is to change GConf values:\n'
@@ -72,7 +72,7 @@ class NScripts():
             os.system('rm -rf ~/.gnome2/nautilus-scripts/' + dir)
         os.system('rm ~/.gnome2/nautilus-scripts/.nscripts_is_installed')
 
-class Gedit_GB2312(_set_gconf) :
+class Gedit_GB2312(gconf_key) :
     __doc__ = _('Add GB2312 detection ability to GEdit')
     detail = _('The trick behind is to change GConf values:\n'
        '/apps/gedit-2/preferences/encodings/auto_detected += ["GB2312", "GBK", "GB18030"]\n'
@@ -88,7 +88,7 @@ class Gedit_GB2312(_set_gconf) :
     def get_reason(self, f):
         self._get_reason(f)
 
-class Speedup_Nautilus(_set_gconf):
+class Speedup_Nautilus(gconf_key):
     __doc__ = _('Speed up Nautilus')
     detail = _('Change Nautilus settings: '
        'Do not count directory items. Do not preview sound. '

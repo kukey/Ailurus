@@ -22,17 +22,32 @@
 from __future__ import with_statement
 from lib import *
 
-__all__ = ['_set_gconf', '_apt_install', '_path_lists', '_ff_extension', '_download_one_file', '_rpm_install']
+class I:
+    'Base class for all app installers'
+    @classmethod
+    def init(cls):
+        pass
+    @classmethod
+    def install(cls):
+        raise NotImplemented
+    @classmethod
+    def installed(cls):
+        raise NotImplemented
+    @classmethod
+    def remove(cls):
+        raise NotImplemented
 
-class _set_gconf :
-    'Must subclass me and set "self.set" and "self.add"'
-    def __check_key(self, key):
+class gconf_key(I):
+    'Must subclass me and set "cls.set_value" and "cls.add_value"'
+    @classmethod
+    def __check_key(cls, key):
         if key=='':
             raise ValueError
         import re
         if re.match(r'^(/[a-zA-Z0-9-_]+)+$',key) is None:
             raise ValueError
-    def __check_list(self, List):
+    @classmethod
+    def __check_list(cls, List):
         if len(List)==0:
             raise ValueError
         for e in List:
@@ -40,47 +55,47 @@ class _set_gconf :
                 raise ValueError
             if e=='':
                 raise ValueError
-    def __check(self):
-        self.set # check existing
-        self.add # check existing
-        if type(self.set)!=tuple or type(self.add)!=tuple:
+    @classmethod
+    def __check(cls):
+        cls.set_value # check existing
+        cls.add_value # check existing
+        if type(cls.set_value)!=tuple or type(cls.add_value)!=tuple:
             raise TypeError
-        for e in self.set:
+        for e in cls.set_value:
             if type(e)!=tuple:
                 raise TypeError
             if len(e)!=3:
                 raise TypeError
             if type(e[0])!=str:
                 raise TypeError
-            self.__check_key(e[0])
+            cls.__check_key(e[0])
             if type(e[1])!=bool and type(e[1])!=int and type(e[1])!=float and type(e[1])!=str:
                 raise TypeError
             if type(e[2])!=bool and type(e[2])!=int and type(e[2])!=float and type(e[2])!=str:
                 raise TypeError
-        for e in self.add:
+        for e in cls.add_value:
             if type(e)!=tuple:
                 raise TypeError
             if len(e)!=2:
                 raise TypeError
             if type(e[0])!=str:
                 raise TypeError
-            self.__check_key(e[0])
+            cls.__check_key(e[0])
             if type(e[1])!=list:
                 raise TypeError
-            self.__check_list(e[1])
-    def __init__(self):
-        raise NotImplementedError
-    def install(self):
-        self.__check()
+            cls.__check_list(e[1])
+    @classmethod
+    def install(cls):
+        cls.__check()
         import gconf
         G = gconf.client_get_default()
-        if len(self.set) or len(self.add):
+        if len(cls.set_value) or len(cls.add_value):
             print _("Change GConf values:")
-        for key, newvalue, oldvalue in self.set:
+        for key, newvalue, oldvalue in cls.set_value:
             G.set_value(key, newvalue)
             print _("Key:"), "\x1b[1;33m%s\x1b[m"%key,
             print _("New value:"), "\x1b[1;33m%s\x1b[m"%newvalue
-        for key, to_add_list in self.add:
+        for key, to_add_list in cls.add_value:
             List = G.get_list(key, gconf.VALUE_STRING)
             for to_add in to_add_list:
                 try:
@@ -91,11 +106,12 @@ class _set_gconf :
             G.set_list(key, gconf.VALUE_STRING, List)
             print _("Key:"), "\x1b[1;33m%s\x1b[m"%key
             print _("Appended items:"), "\x1b[1;33m%s\x1b[m"%to_add_list
-    def installed(self):
-        self.__check()
+    @classmethod
+    def installed(cls):
+        cls.__check()
         import gconf
         G = gconf.client_get_default()
-        for key, newvalue, oldvalue in self.set:
+        for key, newvalue, oldvalue in cls.set_value:
             try:
                 value=G.get_value(key)
                 if type(value)!=float and value!=newvalue:
@@ -104,21 +120,22 @@ class _set_gconf :
                     return False
             except ValueError: #key does not exist
                 return False
-        for key, to_add_list in self.add:
+        for key, to_add_list in cls.add_value:
             List = G.get_list(key, gconf.VALUE_STRING)
             for to_add in to_add_list:
                 if not to_add in List:
                     return False
         return True
-    def _get_reason(self, f):
+    @classmethod
+    def _get_reason(cls, f):
         import gconf
         G = gconf.client_get_default()
-        for key, newvalue, oldvalue in self.set:
+        for key, newvalue, oldvalue in cls.set_value:
             try: value = G.get_value(key)
             except: value = None
             if ( type(value)!=float and value!=newvalue ) or ( type(value)==float and abs(value-newvalue)>1e-6 ):
                 print >>f, _('The value of "%(key)s" is not "%(value)s".')%{'key':key, 'value':newvalue},
-        for key, to_add_list in self.add:
+        for key, to_add_list in cls.add_value:
             List = G.get_list(key, gconf.VALUE_STRING)
             #evaluate "not_in" list
             not_in = []
@@ -128,17 +145,18 @@ class _set_gconf :
             #output
             if not_in:
                 print >>f, _('"%(value)s" is not in "%(key)s".')%{'value':' '.join(not_in), 'key':key}, 
-    def remove(self):
-        self.__check()
+    @classmethod
+    def remove(cls):
+        cls.__check()
         import gconf
         G = gconf.client_get_default()
-        if len(self.set) or len(self.add):
+        if len(cls.set_value) or len(cls.add_value):
             print _("Change GConf values:")
-        for key, newvalue, oldvalue in self.set:
+        for key, newvalue, oldvalue in cls.set_value:
             G.set_value(key, oldvalue)
             print _("Key:"), "\x1b[1;33m%s\x1b[m"%key,
             print _("New value:"), "\x1b[1;33m%s\x1b[m"%oldvalue
-        for key, to_remove_list in self.add:
+        for key, to_remove_list in cls.add_value:
             List = G.get_list(key, gconf.VALUE_STRING)
             for to_remove in to_remove_list:
                 try:
@@ -148,165 +166,184 @@ class _set_gconf :
             G.set_list(key, gconf.VALUE_STRING, List)
             print _("Key:"), "\x1b[1;33m%s\x1b[m"%key
             print _("Removed items:"), "\x1b[1;33m%s\x1b[m"%to_remove_list
-    def support(self):
+    @classmethod
+    def support(cls):
         try:
             import gconf
             return True
         except:
             return False 
 
-class _apt_install :
+class apt_install(I):
     'Must subclass me and set "pkgs".'
-    def __init__(self):
-        raise NotImplementedError
-    def __check(self):
-        self.pkgs # check exists
-        if type ( self.pkgs ) != str:
+    @classmethod
+    def __check(cls):
+        cls.pkgs # check exists
+        if type(cls.pkgs) != str:
             raise TypeError
-        if self.pkgs == '' :
+        if cls.pkgs == '' :
             raise ValueError
-        for pkg in self.pkgs.split():
+        for pkg in cls.pkgs.split():
             import re
             if re.match(r'^[a-zA-Z0-9.-]+$', pkg) is None:
                 raise ValueError, pkg
             if pkg[0]=='-':
                 raise ValueError, pkg
-    def install(self):
-        self.__check()
-        APT.install(*self.pkgs.split())
-    def installed(self):
-        self.__check()
-        for pkg in self.pkgs.split():
-            if not APT.installed ( pkg ):
+    @classmethod
+    def install(cls):
+        cls.__check()
+        APT.install(*cls.pkgs.split())
+    @classmethod
+    def installed(cls):
+        cls.__check()
+        for pkg in cls.pkgs.split():
+            if not APT.installed(pkg):
                 return False
         return True
-    def _get_reason(self, f):
+    @classmethod
+    def _get_reason(cls, f):
         #evaluate
         not_in = []
-        for pkg in self.pkgs.split():
-            if not APT.installed ( pkg ):
+        for pkg in cls.pkgs.split():
+            if not APT.installed(pkg):
                 not_in.append(pkg)
         #output
-        print >>f, _('The packages "%s" are not installed.')%' '.join(not_in),
-    def remove(self):
-        self.__check()
-        APT.remove(*self.pkgs.split() )
+        print >>f, _('The packages "%s" are not installed.') % ' '.join(not_in),
+    @classmethod
+    def remove(cls):
+        cls.__check()
+        APT.remove(*cls.pkgs.split())
 
-class _path_lists:
-    def __check(self):
-        if not isinstance(self.paths, list):
+class path_lists(I):
+    @classmethod
+    def __check(cls):
+        if not isinstance(cls.paths, list):
             raise TypeError
-        if len(self.paths)==0: 
+        if len(cls.paths)==0: 
             raise ValueError
-        for path in self.paths:
+        for path in cls.paths:
             if not isinstance(path, str):
                 raise TypeError
             if path=='':
                 raise ValueError
-    def __init__(self):
+    @classmethod
+    def install(cls):
         raise NotImplementedError
-    def install(self):
-        raise NotImplementedError
-    def installed(self):
-        self.__check()
-        for path in self.paths:
+    @classmethod
+    def installed(cls):
+        cls.__check()
+        for path in cls.paths:
             import os
             if not os.path.exists(path):
                 return False
         return True
-    def remove(self):
-        self.__check()
-        for path in self.paths:
+    @classmethod
+    def remove(cls):
+        cls.__check()
+        for path in cls.paths:
             gksudo('rm "%s" -rf'%path)
-    def _get_reason(self, f):
+    @classmethod
+    def _get_reason(cls, f):
         import os
         #evaluate
         no_list = []
-        for path in self.paths:
+        for path in cls.paths:
             if not os.path.exists(path): no_list.append(path)
         #output
         if no_list:
             print >>f, _('"%s" does not exist.')%' '.join(no_list),
 
-class _ff_extension:
+class ff_extension(I):
     'Firefox Extension'
     category = 'firefox'
     logo = 'default.png'
-    def __init__(self):
-        if not hasattr(_ff_extension, 'ext_path'):
-            _ff_extension.ext_path =  FirefoxExtensions.get_extensions_path()
+    @classmethod
+    def init(cls):
+        if not hasattr(ff_extension, 'ext_path'):
+            ff_extension.ext_path =  FirefoxExtensions.get_extensions_path()
         
-        assert self.name, 'No %s.name'%self.__class__.__name__
-        assert isinstance(self.name, unicode)
-        assert self.R, 'No %s.R'%self.__class__.__name__
-        assert isinstance(self.R, R)
-        assert isinstance(self.desc, unicode) or isinstance(self.desc, str) 
-        assert isinstance(self.download_url, str)
-        assert isinstance(self.range, str)
+        assert cls.name, 'No %s.name'%cls.__class__.__name__
+        assert isinstance(cls.name, unicode)
+        assert cls.R, 'No %s.R'%cls.__class__.__name__
+        assert isinstance(cls.R, R)
+        assert isinstance(cls.desc, unicode) or isinstance(cls.desc, str) 
+        assert isinstance(cls.download_url, str)
+        assert isinstance(cls.range, str)
         import StringIO
         text = StringIO.StringIO()
-        if self.desc:
-            print >>text, self.desc
+        if cls.desc:
+            print >>text, cls.desc
         print >>text, _("<span color='red'>This extension cannot be removed by Ailurus. It can be removed in 'Tools'->'Add-ons' menu of firefox.</span>")
-        print >>text, _('It can be used in Firefox version %s')%self.range
-        print >>text, _('It can be obtained from '), self.download_url
-        self.__class__.detail = text.getvalue()
+        print >>text, _('It can be used in Firefox version %s')%cls.range
+        print >>text, _('It can be obtained from '), cls.download_url
+        cls.__class__.detail = text.getvalue()
         text.close()
-    def install(self):
-        f = self.R.download()
+    @classmethod
+    def install(cls):
+        f = cls.R.download()
         if f.endswith('.xpi') or f.endswith('.jar'):
-            run('cp %s %s'%(f, _ff_extension.ext_path) )
+            run('cp %s %s'%(f, ff_extension.ext_path) )
             delay_notify_firefox_restart()
         else:
-            raise NotImplementedError(self.name, f)
-    def __exists_in_ext_path(self):
+            raise NotImplementedError(cls.name, f)
+    @classmethod
+    def __exists_in_ext_path(cls):
         try:
-            f = self.R.filename
+            f = cls.R.filename
             import os
-            return os.path.exists(_ff_extension.ext_path+'/'+f)
+            return os.path.exists(ff_extension.ext_path+'/'+f)
         except:
             return False
-    def installed(self):
-        return FirefoxExtensions.installed(self.name) or self.__exists_in_ext_path()
-    def remove(self):
+    @classmethod
+    def installed(cls):
+        return FirefoxExtensions.installed(cls.name) or cls.__exists_in_ext_path()
+    @classmethod
+    def remove(cls):
         raise NotImplementedError
 
-class _download_one_file:
-    def install(self):
-        assert isinstance(self.R, R)
-        f = self.R.download()
-        run('cp %s %s'%(f, self.file) )
-    def installed(self):
+class download_one_file(I):
+    @classmethod
+    def install(cls):
+        assert isinstance(cls.R, R)
+        f = cls.R.download()
+        run('cp %s %s'%(f, cls.file) )
+    @classmethod
+    def installed(cls):
         import os
-        return os.path.exists(self.file)
-    def remove(self):
-        run('''rm -f '%s' '''%self.file)
-    def get_reason(self, f):
+        return os.path.exists(cls.file)
+    @classmethod
+    def remove(cls):
+        run('''rm -f '%s' '''%cls.file)
+    @classmethod
+    def get_reason(cls, f):
         import os
-        if not os.path.exists(self.file):
-            print >>f, _('"%s" does not exist.')%self.file,
+        if not os.path.exists(cls.file):
+            print >>f, _('"%s" does not exist.')%cls.file,
 
-class _rpm_install:
-    def __init__(self):
-        raise Exception
-    def _check(self):
-        assert isinstance(self.pkgs, str)
-    def install(self):
-        self._check()
-        RPM.install(self.pkgs)
-    def installed(self):
-        self._check()
-        for p in self.pkgs.split():
+class rpm_install(I):
+    @classmethod
+    def _check(cls):
+        assert isinstance(cls.pkgs, str)
+    @classmethod
+    def install(cls):
+        cls._check()
+        RPM.install(cls.pkgs)
+    @classmethod
+    def installed(cls):
+        cls._check()
+        for p in cls.pkgs.split():
             if not RPM.installed(p): return False
         return True
-    def remove(self):
-        self._check()
-        RPM.remove(self.pkgs)
-    def _get_reason(self, f):
-        self._check()
+    @classmethod
+    def remove(cls):
+        cls._check()
+        RPM.remove(cls.pkgs)
+    @classmethod
+    def _get_reason(cls, f):
+        cls._check()
         #evaluate
         not_in = []
-        for pkg in self.pkgs.split():
+        for pkg in cls.pkgs.split():
             if not RPM.installed ( pkg ):
                 not_in.append(pkg)
         #output

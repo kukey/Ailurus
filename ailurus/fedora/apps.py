@@ -26,7 +26,7 @@ from libapp import *
 from repos import *
 from controversial_apps import *
 
-class WINE(_rpm_install):
+class WINE(rpm_install):
     __doc__ = _('WINE')
     detail = _('This is an indispensable application for running Windows applications on Linux.\n'
        'Command: yum install wine')
@@ -37,7 +37,7 @@ class WINE(_rpm_install):
     def __init__(self):
         self.pkgs = 'wine'
 
-class GEdit_Suitable_For_Programmer(_set_gconf, _rpm_install) :
+class GEdit_Suitable_For_Programmer(gconf_key, rpm_install) :
     __doc__ = _('Make GEdit more suitable for programmers')
     detail = _('Change GEdit settings as follows. '
        'Automatically indent current line. '
@@ -70,22 +70,22 @@ class GEdit_Suitable_For_Programmer(_set_gconf, _rpm_install) :
                     )
         self.pkgs = 'gedit-plugins'
     def install(self):
-        _set_gconf.install(self)
-        _rpm_install.install(self)
+        gconf_key.install(self)
+        rpm_install.install(self)
     def installed(self):
-        return _set_gconf.installed(self) and _rpm_install.installed(self)
+        return gconf_key.installed(self) and rpm_install.installed(self)
     def remove(self):
-        _set_gconf.remove(self)
-        _rpm_install.remove(self)
+        gconf_key.remove(self)
+        rpm_install.remove(self)
 
-class Enhance_Decompression_Capability(_rpm_install) :
+class Enhance_Decompression_Capability(rpm_install) :
     __doc__ = _('Compression/decompression support for "*.7z" and "*.cab" files')
     detail = _('Command: yum install p7zip cabextract')
     logo = 'extract.png'
     def __init__(self):
         self.pkgs = "p7zip cabextract"
 
-class Evince_Read_Chinese_PDF(_rpm_install) :
+class Evince_Read_Chinese_PDF(rpm_install) :
     __doc__ = _('Make Evince be able to reveal Chinese pdf')
     detail = _('Command: yum install poppler-data')
     category='office'
@@ -94,7 +94,7 @@ class Evince_Read_Chinese_PDF(_rpm_install) :
     def __init__(self):
         self.pkgs = 'poppler-data'
 
-class CHMSee_Read_CHM_Documents(_rpm_install) :
+class CHMSee_Read_CHM_Documents(rpm_install) :
     __doc__ = _('ChmSee: A CHM file viewer')
     detail = _('Command: yum install chmsee')
     category = 'office'
@@ -104,7 +104,7 @@ class CHMSee_Read_CHM_Documents(_rpm_install) :
     def __init__(self):
         self.pkgs = 'chmsee'
 
-class Workrave_And_Auto_Start_It(_rpm_install) :
+class Workrave_And_Auto_Start_It(rpm_install) :
     __doc__ = 'Workrave'
     detail = _('The program frequently alerts you to leave computers, take micro-pauses, rest breaks and restricts you to your daily limit of using computers.\n'
        'Command: yum install workrave')
@@ -131,12 +131,12 @@ X-GNOME-Autostart-enabled=true
 '''
             )
     def install(self):
-        _rpm_install.install(self)
+        rpm_install.install(self)
         self.__workraveautostart()
     def installed(self):
         import os
         if not os.path.exists(self.file): return False
-        return _rpm_install.installed(self)
+        return rpm_install.installed(self)
     def get_reason(self, f):
         import os
         if not RPM.installed('workrave'):
@@ -144,12 +144,12 @@ X-GNOME-Autostart-enabled=true
         if not os.path.exists(self.file):
             print >>f, _('The file "%s" does not exist.')%self.file,
     def remove(self):
-        _rpm_install.remove(self)
+        rpm_install.remove(self)
         import os
         if os.path.exists(self.file):
             os.remove(self.file)
 
-class VIM_and_VIMRC(_rpm_install) :
+class VIM_and_VIMRC(rpm_install) :
     __doc__ = _('VIM')
     detail = _('Install VIM and make it more suitable for programming. '
        'The installation process is as follows. '
@@ -169,12 +169,12 @@ class VIM_and_VIMRC(_rpm_install) :
         self.vimrc = os.path.expanduser("~/.vimrc")
         self.lines = [ 'syntax on', 'set autoindent', 'set number', 'set mouse=a' ]
     def install(self):
-        _rpm_install.install(self)
+        rpm_install.install(self)
         self.__vimrc_install()
     def installed(self):
-        return _rpm_install.installed(self)
+        return rpm_install.installed(self)
     def remove(self):
-        _rpm_install.remove(self)
+        rpm_install.remove(self)
         file_remove ( self.vimrc, *self.lines )
 
 class ColorfulBashPromptSymbols :
@@ -199,7 +199,7 @@ class ColorfulBashPromptSymbols :
     def remove(self):
         file_remove ( self.bashrc, self.line )
 
-class CUPS (_rpm_install):
+class CUPS (rpm_install):
     __doc__ = _('Enable "Print to pdf" capability.')
     detail = _('Command: yum install cups-pdf')
     category = 'office'
@@ -207,7 +207,7 @@ class CUPS (_rpm_install):
     def __init__(self):
         self.pkgs = 'cups-pdf'
 
-class Stardict_without_Dictionaries(_rpm_install):
+class Stardict_without_Dictionaries(rpm_install):
     __doc__ = _('Stardict')
     category = 'office'
     detail = _('Command: yum install stardict\n'
@@ -224,7 +224,7 @@ class Stardict_without_Dictionaries(_rpm_install):
     def __init__(self):
         self.pkgs = 'stardict'
 
-class Liferea(_rpm_install):
+class Liferea(rpm_install):
     __doc__ = _('Liferea: a RSS feed reader')
     detail = _('This is a simple and easy used RSS feed reader.\n'
        'Command: yum install liferea')
@@ -234,7 +234,7 @@ class Liferea(_rpm_install):
     def __init__(self):
         self.pkgs = 'liferea'
 
-class CommonUsedProgrammingPackages(_rpm_install):
+class CommonUsedProgrammingPackages(rpm_install):
     __doc__ = _('Useful applications for programming')
     detail = _('The tools are:\n'
        '<i>'
@@ -259,7 +259,7 @@ class CommonUsedProgrammingPackages(_rpm_install):
     def get_reason(self, f):
         self._get_reason(f)
 
-class QtiPlot(_rpm_install) :
+class QtiPlot(rpm_install) :
     __doc__ = _('QtiPlot: The equivalence of "Origin" plotting application in Linux')
     detail = _('It is the indispensable plotting application for writing Physics experiments reports.\n'
        'Command: yum install qtiplot')
@@ -269,7 +269,7 @@ class QtiPlot(_rpm_install) :
     def __init__(self):
         self.pkgs = 'qtiplot'
 
-class QCad (_rpm_install):
+class QCad (rpm_install):
     'QCad'
     detail = _('A CAD software which supports DXF-format. ')
     license = ('Non-free with limited-time free trial (professional edition) or GPL (community edition)')
@@ -323,7 +323,7 @@ class DisableGetty:
         finally:
             FileServer.chdir_back()
 
-class Octave(_rpm_install):
+class Octave(rpm_install):
     __doc__ = 'Octave'
     detail = _(u'A Matlab® compatible numerical computation appliation.\n'
        'Command: yum install qtoctave')
@@ -356,7 +356,7 @@ class Generic_Genome_Browser:
     def remove(self):
         raise NotImplementedError
 
-class TuxPaint(_rpm_install):
+class TuxPaint(rpm_install):
     'Tux Paint'
     detail = _('This is a drawing program for young children three years and up.\n' 
                     'Command: yum install tuxpaint')
@@ -366,7 +366,7 @@ class TuxPaint(_rpm_install):
     def __init__(self):
         self.pkgs='tuxpaint'
 
-class ChildsPlay(_rpm_install):
+class ChildsPlay(rpm_install):
     'ChildsPlay'
     detail = _('This is a suite of educational games for young children.\n'
                     'Command: yum install childsplay')
@@ -376,7 +376,7 @@ class ChildsPlay(_rpm_install):
     def __init__(self):
         self.pkgs ='childsplay'
         
-class GCompris(_rpm_install):
+class GCompris(rpm_install):
     'GCompris'
     detail = _('GCompris provides educational games for children aged 2 to 10.\n'
                     'Command: yum install gcompris')
@@ -386,7 +386,7 @@ class GCompris(_rpm_install):
     def __init__(self):
         self.pkgs = 'gcompris'
 
-class QT_Creator(_rpm_install):
+class QT_Creator(rpm_install):
     'Qt Creator'
     detail = _('This is an IDE for Qt.\n'
                'Command: yum install qt-creator')
@@ -396,7 +396,7 @@ class QT_Creator(_rpm_install):
     def __init__(self):
         self.pkgs = 'qt-creator'
 
-class Kadu(_rpm_install):
+class Kadu(rpm_install):
     __doc__ = 'Kadu'
     detail = _('Kadu is an instant messenger, which is very popular in Poland.\n'
                'Command : yum install kadu')
@@ -407,7 +407,7 @@ class Kadu(_rpm_install):
     def support(self):
         return Config.is_Poland_locale()
 
-class Parcellite(_rpm_install):
+class Parcellite(rpm_install):
     __doc__ = _('Parcellite: clipboard manager')
     detail = _('This is a powerful clipboard manager. '
                'It can preserve 25 strings concurrently.')
@@ -470,7 +470,7 @@ class Disable_SELinux:
                     f.writelines(lines)
         su('/usr/sbin/setenforce 1')
 
-class Wallpaper_Tray(_rpm_install):
+class Wallpaper_Tray(rpm_install):
     __doc__ = _('WallpaperTray: Randomly change GNOME desktop background')
     category = 'appearance'
     detail = _('Command: yum install wp_tray\n'
@@ -481,7 +481,7 @@ class Wallpaper_Tray(_rpm_install):
     def __init__(self):
         self.pkgs = 'wp_tray'
 
-class Gnash(_rpm_install):
+class Gnash(rpm_install):
     __doc__ = _('Flash plugin for web browser')
     detail = _('Command: yum install gnash')
     category = 'media'
@@ -490,7 +490,7 @@ class Gnash(_rpm_install):
     def __init__(self):
         self.pkgs = 'gnash'
 
-class Multimedia_Codecs (_rpm_install) :
+class Multimedia_Codecs (rpm_install) :
     __doc__ = _('Multi-media codec')
     detail = _(
        'Command: yum install '
@@ -506,6 +506,6 @@ class Multimedia_Codecs (_rpm_install) :
         obj = Repo_RPMFusion_Free()
         if not obj.installed(): obj.install()
         
-        _rpm_install.install(self)
+        rpm_install.install(self)
     def get_reason(self, f):
         self._get_reason(f)

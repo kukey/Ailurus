@@ -24,7 +24,7 @@ import sys, os
 from lib import *
 from libapp import *
 
-class SUN_JDK6(_apt_install):
+class SUN_JDK6(apt_install):
     __doc__ = _(u'SUN Java® 6.')
     detail = _('<span color="red">You should manually agree a license during the installation.</span>\n'
        'In the installation process, these commands will be executed: '
@@ -71,7 +71,7 @@ class SUN_JDK6(_apt_install):
         env.remove('CLASSPATH', '.', '/usr/lib/jvm/java-6-sun/lib/dt.jar', '/usr/lib/jvm/java-6-sun/lib/tools.jar')
         env.save()
 
-class WINE(_apt_install):
+class WINE(apt_install):
     __doc__ = _('WINE')
     detail = _('This is an indispensable application for running Windows applications on Linux.\n'
        'Command: sudo apt-get install wine wine-gecko')
@@ -85,19 +85,19 @@ class WINE(_apt_install):
     def __init__(self):
         self.pkgs = 'wine wine-gecko'
     def install(self):
-        _apt_install.install(self)
+        apt_install.install(self)
         import os
         if not os.path.exists( os.path.expanduser('~/.wine') ):
             run("wineprefixcreate") #Do not use 'winecfg' !
     def installed(self):
-        if not _apt_install.installed(self):
+        if not apt_install.installed(self):
             return False
         import os
         if not os.path.exists( os.path.expanduser('~/.wine') ):
             return False
         return True
 
-class WINE_Chinese(_apt_install):
+class WINE_Chinese(apt_install):
     __doc__ = _('WINE &amp; Wen-Quan-Yi Chinese font')
     detail = _('WINE is an indispensable application for running Windows applications on Linux.\n'
        'During the installation process, firstly "sudo apt-get install wine wine-gecko ttf-wqy-zenhei" command is executed, '
@@ -113,14 +113,14 @@ class WINE_Chinese(_apt_install):
         self.pkgs = 'ttf-wqy-zenhei wine wine-gecko'
         self.wqy = '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc'
     def install(self):
-        _apt_install.install(self)
+        apt_install.install(self)
         import os
         if not os.path.exists( os.path.expanduser('~/.wine') ):
             run("wineprefixcreate") #Do not use 'winecfg' !
         run("cp %s ~/.wine/drive_c/windows/Fonts/"%self.wqy)
         run(r"wine regedit "+D+"../support/wine_wqy_font.reg")
     def installed(self):
-        if not _apt_install.installed(self):
+        if not apt_install.installed(self):
             return False
         import os
         if not os.path.exists( os.path.expanduser('~/.wine') ):

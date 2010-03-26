@@ -40,36 +40,6 @@ def message(title, content):
     dialog.destroy()
     gtk.gdk.threads_leave()
 
-class _parser:
-    def __init__(self):
-        self.attension = False
-        self.url = None
-    def cope_a(self, line):
-        if self.attension == False: return
-        if self.url: return
-        
-        import re
-        match = re.search('<a href="([^"]+)"', line)
-        assert match
-        self.url = match.group(1)
-        assert self.url.startswith('download.php?'), self.url
-    def cope_download(self, line):
-        self.attension = True
-    def cope(self, line):
-        if '<b>Download</b>' in line:
-            self.cope_download(line)
-        elif '<a href=' in line:
-            self.cope_a(line)
-    def parse(self, URL):
-        import urllib2
-        f = urllib2.urlopen(URL)
-        lines = f.readlines()
-        f.close()
-        for line in lines:
-            self.cope(line)
-        assert self.url
-        return self.url
-
 def create_eclipse_icon():
         memarg = ''
         try:
@@ -94,7 +64,7 @@ Type=Application
 Categories=Development
 Icon=/opt/eclipse/icon.xpm''')
 
-class Eclipse_basic(_path_lists):
+class Eclipse_basic(path_lists):
     __doc__ = _('Eclipse (basic development environment)')
     detail = ( 
             _('Eclipse is from http://www.eclipse.org/downloads/ \n') +
@@ -339,7 +309,7 @@ class Eclipse_basic(_path_lists):
         obj = cls()
         if not obj.installed(): obj.install()
 
-class Eclipse_J2EE(_path_lists):
+class Eclipse_J2EE(path_lists):
     __doc__ = _('Eclipse (basic development environment + J2EE)')
     category = 'eclipse'
     logo = 'eclipse.png'
@@ -560,9 +530,9 @@ class Eclipse_J2EE(_path_lists):
         import glob
         List = glob.glob('/opt/eclipse/plugins/org.eclipse.epp.*')
         if bool(List) == False: return False
-        return _path_lists.installed(self)
+        return path_lists.installed(self)
 
-class CDT(_path_lists):
+class CDT(path_lists):
     __doc__ = _('CDT: C/C++ development')
     detail = _('CDT is from http://www.eclipse.org/cdt/')
     category = 'eclipse'
@@ -583,7 +553,7 @@ class CDT(_path_lists):
         gksudo("unzip -qo %s -d %s"%(f, self.path))
         gksudo("chown $USER:$USER /opt/eclipse -R")
 
-class Pydev(_path_lists):
+class Pydev(path_lists):
     __doc__ = _('Pydev: Python development')
     detail = _('Pydev is from http://pydev.org/download.html')
     category = 'eclipse'
@@ -653,7 +623,7 @@ class RadRails:
     def remove(self):
         raise NotImplementedError
 
-class Mylyn(_path_lists):
+class Mylyn(path_lists):
     'Mylyn'
     detail = _('Mylyn is from http://www.eclipse.org/mylyn/downloads/')
     category = 'eclipse'
@@ -742,7 +712,7 @@ class Subversive:
     def remove(self):
         raise NotImplementedError
 
-class MTJ(_path_lists):
+class MTJ(path_lists):
     __doc__ = _('MTJ: J2ME development')
     detail = _('It is downloaded from http://download.eclipse.org/dsdp/mtj/downloads/drops/R-1.0.1-200909181641/')
     category = 'eclipse'
