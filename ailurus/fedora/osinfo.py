@@ -33,6 +33,10 @@ def get():
         with open('/etc/fedora-release') as f:
             value = f.read().strip()
         return [row(_('Fedora version:'), value, D+'other_icons/fedora.png')]
+	  if int(vaule[14:17])<12:
+		import gtk
+		button_preupgrade=gtk.Button(_('preupgrade').center(#这里不知道改写多少，而且这个按钮的位置也不会写，请升哥完善))
+		button_preupgrade.connect('click',RPM.preupgrade())
     except: 
         traceback.print_exc(file=sys.stderr)
         return []

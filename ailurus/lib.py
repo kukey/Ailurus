@@ -616,6 +616,13 @@ class RPM:#定义了RPM类
     def import_key(cls, path):#加载公共密匙
         assert isinstance(path, str)
         run_as_root_in_terminal('rpm --import %s' % path)
+    @classmethod
+    def preupgrade():#增加preupgrade功能
+	  title='information'
+	  connect='Aliurus is preupgrade your system,please wait many minutes'
+	  notify(title,connenct)
+        run_as_root_in_terminal('yum update -y')#update all rpm packges you installed
+        run_as_root('preupgrade', ignore_error=True)#upgrade system
 
 class APT:
     fresh_cache = False
