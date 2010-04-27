@@ -31,7 +31,7 @@ class I:
     
 class Config:
     @classmethod
-    def make_config_dir(cls):
+    def make_config_dir(cls):#创建ailurus的配置文件夹路径
         import os
         dir = os.path.expanduser('~/.config/ailurus/')
         if not os.path.exists(dir): # make directory
@@ -42,7 +42,7 @@ class Config:
         if not os.access(dir, os.R_OK|os.W_OK|os.X_OK): # change access mode
             os.chmod(dir, 0755)
     @classmethod
-    def get_config_dir(cls):
+    def get_config_dir(cls):#得到ailurus的配置文件夹路径
         import os
         return os.path.expanduser('~/.config/ailurus/')
     @classmethod
@@ -58,82 +58,82 @@ class Config:
         if os.path.exists(path):
             cls.parser.read(path)
     @classmethod
-    def save(cls):
+    def save(cls):#保存配置文件
         cls.make_config_dir()
         with open(cls.get_config_dir() + 'conf' , 'w') as f:
             cls.parser.write(f)
     @classmethod
-    def set_string(cls, key, value):
+    def set_string(cls, key, value):#设置配置文件字符串
         assert isinstance(key, str) and key
         assert isinstance(value, (str,unicode))  and value
         cls.parser.set('DEFAULT', key, value)
         cls.save()
     @classmethod
-    def get_string(cls, key):
+    def get_string(cls, key):#得到配置文件字符串关键字
         assert isinstance(key, str) and key
         return cls.parser.get('DEFAULT', key)
     @classmethod
-    def set_int(cls, key, value):
+    def set_int(cls, key, value):#更改配置文件，把字符串或数转换成纯整数
         assert isinstance(key, str) and key
         assert isinstance(value, int)
         cls.parser.set('DEFAULT', key, value)
         cls.save()
     @classmethod
-    def get_int(cls, key):
+    def get_int(cls, key):#得到配置文件关键字的值
         assert isinstance(key, str) and key
         value = cls.parser.get('DEFAULT', key)
         return int(value)
     @classmethod
-    def set_bool(cls, key, value):
+    def set_bool(cls, key, value):#设置配置文件中vaule的bool值
         assert isinstance(key, str) and key
         assert isinstance(value, bool)
         cls.parser.set('DEFAULT', key, value)
         cls.save()
     @classmethod
-    def get_bool(cls, key):
+    def get_bool(cls, key):#得到关键字的bool值
         assert isinstance(key, str) and key
         value = cls.parser.get('DEFAULT', key)
         value = str(value)
         return value=='True' or value=='true'
     @classmethod
-    def set_hide_quick_setup_pane(cls, value):
+    def set_hide_quick_setup_pane(cls, value):#设置隐藏快速安装界面
         cls.set_bool('hide_quick_setup_pane', value)
     @classmethod
-    def get_hide_quick_setup_pane(cls):
+    def get_hide_quick_setup_pane(cls):#得到隐藏快速安装界面的bool值
         try:        return cls.get_bool('hide_quick_setup_pane')
         except:     return False
     @classmethod
-    def set_disable_tip(cls, value):
+    def set_disable_tip(cls, value):#设置不允许提示
         cls.set_bool('disable-tip-on-startup', value)
     @classmethod
-    def get_disable_tip(cls):
+    def get_disable_tip(cls):#设置不允许提示
         try:       return cls.get_bool('disable-tip-on-startup')
         except: return False
     @classmethod
-    def set_query_before_exit(cls, value):
+    def set_query_before_exit(cls, value):#设置离开前查询
         cls.set_bool('query_before_exit', value)
     @classmethod
-    def get_query_before_exit(cls):
+    def get_query_before_exit(cls):#得到离开前查询的bool值
         try:       return cls.get_bool('query_before_exit')
         except:    return True
     @classmethod
-    def get_locale(cls):
+    def get_locale(cls):#得到本地语言设置，如果本地语言设置了返回值，默认为en_US
         import locale
         value = locale.getdefaultlocale()[0]
         if value: return value # language code and encoding may be None if their values cannot be determined.
         else: return 'en_US'
     @classmethod
-    def is_Chinese_locale(cls):
+    def is_Chinese_locale(cls):#本地为中文语言，返回字符串zh
         return cls.get_locale().startswith('zh')
     @classmethod
-    def is_Poland_locale(cls):
+    def is_Poland_locale(cls):#本地为波兰语言,返回字符串pl
         return cls.get_locale().startswith('pl')
     @classmethod
-    def supported_Ubuntu_version(cls, version):
+    def supported_Ubuntu_version(cls, version):#定义了所支持的Utunbu的版本
         assert isinstance(version, str) and version
         return version in ['hardy', 'intrepid', 'jaunty', 'karmic', 'lucid', ]
     @classmethod
-    def is_Ubuntu(cls):
+    def is_Ubuntu(cls):#返回/etc/issue.net文件中是不是包含Ubuntu这个词
         import os
         if not os.path.exists('/etc/lsb-release'): 
             return False
@@ -141,12 +141,12 @@ class Config:
             c = f.read()
         return 'Ubuntu' in c
     @classmethod
-    def set_Ubuntu_version(cls, version):
+    def set_Ubuntu_version(cls, version):#设置Ubuntu的版本信息
         if not cls.supported_Ubuntu_version(version):
             raise ValueError
         cls.set_string('ubuntu-version', version)
     @classmethod
-    def get_Ubuntu_version(cls):
+    def get_Ubuntu_version(cls):#返回Ubuntu的版本信息，并返回版本开发代号
         '''return 'hardy', 'intrepid', 'jaunty', 'karmic' or 'lucid'.'''
         if cls.is_Ubuntu():
             with open('/etc/lsb-release') as f:
@@ -158,14 +158,14 @@ class Config:
         assert cls.supported_Ubuntu_version(value), value
         return value
     @classmethod
-    def is_Mint(cls):
+    def is_Mint(cls):#定义Mint信息，如果不是，则返回False,否则返回LinuxMint
         import os
         if not os.path.exists('/etc/lsb-release'): return False
         with open('/etc/lsb-release') as f:
             c = f.read()
         return 'LinuxMint' in c
     @classmethod
-    def get_Mint_version(cls):
+    def get_Mint_version(cls):#得到Mint的信息，并返回5，6，7，8
         '''return '5', '6', '7' or '8'. '''
         import os
         with open('/etc/lsb-release') as f:
@@ -174,16 +174,16 @@ class Config:
             if line.startswith('DISTRIB_RELEASE='):
                 return line.split('=')[1].strip()
     @classmethod
-    def is_Fedora(cls):
+    def is_Fedora(cls):#定义Fedora，返回fedora生产版本信息
         import os
         return os.path.exists('/etc/fedora-release')
     @classmethod
-    def get_Fedora_version(cls):
+    def get_Fedora_version(cls):#得到Fedora版本信息
         with open('/etc/fedora-release') as f:
             c = f.read()
         return c.split()[2].strip()
     @classmethod
-    def is_GNOME(cls):
+    def is_GNOME(cls):#检测桌面环境，若为XFCE,则返回False,尝试是否可以输出pgrep -u $USER gnome-panel，如果是则返回True,否则返回False
         if cls.is_XFCE(): return False
         try:
             get_output('pgrep -u $USER gnome-panel')
@@ -191,45 +191,49 @@ class Config:
         except:
             return False
     @classmethod
-    def is_XFCE(cls):
+    def is_XFCE(cls):#定义XFCE桌面环境，尝试是否可以输出pgrep -u $USER xfce4-session，如果是则返回True,否则返回False
         try:  
             get_output('pgrep -u $USER xfce4-session')
             return True
         except: 
             return False
     @classmethod
-    def wget_set_timeout(cls, timeout):
+    def wget_set_timeout(cls, timeout):#设置wget超时次数
         assert isinstance(timeout, int) and timeout>0, timeout
         cls.set_int('wget_timeout', timeout)
     @classmethod
-    def wget_get_timeout(cls):
+    def wget_get_timeout(cls):#得到wget超时次数并返回值，若不能检测到值则返回最大值20
         try:       value = cls.get_int('wget_timeout')
         except: value = 20
         return value
     @classmethod
-    def wget_set_triesnum(cls, triesnum):
+    def wget_set_triesnum(cls, triesnum):#设置下载文件的重试次数
         assert isinstance(triesnum, int) and triesnum>0, triesnum
         cls.set_int('wget_triesnum', triesnum)
     @classmethod
-    def wget_get_triesnum(cls):
+    def wget_get_triesnum(cls):#得到下载文件的重试次数并返回，若不能检测到值则返回3
         try:       value = cls.get_int('wget_triesnum')
         except: value = 3
         return value
     @classmethod
-    def set_fastest_repository(cls, value):
+    def set_fastest_repository(cls, value):#设置最快源
         assert ':' in value
         cls.set_string('fastest_repository', value)
     @classmethod
-    def get_fastest_repository(cls):
+    def get_fastest_repository(cls):#得到最快源
         return cls.get_string('fastest_repository')
     @classmethod
-    def set_fastest_repository_response_time(cls, value):
+    def set_fastest_repository_response_time(cls, value):#设置最快源响应时间
         cls.set_int('fastest_repository_response_time', value)
     @classmethod
-    def get_fastest_repository_response_time(cls):
+    def get_fastest_repository_response_time(cls):#得到最快源响应时间并返回
         return cls.get_int('fastest_repository_response_time')
 
 def install_locale(force_reload=False):
+	"""如果 reload 不是 bool，则引起异常
+	输出 None
+	如果 reload 为 True，则重新安装一次语言。否则，不重新装。
+	安装后，_ 和 ngettext 可用 """
     assert isinstance(force_reload, bool)
     
     if force_reload or getattr(install_locale, 'installed', False)==False:
@@ -239,13 +243,14 @@ def install_locale(force_reload=False):
     import gettext
     gettext.translation('ailurus', '/usr/share/locale', fallback=True).install(names=['ngettext'])
 
-def DUAL_LICENSE(A, B):
+def DUAL_LICENSE(A, B):#定义双许可
     return _('Dual-licensed under %(A)s and %(B)s') % {'A':A, 'B':B}
 
-def TRI_LICENSE(A, B, C):
+def TRI_LICENSE(A, B, C):#定义三许可
     return _('Tri-licensed under %(A)s, %(B)s and %(C)s') % {'A':A, 'B':B, 'C':C}
 
 class ResponseTime:
+"""定义了响应时间类，包括load,save,get,set四个函数"""
     map = {}
     changed = False
     @classmethod
@@ -287,13 +292,14 @@ class ResponseTime:
         cls.changed = True
 
 class ShowALinuxSkill:
+	"""显示linux技巧，包括installed,install,remove三个函数"""
     @classmethod
-    def installed(cls):
+    def installed(cls):#检测showaliunxskill是否安装
         import os
         path = os.path.expanduser('~/.config/autostart/show-a-linux-skill-bubble.desktop')
         return os.path.exists(path)
     @classmethod
-    def install(cls):
+    def install(cls):#安装showalinuxskill
         import os
         dir = os.path.expanduser('~/.config/autostart/')
         if not os.path.exists(dir): os.system('mkdir %s -p' % dir)
@@ -309,7 +315,7 @@ class ShowALinuxSkill:
                     'Categories=System;\n'
                     'StartupNotify=false\n')
     @classmethod
-    def remove(cls):
+    def remove(cls):#删除showalinuxskill
         import os
         path = os.path.expanduser('~/.config/autostart/show-a-linux-skill-bubble.desktop')
         os.system('rm %s -f'%path)
@@ -333,6 +339,7 @@ class CommandFailError(Exception):
         Exception.__init__(self, *new_args)
 
 def run(cmd, ignore_error=False):
+	"""run a command"""
     is_string_not_empty(cmd)
     if not isinstance(ignore_error,  bool): raise TypeError
 
@@ -347,7 +354,7 @@ def run(cmd, ignore_error=False):
         import os
         if os.system(cmd) and not ignore_error: raise CommandFailError(cmd)
 
-def pack(D):
+def pack(D):#获得输入输出的字符串
     assert isinstance(D, dict)
     import StringIO
     buf = StringIO.StringIO()
@@ -356,13 +363,13 @@ def pack(D):
         print >>buf, v
     return buf.getvalue()
 
-def packed_env_string():
+def packed_env_string():#添加默认路径
     import os
     env = dict( os.environ )
     env['PWD'] = os.getcwd()
     return pack(env)
 
-def get_authentication_method():
+def get_authentication_method():#获得验证方法
     import dbus
     bus = dbus.SystemBus()
     obj = bus.get_object('cn.ailurus', '/')
@@ -371,7 +378,7 @@ def get_authentication_method():
     assert ret == 0 or ret == 1, ret
     return ret
 
-def authenticate():
+def authenticate():#验证
     if get_authentication_method() == 0:
         import dbus
         bus = dbus.SessionBus()
@@ -391,7 +398,7 @@ def spawn_as_root(command):
 class AccessDeniedError(Exception):
     'User press cancel button in policykit window'
 
-def run_as_root(cmd, ignore_error=False):
+def run_as_root(cmd, ignore_error=False):#在root权限下运行命令，cmd为字符串
     is_string_not_empty(cmd)
     assert isinstance(ignore_error, bool)
     
@@ -410,11 +417,11 @@ def run_as_root(cmd, ignore_error=False):
     else:
         run(cmd, ignore_error)
 
-def is_string_not_empty(string):
+def is_string_not_empty(string):#非空字符，否则引发错误
     if type(string)!=str and type(string)!=unicode: raise TypeError(string)
     if string=='': raise ValueError
 
-def get_output(cmd, ignore_error=False):
+def get_output(cmd, ignore_error=False):#获得输出
     is_string_not_empty(cmd)
     assert isinstance(ignore_error, bool)
     
@@ -423,7 +430,7 @@ def get_output(cmd, ignore_error=False):
     if status and not ignore_error: raise CommandFailError(cmd)
     return output
     
-class TempOwn:
+class TempOwn:#改变交换文件权限
     def __init__(self,path):
         is_string_not_empty(path)
         if path[0]=='-':
@@ -500,7 +507,7 @@ def file_insert(path, *args):
     with open(path, "w") as f:
         f.writelines(contents)
 
-def file_append(path, *lines):
+def file_append(path, *lines):#向文件末尾添加字符串
     is_string_not_empty(path)
     if not len(lines): raise ValueError
     for line in lines:
@@ -510,7 +517,7 @@ def file_append(path, *lines):
             if line[-1]!='\n': line+='\n'
             f.write(line)
 
-def file_remove(path, *lines):
+def file_remove(path, *lines):#向文件末尾删除字符串
     is_string_not_empty(path)
     if not len(lines): raise ValueError
     for line in lines:
@@ -525,14 +532,14 @@ def file_remove(path, *lines):
     with open(path, "w") as f:
         f.writelines(contents)
 
-def free_space(path):
+def free_space(path):#显示磁盘剩余空间
     is_string_not_empty(path)
     assert path[0]=='/'
     import os, statvfs
     e = os.statvfs(path)
     return e[statvfs.F_BAVAIL] * e[statvfs.F_BSIZE]
 
-def own_by_user(*paths):
+def own_by_user(*paths):#更改权限为user
     if not len(paths): raise ValueError
     for path in paths:
         is_string_not_empty(path)
@@ -549,7 +556,7 @@ def is_pkg_list(packages):
         if package[0]=='-': raise ValueError
         if ' ' in package: raise ValueError
 
-def run_as_root_in_terminal(command):
+def run_as_root_in_terminal(command):#在终端中以命令权限运行
     is_string_not_empty(command)
     print '\x1b[1;33m', _('Run command:'), command, '\x1b[m'
 
@@ -565,14 +572,14 @@ def run_as_root_in_terminal(command):
     obj = bus.get_object('cn.ailurus', '/')
     obj.run(string, packed_env_string(), False, timeout=36000, dbus_interface='cn.ailurus.Interface')
 
-class RPM:
+class RPM:#定义了RPM类
     fresh_cache = False
     __set1 = set()
     @classmethod
-    def cache_changed(cls):
+    def cache_changed(cls):#调用此方法后，下一次对installed的调用前，自动刷新缓存
         cls.fresh_cache = False
     @classmethod
-    def refresh_cache(cls):
+    def refresh_cache(cls):#刷新缓存
         if getattr(cls, 'fresh_cache', False): return
         cls.fresh_cache = True
         del cls.__set1
@@ -585,16 +592,16 @@ class RPM:
         for line in task.stdout:
             cls.__set1.add(line[:-1])
     @classmethod
-    def installed(cls, package_name):
+    def installed(cls, package_name):#检测包是否安装
         is_pkg_list([package_name])
         cls.refresh_cache()
         return package_name in cls.__set1
     @classmethod
-    def install(cls, *package):
+    def install(cls, *package):#安装包
         run_as_root_in_terminal('yum install %s -y' % ' '.join(package))
         cls.cache_changed()
     @classmethod
-    def install_local(cls, path):
+    def install_local(cls, path):#本地安装包
         assert isinstance(path, str)
         import os
         assert os.path.exists(path)
@@ -602,11 +609,11 @@ class RPM:
         run_as_root_in_terminal('yum localinstall --nogpgcheck -y %s' % path)
         cls.cache_changed()
     @classmethod
-    def remove(cls, *package):
+    def remove(cls, *package):#删除包
         run_as_root_in_terminal('yum remove %s -y' % ' '.join(package))
         cls.cache_changed()
     @classmethod
-    def import_key(cls, path):
+    def import_key(cls, path):#加载公共密匙
         assert isinstance(path, str)
         run_as_root_in_terminal('rpm --import %s' % path)
 
@@ -615,10 +622,10 @@ class APT:
     __set1 = set()
     __set2 = set()
     @classmethod
-    def cache_changed(cls):
+    def cache_changed(cls):#调用此方法后，下一次对installed和exist的调用前，自动刷新缓存
         cls.fresh_cache = False
     @classmethod
-    def refresh_cache(cls):
+    def refresh_cache(cls):#刷新缓存
         if getattr(cls, 'fresh_cache', False): return
         cls.fresh_cache = True
         del cls.__set1
@@ -643,12 +650,12 @@ class APT:
         cls.refresh_cache()
         return cls.__set2
     @classmethod
-    def installed(cls, package_name):
+    def installed(cls, package_name):#返回给定的APT包是否安装
         is_pkg_list([package_name])
         cls.refresh_cache()
         return package_name in cls.__set1
     @classmethod
-    def exist(cls, package_name):
+    def exist(cls, package_name):#返回给定的APT包是否存在
         is_pkg_list([package_name])
         cls.refresh_cache()
         return package_name in cls.__set1 or package_name in cls.__set2
@@ -726,7 +733,7 @@ class APT:
             msg = 'Cannot remove "%s".' % ' '.join(failed+not_exist)
             raise CommandFailError(msg)
     @classmethod
-    def apt_get_update(cls):
+    def apt_get_update(cls):#更新所有包
         # (c) 2005-2007 Canonical, GPL
         print '\x1b[1;36m', _('Run "apt-get update". Please wait for few minutes.'), '\x1b[m'
         cmd = "/usr/sbin/synaptic --hide-main-window --non-interactive -o Synaptic::closeZvt=true --update-at-startup"
@@ -747,7 +754,7 @@ class DPKG:
             return False
         raise CommandFailError # other error reason
     @classmethod
-    def get_deb_depends(cls, filename):
+    def get_deb_depends(cls, filename):#解决依赖
         is_pkg_list([filename])
         import os
         if os.path.splitext(filename)[1]!='.deb': raise ValueError
@@ -763,7 +770,7 @@ class DPKG:
             depends.append( item.split()[0] )
         return depends
     @classmethod
-    def install_deb(cls, *packages):
+    def install_deb(cls, *packages):#安装deb包
         is_pkg_list(packages)
         for package in packages:
             import os
@@ -775,12 +782,12 @@ class DPKG:
             run_as_root('dpkg --install --force-architecture %s'%package)
             APT.cache_changed()
     @classmethod
-    def remove_deb(cls, package_name):
+    def remove_deb(cls, package_name):#删除deb包
         is_string_not_empty(package_name)
         run_as_root('dpkg -r %s'%package_name)
         APT.cache_changed()
 
-def get_response_time(url):
+def get_response_time(url):#获得响应时间
     is_string_not_empty(url)
 
     import urllib2
@@ -794,7 +801,7 @@ def get_response_time(url):
     end = time.time()
     return (end - begin) * 1000 # in milliseconds
 
-def derive_size(size):
+def derive_size(size):#将以字节为单位的整数转换成字符串，如大于1M的转换为“xx 兆字节”等
     if not ( isinstance(size, int) or isinstance(size, long) ): raise TypeError
     if not size>=0: raise ValueError
     _1G = 1e9
@@ -808,7 +815,7 @@ def derive_size(size):
         return _('%.1f KB') % ( size/_1K )
     return _('%s bytes') % int(size)
 
-def derive_time(time):
+def derive_time(time):#将以秒为单位的整数转成字符串。如大于60的转换成“xx 分钟”等
     if not isinstance(time, int): raise TypeError
     if not time>=0: raise ValueError
     _1h = 3600.
@@ -819,7 +826,7 @@ def derive_time(time):
         return _('%.1f minutes') % ( time/_1m )
     return _('%d seconds') % time
 
-class KillWhenExit:
+class KillWhenExit:#离开后杀死进程
     task_list = []
     @classmethod
     def add(cls, task):
@@ -841,7 +848,7 @@ class KillWhenExit:
                 traceback.print_exc(file=sys.stderr)
         cls.task_list = []
 
-def download(url, filename):
+def download(url, filename):#下载资源，url为字符串
     is_string_not_empty(url)
     assert url[0]!='-'
     is_string_not_empty(filename)
@@ -857,7 +864,7 @@ def download(url, filename):
         if os.path.exists(filename): os.unlink(filename)
         raise
     
-def reset_dir():
+def reset_dir():#重设路径
     import os, sys
     if sys.argv[0]!='':
         os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
@@ -951,7 +958,7 @@ class APTSource:
                         ret.append(line)
         return ''.join(ret)
 
-def parse_maintainer(string):
+def parse_maintainer(string):#解析string，返回三个字符串组成的tuple (name, email, webpage) 
     is_string_not_empty(string)
     
     if not hasattr(parse_maintainer, 'init'):
@@ -973,7 +980,7 @@ def parse_maintainer(string):
     return name, email, webpage
 
 import threading
-class PingThread(threading.Thread):
+class PingThread(threading.Thread):#是一个线程，用来PING给定的服务器，并返回响应时间 
     def __init__(self, url, server, result):
         is_string_not_empty(url)
         is_string_not_empty(server)
@@ -995,19 +1002,19 @@ class PingThread(threading.Thread):
         except:
             self.result.append([self.server, 'unreachable'])
 
-def open_web_page(page):
+def open_web_page(page):#打开网址，page为字符串
     is_string_not_empty(page)
     notify( _('Opening web page'), page)
     KillWhenExit.add('xdg-open %s'%page)
 
-def report_bug(*w):
+def report_bug(*w):#报告bug
     page = 'http://code.google.com/p/ailurus/issues/entry'
     notify( _('Opening web page'), page)
     KillWhenExit.add('xdg-open %s'%page)
 
-class FirefoxExtensions:
+class FirefoxExtensions:#firefox浏览器扩展
     @classmethod
-    def get_extensions_path(cls):
+    def get_extensions_path(cls):#返回Firefox存放配置文件的目录
         import os
         path = os.path.expandvars('$HOME/.mozilla/firefox')
         assert os.path.exists(path), path
@@ -1039,7 +1046,7 @@ class FirefoxExtensions:
         try:       return re.search('<em:name>(.+)</em:name>', doc).group(1)
         except: return None
     @classmethod
-    def analysis_extension(cls, extension_path, ret):
+    def analysis_extension(cls, extension_path, ret):#分析这个目录里的 install.rdf 文件，如果文件里包含name项，则把name加入到ret里
         import os
         if os.path.isdir(extension_path)==False: return
         
@@ -1057,7 +1064,7 @@ class FirefoxExtensions:
             traceback.print_exc()
     
     @classmethod
-    def __get_extensions_basic(cls):
+    def __get_extensions_basic(cls):#
         import os, traceback, glob
         try:
             ret = []
@@ -1072,18 +1079,18 @@ class FirefoxExtensions:
             return []
     
     @classmethod
-    def get_extensions(cls, force_reload = False):
+    def get_extensions(cls, force_reload = False):#返回一个str类型或者unicode类型的串的列表，包含所有已经安装的Firefox插件 
         if not hasattr(cls, 'cache_get_extensions') or force_reload:
             cls.cache_get_extensions = cls.__get_extensions_basic()
         return cls.cache_get_extensions
     
     @classmethod
-    def installed(cls, extension_name):
+    def installed(cls, extension_name):#以安装的扩展并返回扩展名
         assert isinstance(extension_name, (str, unicode))
         ret = cls.get_extensions()
         return extension_name in ret
 
-def delay_notify_firefox_restart(show_notify=False):
+def delay_notify_firefox_restart(show_notify=False):#提示用户重启firefox以完成安装
     assert isinstance(show_notify, bool)
     if not show_notify:
         delay_notify_firefox_restart.should_show = True
@@ -1101,7 +1108,7 @@ def delay_notify_firefox_restart(show_notify=False):
                 traceback.print_exc(file=sys.stderr)
                 notify('Please restart Firefox', 'Please restart Firefox to complete installation.')
 
-def sha1(path):
+def sha1(path):#返回所给文件的sha1
     is_string_not_empty(path)
     import os
     assert os.path.exists(path)
@@ -1223,7 +1230,7 @@ class R:
             if filehash!=self.hash: 
                 raise CommandFailError('File is broken. Expected hash is %s, but real hash is %s.'%(self.hash, filehash) )
             print _('Good.')
-    def download(self):
+    def download(self):#从url中选择最快的服务器，下载资源
         self.sort()
         dest = '/var/cache/ailurus/'+self.filename
         import os, sys, traceback
@@ -1297,7 +1304,7 @@ class ETCEnvironment:
                 f.write('\"')
                 f.write('\n')
 
-class Chdir:
+class Chdir:#改变路径
     def __init__(self,path):
         is_string_not_empty(path)
         if path[0]=='-':
@@ -1314,7 +1321,7 @@ class Chdir:
         import os
         os.chdir(self.oldpath)
 
-def create_file(path, content):
+def create_file(path, content):#建立文件
     with TempOwn(path) as o:
         with open(path, 'w') as f:
             f.write(content)
@@ -1385,7 +1392,7 @@ class Tasksel:
             APT.remove( *to_remove )
             cls.cache_changed()
 
-def show_about_dialog():
+def show_about_dialog():#显示日志
     import gtk
     gtk.about_dialog_set_url_hook( lambda dialog, link: 1 )
     about = gtk.AboutDialog()
