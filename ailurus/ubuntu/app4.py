@@ -164,6 +164,16 @@ class Pidgin_beta(_apt_install):
     category = 'internet'
     depends = Repo_Pidgin_Develop
     pkgs = 'pidgin'
+    def installed(self):
+        if APT.installed('pidgin'):
+            string = get_output('pidgin -v')
+            version = string.split()[1]
+            return tuple(map(int,version.split('.'))) >= (2, 6, 6)
+        return False
+    def install(self):
+        if APT.installed('pidgin'):
+            APT.remove('pidgin')
+        APT.install('pidgin')
 
 class PlayOnLinux(_apt_install):
     __doc__ = _('PlayOnLinux: A graphical front-end for wine')
