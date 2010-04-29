@@ -4,6 +4,7 @@
 # Ailurus - make Linux easier to use
 #
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
+# Copyright (C) 2009-2010, Ailurus Developers Team
 #
 # Ailurus is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -241,3 +242,19 @@ class Songbird(_apt_install):
     pkgs = 'songbird'
     def support(self):
         return Config.get_Ubuntu_version() != 'lucid'
+
+class Netbeans(_apt_install):
+    __doc__ = 'Netbeans'
+    detail = (
+              _('It is an open source IDE which supports several languages (C, C++, Java, Ruby, etc.)'
+               ' and frameworks (J2SE, J2ME, etc.). '
+               'Official site: http://netbeans.org/downloads/ .') +
+              _(' This application depends on Java.') )
+    category = 'dev'
+    license = DUAL_LICENSE(CDDL, GPL) + ' http://netbeans.org/about/legal/license.html'
+    pkgs = 'netbeans'
+
+class TeXLive2007(_apt_install):
+    'TeXLive 2007'
+    category = 'latex'
+    pkgs = 'texlive'

@@ -4,6 +4,7 @@
 # Ailurus - make Linux easier to use
 #
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
+# Copyright (C) 2009-2010, Ailurus Developers Team
 #
 # Ailurus is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -393,8 +394,14 @@ def spawn_as_root(command):
     import dbus
     bus = dbus.SystemBus()
     obj = bus.get_object('cn.ailurus', '/')
-    obj.spawn(command, packed_env_string(), dbus_interface='cn.ailurus.Interface')
+    obj.spawn(command, packed_env_string(), secret_key, dbus_interface='cn.ailurus.Interface')
 
+def drop_priviledge():
+    import dbus
+    bus = dbus.SystemBus()
+    obj = bus.get_object('cn.ailurus', '/')
+    obj.drop_priviledge(secret_key, dbus_interface='cn.ailurus.Interface')
+    
 class AccessDeniedError(Exception):
     'User press cancel button in policykit window'
 
@@ -410,7 +417,7 @@ def run_as_root(cmd, ignore_error=False):#在root权限下运行命令，cmd为�
         bus = dbus.SystemBus()
         obj = bus.get_object('cn.ailurus', '/')
         try:
-            obj.run(cmd, packed_env_string(), ignore_error, timeout=36000, dbus_interface='cn.ailurus.Interface')
+            obj.run(cmd, packed_env_string(), secret_key, ignore_error, timeout=36000, dbus_interface='cn.ailurus.Interface')
         except dbus.exceptions.DBusException, e:
             if e.get_dbus_name() == 'cn.ailurus.AccessDeniedError': raise AccessDeniedError
             else: raise
@@ -570,7 +577,7 @@ def run_as_root_in_terminal(command):#在终端中以命令权限运行
     import dbus
     bus = dbus.SystemBus()
     obj = bus.get_object('cn.ailurus', '/')
-    obj.run(string, packed_env_string(), False, timeout=36000, dbus_interface='cn.ailurus.Interface')
+    obj.run(string, packed_env_string(), secret_key, False, timeout=36000, dbus_interface='cn.ailurus.Interface')
 
 class RPM:#定义了RPM类
     fresh_cache = False
@@ -1406,8 +1413,8 @@ def show_about_dialog():#显示日志
     about.set_logo(gtk.gdk.pixbuf_new_from_file(D+'suyun_icons/logo.png'))
     about.set_name('Ailurus')
     about.set_version(AILURUS_VERSION)
-    about.set_website_label( _('Ailurus blog')+' http://ailurus.cn/' )
-    about.set_website('http://ailurus.cn/')
+    about.set_website_label( _('Project homepage') )
+    about.set_website('http://ailurus.googlecode.com/')
     about.set_authors( [
           _('Developers:'),
           'Homer Xing <homer.xing@gmail.com>', 
@@ -1424,7 +1431,8 @@ def show_about_dialog():#显示日志
           'M. Umut Pulat    http://12m3.deviantart.com/', 
           'Andrea Soragna   http://sora-meliae.deviantart.com/',
           'Paul Davey       http://mattahan.deviantart.com/',] )
-    about.set_copyright( _(u"Copyright © 2007-2010,\nTrusted Digital Technology Laboratory,\nShanghai Jiao Tong University, China.") )
+    about.set_copyright( _(u"Copyright © 2007-2010,\nTrusted Digital Technology Laboratory,\nShanghai Jiao Tong University, China.") + '\n'
+                         + _(u"Copyright © 2009-2010, Ailurus Developers Team") )
     about.set_wrap_license(False)
     about.set_license(
 '''
@@ -1502,7 +1510,6 @@ xbmc.png is copied from XBMC project. It is released under the GPL license. Its 
 All rights of other images which are not mensioned above are preserves by their authors.
 
 All rights of the applications installed by Ailurus are preserved by their authors.''')
-    about.vbox.pack_start( gtk.Label( _('Welcome to leave response in blog~') ) , False, False )
     about.vbox.pack_start( gtk.Label( _('\nThis version is released at %s.') % AILURUS_RELEASE_DATE), False)
     about.vbox.show_all()
     about.run()
@@ -1696,6 +1703,7 @@ AL = _('Artistic License')
 import atexit
 atexit.register(ResponseTime.save)
 atexit.register(KillWhenExit.kill_all)
+atexit.register(drop_priviledge) 
 
 try:
     Config.get_bool('show-a-linux-skill-bubble')
@@ -1706,3 +1714,7 @@ except:
     except:
         import traceback
         traceback.print_exc()
+        
+
+import random
+secret_key = ''.join([chr(random.randint(97,122)) for i in range(0, 64)])

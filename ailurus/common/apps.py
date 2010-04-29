@@ -4,6 +4,7 @@
 # Ailurus - make Linux easier to use
 #
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
+# Copyright (C) 2009-2010, Ailurus Developers Team
 #
 # Ailurus is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -183,17 +184,6 @@ class Speed_Up_Firefox(I):
 #    def __init__(self):
 #        self.firefox_path = FirefoxExtensions.get_extensions_path()[1:-11] 
 
-class Netbeans(_apt_install):
-    __doc__ = 'Netbeans'
-    detail = (
-              _('It is an open source IDE which supports several languages (C, C++, Java, Ruby, etc.)'
-               ' and frameworks (J2SE, J2ME, etc.). '
-               'Official site: http://netbeans.org/downloads/ .') +
-              _(' This application depends on Java.') )
-    category = 'dev'
-    license = DUAL_LICENSE(CDDL, GPL) + ' http://netbeans.org/about/legal/license.html'
-    pkgs = 'netbeans'
-    
 class OpenJUMP(_path_lists):
     __doc__ = _('OpenJUMP: A geographic information system')
     detail = ( 
@@ -244,11 +234,6 @@ class QueryBeforeRmALotFiles(I) :
         return file_contain ( self.bashrc, self.line )
     def remove(self):
         file_remove ( self.bashrc, self.line )
-
-class TeXLive2007(_apt_install):
-    'TeXLive 2007'
-    category = 'latex'
-    pkgs = 'texlive'
 
 class TeXLive2009(I):
     __doc__ = _('TeXLive 2009')

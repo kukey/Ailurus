@@ -4,6 +4,7 @@
 # Ailurus - make Linux easier to use
 #
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
+# Copyright (C) 2009-2010, Ailurus Developers Team
 #
 # Ailurus is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,11 +34,13 @@ class CommandFailError(dbus.DBusException):
 
 class AilurusFulgens(dbus.service.Object):
     @dbus.service.method('cn.ailurus.Interface', 
-                                          in_signature='ssb', 
+                                          in_signature='sssb', 
                                           out_signature='', 
                                           sender_keyword='sender')
-    def run(self, command, env_string, ignore_error, sender=None):
-        self.__check_permission(sender)
+    def run(self, command, env_string, secret_key, ignore_error, sender=None):
+        if not secret_key in self.authorized_secret_key:
+            self.__check_permission(sender)
+            self.authorized_secret_key.add(secret_key)
         
         command = command.encode('utf8')
         env_string = env_string.encode('utf8')
@@ -54,11 +57,13 @@ class AilurusFulgens(dbus.service.Object):
             raise CommandFailError(command, task.returncode)
 
     @dbus.service.method('cn.ailurus.Interface', 
-                                          in_signature='ss', 
+                                          in_signature='sss', 
                                           out_signature='i', 
                                           sender_keyword='sender')
-    def spawn(self, command, env_string, sender=None):
-        self.__check_permission(sender)
+    def spawn(self, command, env_string, secret_key, sender=None):
+        if not secret_key in self.authorized_secret_key:
+            self.__check_permission(sender)
+            self.authorized_secret_key.add(secret_key)
 
         command = command.encode('utf8')
         env_string = env_string.encode('utf8')
@@ -93,6 +98,7 @@ class AilurusFulgens(dbus.service.Object):
             raise ValueError
 
     def __init__(self):
+        self.authorized_secret_key = set()
         bus_name = dbus.service.BusName('cn.ailurus', bus = dbus.SystemBus())
         dbus.service.Object.__init__(self, bus_name, '/')
         
@@ -135,11 +141,17 @@ class AilurusFulgens(dbus.service.Object):
             v = List[i+1]
             Dict[k] = v
         return Dict
-
+    
+    @dbus.service.method('cn.ailurus.Interface', 
+                                    in_signature='s',
+                                    out_signature='') 
+    def drop_priviledge(self, secret_key):
+        if secret_key in self.authorized_secret_key:
+            self.authorized_secret_key.remove(secret_key)
+        
 def main():
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     AilurusFulgens()
-
     mainloop = gobject.MainLoop()
     mainloop.run()    
 
