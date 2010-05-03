@@ -25,10 +25,7 @@ import traceback
 import sys, os
 from lib import *
 
-def row(text, value, icon=D+'umut_icons/i_default.png', tooltip = None):
-    return (text, value, icon, tooltip)
-
-def get():
+def __gnome():
     import os, re
     ret = []
     
@@ -47,7 +44,10 @@ def get():
     except:
         traceback.print_exc(file=sys.stderr)
         
-    try: ret.append( row(_('GNOME locale:'), os.environ['LANG'], D+'umut_icons/i_locale.png' ) )
+    try: ret.append( row(_('GNOME locale:'), os.environ['LANG'], D+'other_icons/i_locale.png' ) )
     except: traceback.print_exc(file=sys.stderr)
 
     return ret
+
+def get():
+    return [__gnome]

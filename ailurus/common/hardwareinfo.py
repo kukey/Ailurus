@@ -25,9 +25,6 @@ import traceback
 import sys, os
 from lib import *
 
-def row(text, value, icon=D+'umut_icons/i_default.png', tooltip = None):
-    return (text, value, icon, tooltip)
-
 def __read(path):
     with open(path) as f:
         ret = f.read().rstrip()
@@ -121,6 +118,7 @@ def __cpu():
     return ret
 
 def __cpu_temp():
+    __cpu_temp.please_refresh_me = True
     try:
         import glob
         pathlist = glob.glob('/proc/acpi/thermal_zone/*')
@@ -169,6 +167,7 @@ def __pci():
     return ret
 
 def __battery():
+    __battery.please_refresh_me = True
     ret = []
     try:
         with open('/proc/acpi/battery/BAT0/state') as f:
@@ -195,5 +194,5 @@ def __battery():
     return ret
 
 def get():
-    return ( __motherboard() + __bios() + __cpu() + __cpu_temp() +
-             __mem() + __pci() + __battery() )
+    return [ __motherboard, __bios, __cpu, __cpu_temp,
+             __mem, __pci, __battery ]
