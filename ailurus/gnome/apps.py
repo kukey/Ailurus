@@ -32,6 +32,7 @@ class ChangeTerminalColor(_set_gconf):
        '/apps/gnome-terminal/profiles/Default/use_theme_colors = False\n'
        '/apps/gnome-terminal/profiles/Default/background_color = #000000000000\n'
        '/apps/gnome-terminal/profiles/Default/foreground_color = #FFFFFFFFFFFF')
+    DE = 'gnome'
     def __init__(self):
         self.set=(
 ('/apps/gnome-terminal/profiles/Default/use_theme_colors',False,True), 
@@ -42,14 +43,15 @@ class ChangeTerminalColor(_set_gconf):
 
 class NScripts(I):
     __doc__ = _('NScripts: a set of useful Nautilus scripts')
-    detail = _('NScripts help you change the background, create/check MD5 checksums, create a diff, create shortcuts via Nautilus. '
-               'Its web site is http://freshmeat.net/projects/nscripts . '
+    detail = _('NScripts help you change the background, create/check MD5 checksums, create a diff, create shortcuts via Nautilus.\n'
                'NScripts is installed in ~/.gnome2/nautilus-scripts.')
+    download_url = 'http://freshmeat.net/projects/nscripts'
     license = GPL
-    category = 'nautilus'
-
+    category = 'nautilus_extension'
+    DE = 'gnome'
     def install(self):
-        f = R('http://www.nanolx.org/free/NScripts-3.6.tar.bz2').download()
+        # We add the first url in case of failure of the second one 
+        f = R(['http://ailurus.googlecode.com/files/NScripts-3.6.tar.bz2', urls.nscript]).download()
         import os
         dir = os.path.expanduser('~/.gnome2/nautilus-scripts/')
         if not os.path.exists(dir): os.mkdir(dir)
@@ -76,6 +78,7 @@ class Gedit_GB2312(_set_gconf) :
        '/apps/gedit-2/preferences/encodings/auto_detected += ["GB2312", "GBK", "GB18030"]\n'
        '/apps/gedit-2/preferences/encodings/shown_in_menu += ["GB2312"]')
     Chinese = True
+    DE = 'gnome'
     def __init__(self):
         self.set = ()
         self.add = (
@@ -94,8 +97,9 @@ class Speedup_Nautilus(I):
        '/apps/nautilus/preferences/show_icon_text = never\n'
        '/apps/nautilus/icon_view/default_use_tighter_layout = true\n'
        'delete "size" from /apps/nautilus/list_view/default_visible_columns')
-    category = 'nautilus'
-
+    category = 'nautilus_extension'
+    DE = 'gnome'
+    
     def __init__(self):
         self.keys = ['/apps/nautilus/preferences/show_icon_text',
                      '/apps/nautilus/preferences/show_directory_item_counts',
@@ -145,7 +149,8 @@ class GEdit_Suitable_For_Programmer(_set_gconf):
        'Do not automatically create a hidden copy of current file. '
        'Automatically save files once in each minute. '
        'Show line numbers.')
-    category = 'dev'
+    category = 'saber'
+    DE = 'gnome'
     def __init__(self):
         self.set = (
 ('/apps/gedit-2/preferences/editor/save/auto_save',True,False),

@@ -1,10 +1,14 @@
 #!/usr/bin/env python
+import os, sys, glob
 from distutils.core import setup
-from DistUtilsExtra.command import *
-from glob import glob
-import os
+try:
+    from DistUtilsExtra.command import *
+except ImportError:
+    print 'Cannot install Ailurus :('
+    print 'Would you please install package "python-distutils-extra" first?'
+    sys.exit()
 
-f = open('version')
+f = open('ailurus/version')
 version = f.read().strip()
 f.close()
 
@@ -31,29 +35,20 @@ Features:
       url = 'http://ailurus.googlecode.com/',
       license = 'GPLv2+',
       platforms = ['linux'],
-      packages = ['ailurus', 'ailurus.common', 'ailurus.gnome', 'ailurus.fedora', 'ailurus.ubuntu', 'ailurus.support', ],
+      packages = ['ailurus', 'ailurus.common', 'ailurus.gnome', 'ailurus.archlinux', 'ailurus.fedora', 'ailurus.ubuntu', 'ailurus.support', ],
+      package_data={'ailurus': ['native_apps', 'version', 
+                                'icons/suyun_icons/*', 'icons/umut_icons/*', 'icons/sora_icons/*', 'icons/velly_icons/*', ],
+                    'ailurus.support': [os.path.basename(f) for f in glob.glob('ailurus/support/*') if '.' not in os.path.basename(f)]},
       data_files = [
         ('share/man/man1/', ['ailurus.1']),
-        ('share/desktop-directories', ['ailurus_quick_start.directory']),
-        ('/etc/xdg/menus/applications-merged', ['ailurus.menu']),
-        ('share/applications/', ['ailurus-recovery.desktop', 'ailurus-information.desktop',
-                                 'ailurus-clean-up.desktop', 'ailurus-install-software.desktop',
-                                 'ailurus.desktop', 'ailurus-fastest-repository.desktop', 'ailurus-system-setting.desktop'
-                                 ]),
+        ('share/applications/', ['ailurus.desktop']),
         
         ('share/ailurus/', ['ChangeLog']),
-        
-        ('share/ailurus/data/appicons/', glob('data/appicons/*.png') ),
-        ('share/ailurus/data/other_icons/', glob('data/other_icons/*.png') ),
-        ('share/ailurus/data/suyun_icons/', glob('data/suyun_icons/*.png') ),
-        ('share/ailurus/data/umut_icons/', glob('data/umut_icons/*.png') ),
-        ('share/ailurus/data/sora_icons/', glob('data/sora_icons/*.png') ),
-        ('share/ailurus/data/velly_icons/', glob('data/velly_icons/*.png') ),
         ('share/dbus-1/system-services/', ['support/dbus/cn.ailurus.service']),
         ('/etc/dbus-1/system.d/', ['support/dbus/cn.ailurus.conf']),
         ('share/PolicyKit/policy/', ['support/policykit0/cn.ailurus.policy']),
         ('share/polkit-1/actions/', ['support/policykit1/cn.ailurus.policy']),
-        ('share/ailurus/support/', [ e for e in glob('support/*') if os.path.isfile(e)] ),
+        ('share/ailurus/support/', [ e for e in glob.glob('support/*') if os.path.isfile(e)] ),
         ('share/ailurus/support/', ['support/dbus/cn.ailurus.service', 'support/dbus/cn.ailurus.conf']),
       ],
       scripts = ['bin/ailurus'],

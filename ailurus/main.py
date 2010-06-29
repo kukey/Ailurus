@@ -27,7 +27,7 @@ from libu import *
 from loader import *
 
 def detect_running_instances():
-    string = get_output('ps -a -u $USER | grep ailurus', True)
+    string = get_output('pgrep -u $USER ailurus', True)
     if string!='':
         notify(_('Warning!'), 
            _('Another instance of Ailurus is running. '
@@ -51,69 +51,157 @@ def with_same_content(file1, file2):
         content2 = f.read()
     return content1 == content2
 
-def check_dbus_configuration():
-    same_content = True
-    if not with_same_content('/etc/dbus-1/system.d/cn.ailurus.conf', '/usr/share/ailurus/support/cn.ailurus.conf'):
-        same_content = False
-    if not with_same_content('/usr/share/dbus-1/system-services/cn.ailurus.service', '/usr/share/ailurus/support/cn.ailurus.service'):
-        same_content = False
-    dbus_ok = True
-    try:
-        get_authentication_method()
+def check_required_packages():
+    ubuntu_missing = []
+    fedora_missing = []
+    archlinux_missing = []
+
+    try: import pynotify
+    except: 
+        ubuntu_missing.append('python-notify')
+        fedora_missing.append('notify-python')
+        archlinux_missing.append('python-notify')
+    try: import vte
+    except: 
+        ubuntu_missing.append('python-vte')
+        fedora_missing.append('vte')
+        archlinux_missing.append('vte')
+    try: import apt
+    except: 
+        ubuntu_missing.append('python-apt')
+    try: import rpm
+    except: 
+        fedora_missing.append('rpm-python')
+    try: import dbus
+    except: 
+        ubuntu_missing.append('python-dbus')
+        fedora_missing.append('dbus-python')
+        archlinux_missing.append('dbus-python')
+    try: import gnomekeyring
     except:
-        dbus_ok = False
-    if same_content and dbus_ok: return
+        ubuntu_missing.append('python-gnomekeyring')
+        fedora_missing.append('gnome-python2-gnomekeyring')
+        archlinux_missing.append('python-gnomekeyring') # I am not sure. python-gnomekeyring is on AUR. get nothing from pacman -Ss python*keyring 
+    if not os.path.exists('/usr/bin/unzip'):
+        ubuntu_missing.append('unzip')
+        fedora_missing.append('unzip')
+        archlinux_missing.append('unzip')
+    if not os.path.exists('/usr/bin/wget'):
+        ubuntu_missing.append('wget')
+        fedora_missing.append('wget')
+        archlinux_missing.append('wget')
+    if not os.path.exists('/usr/bin/xterm'):
+        ubuntu_missing.append('xterm')
+        fedora_missing.append('xterm')
+        archlinux_missing.append('xterm')
+
+    try: # detect policykit version 0.9.x
+        import dbus
+        obj = dbus.SystemBus().get_object('org.freedesktop.PolicyKit', '/')
+        obj = dbus.Interface(obj, 'org.freedesktop.PolicyKit')
+        has_policykit_0 = True
+    except ImportError:
+        has_policykit_0 = True # We cannot detect PolicyKit if we haven't dbus.
+    except:
+        has_policykit_0 = False
+    try: # detect policykit version 1.x
+        import dbus
+        obj = dbus.SystemBus().get_object('org.freedesktop.PolicyKit1', '/org/freedesktop/PolicyKit1/Authority')
+        obj = dbus.Interface(obj, 'org.freedesktop.PolicyKit1.Authority')
+        has_policykit_1 = True
+    except ImportError:
+        has_policykit_1 = True # We cannot detect PolicyKit if we haven't dbus.
+    except:
+        has_policykit_1 = False
+    if not has_policykit_0 and not has_policykit_1:
+        ubuntu_missing.append('policykit-gnome (or policykit-kde or policykit-1-gnome)') # FIXME: It is not good to list all these packages. Should be more precise.
+        # FIXME: policykit-1-kde does not exist in Ubuntu.
+        fedora_missing.append('polkit-gnome (or polkit-kde)')
+        archlinux_missing.append('polkit-gnome (or polkit-kde)')
+
+    error = ((UBUNTU or UBUNTU_DERIV) and ubuntu_missing) or (FEDORA and fedora_missing) or (ARCHLINUX and archlinux_missing)
+    if error:
+        import StringIO
+        message = StringIO.StringIO()
+        print >>message, _('Necessary packages are not installed. Ailurus cannot work.')
+        print >>message, ''
+        print >>message, _('Please install these packages:')
+        print >>message, ''
+        if UBUNTU or UBUNTU_DERIV:
+            print >>message, '<span color="blue">', ', '.join(ubuntu_missing), '</span>'
+        if FEDORA:
+            print >>message, '<span color="blue">', ', '.join(fedora_missing), '</span>'
+        if ARCHLINUX:
+            print >>message, '<span color="blue">', ', '.join(archlinux_missing), '</span>'
+        dialog = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons=gtk.BUTTONS_OK)
+        dialog.set_title('Ailurus ' + AILURUS_VERSION)
+        dialog.set_markup(message.getvalue())
+        dialog.run()
+        dialog.destroy()
+
+def check_dbus_daemon_status():
+    if not with_same_content('/etc/dbus-1/system.d/cn.ailurus.conf', '/usr/share/ailurus/support/cn.ailurus.conf'):
+        correct_conf_files = False
+    elif not with_same_content('/usr/share/dbus-1/system-services/cn.ailurus.service', '/usr/share/ailurus/support/cn.ailurus.service'):
+        correct_conf_files = False
+    else:
+        correct_conf_files = True
+
+    try:
+        running_version = get_dbus_daemon_version()
+    except:
+        print_traceback()
+        running_version = 0
+    from daemon import version as current_version
+    same_version = (current_version == running_version)
+    
+    daemon_current = A+'/daemon.py'
+    daemon_installed = '<None>'
+    try:
+        import ailurus
+    except:
+        same_daemon = False
+    else:
+        daemon_installed = os.path.dirname(os.path.abspath(ailurus.__file__))+'/daemon.py'
+        same_daemon = with_same_content(daemon_current, daemon_installed)
+    
+    if correct_conf_files and same_version and same_daemon: return
+    def show_text_dialog(msg, icon=gtk.MESSAGE_ERROR):
+        dialog = gtk.MessageDialog(type=icon, buttons=gtk.BUTTONS_OK)
+        dialog.set_title('Ailurus')
+        dialog.set_markup(msg)
+        dialog.run()
+        dialog.destroy()
     import StringIO
     message = StringIO.StringIO()
     print >>message, _('Error happened. You cannot install any software by Ailurus. :(')
     print >>message, ''
-    if not same_content:
+    if not correct_conf_files:
         print >>message, _('System configuration file should be updated.')
         print >>message, _('Please run these commands using <b>su</b> or <b>sudo</b>:')
         print >>message, ''
         print >>message, '<span color="blue">', 'cp /usr/share/ailurus/support/cn.ailurus.conf /etc/dbus-1/system.d/cn.ailurus.conf', '</span>'
         print >>message, '<span color="blue">', 'cp /usr/share/ailurus/support/cn.ailurus.service /usr/share/dbus-1/system-services/cn.ailurus.service', '</span>'
         print >>message, ''
-    if not dbus_ok:
-        print >>message, _("Ailurus' D-Bus daemon exited with error.")
-        print >>message, _("Please restart your computer, or start daemon using <b>su</b> or <b>sudo</b>:")
+        show_text_dialog(message.getvalue())
+    elif not same_daemon:
+        print >>message, _('Please re-install Ailurus.')
+        print >>message, _('Because file contents are different:')
+        print >>message, '<span color="blue">', daemon_current, '</span>'
+        print >>message, '<span color="blue">', daemon_installed, '</span>'
+        show_text_dialog(message.getvalue())
+    elif not same_version:
+        print >>message, _('We need to restart Ailurus daemon.')
+        print >>message, _('Old version is %s.') % running_version, _('New version is %s') % current_version
         print >>message, ''
-        print >>message, '<span color="blue">', '/usr/share/ailurus/support/ailurus-daemon &amp;', '</span>'
-    dialog = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons=gtk.BUTTONS_OK)
-    dialog.set_title('Ailurus ' + AILURUS_VERSION)
-    dialog.set_markup(message.getvalue())
-    dialog.run()
-    dialog.destroy()
-
-def import_desktop_environment():
-    if Config.is_GNOME():
-        import gnome
-        return gnome
-    else:
-        return None
-
-def import_distribution():
-    if Config.is_Mint():
+        print >>message, _('Press this button to restart daemon. Require authentication.')
+        show_text_dialog(message.getvalue())
         try:
-            versions = ['hardy', 'intrepid', 'jaunty', 'karmic', 'lucid', ]
-            rs = Config.get_Mint_version()
-            if rs in ['5', '6', '7', '8', '9']:
-                version = versions[int(rs)-5]
-            Config.set_Ubuntu_version( version )
-            import ubuntu
-            return ubuntu
+            restart_dbus_daemon()
+            show_text_dialog(_('Ailurus daemon successfully restarted. Ailurus will work fine.'), icon=gtk.MESSAGE_INFO)
         except:
-            import traceback
-            traceback.print_exc()
-            return None
-    elif Config.is_Ubuntu(): 
-        import ubuntu
-        return ubuntu
-    elif Config.is_Fedora():
-        import fedora
-        return fedora
-    else:
-        return None
+            show_text_dialog(_("Cannot restart Ailurus daemon. Please restart your computer."))
+            print_traceback()
 
 def wait_firefox_to_create_profile():
     if os.path.exists('/usr/bin/firefox'):
@@ -124,56 +212,6 @@ def wait_firefox_to_create_profile():
             start = time.time()
             while not os.path.exists(propath) and time.time() - start < 6:
                 time.sleep(0.1)
-
-def exception_happened(etype, value, tb):
-    if etype == KeyboardInterrupt: return
-    
-    import traceback, StringIO
-    msg = StringIO.StringIO()
-    print >>msg, _('Traceback:')
-    traceback.print_tb(tb, file=msg)
-    print >>msg, etype, ':', value
-    print >>msg, 'Ailurus version:', AILURUS_VERSION
-
-    title_box = gtk.HBox(False, 5)
-    import os
-    if os.path.exists(D+'umut_icons/bug.png'):
-        image = gtk.Image()
-        image.set_from_file(D+'umut_icons/bug.png')
-        title_box.pack_start(image, False)
-    title = label_left_align( _('A bug appears. Would you please tell Ailurus developers? Thank you!') )
-    title_box.pack_start(title, False)
-    
-    textview_traceback = gtk.TextView()
-    gray_bg(textview_traceback)
-    textview_traceback.set_wrap_mode(gtk.WRAP_WORD)
-    textview_traceback.get_buffer().set_text(msg.getvalue())
-    textview_traceback.set_cursor_visible(False)
-    scroll_traceback = gtk.ScrolledWindow()
-    scroll_traceback.set_shadow_type(gtk.SHADOW_IN)
-    scroll_traceback.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-    scroll_traceback.add(textview_traceback)
-    scroll_traceback.set_size_request(-1, 300)
-    button_report_bug = image_stock_button(gtk.STOCK_DIALOG_WARNING, _('Click here to report bug via web-page') )
-    button_report_bug.connect('clicked', lambda w: report_bug() )
-    button_close = image_stock_button(gtk.STOCK_CLOSE, _('Close'))
-    button_close.connect('clicked', lambda w: dialog.destroy())
-    bottom_box = gtk.HBox(False, 10)
-    bottom_box.pack_start(button_report_bug, False)
-    bottom_box.pack_start(button_close, False)
-    
-    dialog = gtk.Dialog(_('Bug appears!'), None, gtk.DIALOG_NO_SEPARATOR)
-    dialog.set_border_width(10)
-    dialog.vbox.set_spacing(5)
-    dialog.vbox.pack_start(title_box, False)
-    dialog.vbox.pack_start(scroll_traceback)
-    dialog.vbox.show_all()
-    
-    dialog.action_area.pack_start(bottom_box, False)
-    dialog.action_area.show_all()
-    
-    dialog.run()
-    dialog.destroy()
 
 sys.excepthook = exception_happened
 
@@ -232,45 +270,98 @@ class toolitem(gtk.ToolItem):
         button.connect(signal_name, callback, *callback_args)
         self.add(button)
 
+class PaneLoader:
+    def __init__(self, main_view, pane_class, content_function = None):
+        import gobject
+        assert isinstance(pane_class, gobject.GObjectMeta)
+        assert callable(content_function) or content_function is None
+        self.main_view = main_view
+        self.pane_class = pane_class
+        self.content_function = content_function
+        self.pane_object = None
+    def get_pane(self):
+        if self.pane_object is None:
+            if self.content_function: arg = [self.content_function()] # has argument
+            else: arg = [] # no argument
+            self.pane_object = self.pane_class(self.main_view, *arg)
+        return self.pane_object
+    def need_to_load(self):
+        return self.pane_object is None
+
+def create_menu_from(menuitems):
+    assert isinstance(menuitems, list)
+    menu = gtk.Menu()
+    for item in menuitems:
+        menu.append(item)
+    menu.show_all()
+    return menu
+
+class DefaultPaneMenuItem(gtk.CheckMenuItem):
+    def __init__(self, text, value, group):
+        'text is displayed. value is saved in Config. group consists of all menu items'
+        assert isinstance(text, str)
+        assert isinstance(value, str)
+        assert isinstance(group, list)
+        for obj in group:
+            assert isinstance(obj, gtk.CheckMenuItem)
+        self.text = text.replace('\n', '')
+        self.value = value
+        self.group = group
+        gtk.CheckMenuItem.__init__(self, self.text)
+        self.set_draw_as_radio(True)
+        self.set_active(Config.get_default_pane() == value)
+        self.connect('toggled', lambda w: self.toggled())
+    def toggled(self):
+        if self.get_active():
+            Config.set_default_pane(self.value)
+            for obj in self.group:
+                if obj != self:
+                    obj.set_active(False)
+        self.set_active(Config.get_default_pane() == self.value)
+
 class MainView:
+    def create_default_pane_menu(self):
+        'Create a menu, to select default pane.'
+        menuitems = []
+        reversed_order = self.ordered_key[:]
+        reversed_order.reverse()
+        for key in reversed_order:
+            pane = self.contents[key]
+            assert hasattr(pane, 'pane_class') # pane is a PaneLoader object
+            assert hasattr(pane.pane_class, 'text')
+            item = DefaultPaneMenuItem(pane.pane_class.text, pane.pane_class.__name__, menuitems)
+            menuitems.append(item)
+        return create_menu_from(menuitems)
+    
     def add_quit_button(self):
         item_quit = toolitem(D+'sora_icons/m_quit.png', _('Quit'), 'clicked', self.terminate_program)
         self.toolbar.insert(item_quit, 0)
 
     def add_study_button_preference_button_other_button(self):
-        menu = load_others_menu(COMMON, DESKTOP, DISTRIBUTION, self)
-        item = toolitem(D+'sora_icons/m_others.png', _('Others'), 'button_release_event', self.__show_popupmenu_on_toolbaritem, menu)
+        item = toolitem(D+'sora_icons/m_others.png', _('Others'), 'button_release_event', 
+                        self.__show_popupmenu_on_toolbaritem, create_menu_from(load_others_menuitems()))
         self.toolbar.insert(item, 0)
-        menu = load_preferences_menu(COMMON, DESKTOP, DISTRIBUTION, self)
-        item = toolitem(D+'sora_icons/m_preference.png', _('Preferences'), 'button_release_event', self.__show_popupmenu_on_toolbaritem, menu)
+        self.menu_preference = create_menu_from(load_preferences_menuitems())
+        default_pane_item = gtk.MenuItem(_('Default pane'))
+        default_pane_item.set_submenu(self.create_default_pane_menu())
+        self.menu_preference.append(default_pane_item)
+        self.menu_preference.show_all()
+        item = toolitem(D+'sora_icons/m_preference.png', _('Preferences'), 'button_release_event', 
+                        self.__show_popupmenu_on_toolbaritem, self.menu_preference)
         self.toolbar.insert(item, 0)
-        menu = load_study_linux_menu(COMMON, DESKTOP, DISTRIBUTION, self)
-        item = toolitem(D+'sora_icons/m_study_linux.png', _('Study\nLinux'), 'button_release_event', self.__show_popupmenu_on_toolbaritem, menu)
+        item = toolitem(D+'sora_icons/m_study_linux.png', _('Study\nLinux'), 'button_release_event', 
+                        self.__show_popupmenu_on_toolbaritem, create_menu_from(load_study_linux_menuitems()))
         self.toolbar.insert(item, 0)
 
     def add_pane_buttons_in_toolbar(self):
-        List = [
-                ('InfoPane', D+'sora_icons/m_hardware.png', _('Information'), ),
-                ('SystemSettingPane', D+'sora_icons/m_linux_setting.png', _('System\nSettings'), ),
-                ('InstallRemovePane', D+'sora_icons/m_install_remove.png', _('Install\nSoftware'), ),
-                ('UbuntuFastestMirrorPane', D+'sora_icons/m_fastest_repos.png', _('Fastest\nRepository'), ),
-                ('FedoraFastestMirrorPane', D+'sora_icons/m_fastest_repos.png', _('Fastest\nRepository'), ),
-                ('UbuntuAPTRecoveryPane', D+'sora_icons/m_recovery.png', _('Recover\nAPT'), ),
-                ('FedoraRPMRecoveryPane', D+'sora_icons/m_recovery.png', _('Recover\nRPM'), ),
-                ('CleanUpPane', D+'other_icons/m_clean_up.png', _('Clean up')),
-                ]
-        List.reverse()
-        for name, icon, text in List:
-            if not name in self.contents: continue
-            item = toolitem(icon, text, 'clicked', self.activate_pane, name)
+        for key in self.ordered_key:
+            pane_loader = self.contents[key]
+            icon = pane_loader.pane_class.icon
+            text = pane_loader.pane_class.text
+            item = toolitem(icon, text, 'clicked', self.activate_pane, key)
             self.toolbar.insert(item, 0)
-            left_most_pane_name = name
         
-        if 'InstallRemovePane' in self.contents:
-            self.activate_pane(None, 'InstallRemovePane')
-        else:
-            assert left_most_pane_name != None
-            self.activate_pane(None, left_most_pane_name) # automatically activate the left-most pane
+        self.activate_pane(None, Config.get_default_pane())
 
     def get_item_icon_size(self):
         return min( int(self.last_x / 20), 48)
@@ -295,16 +386,25 @@ class MainView:
     
     def activate_pane(self, widget, name):
         assert isinstance(name, str)
-        if name in self.contents:
-            self.change_content_basic(name)
-
-    def change_content_basic(self, name):
-        assert isinstance(name, str)
         self.current_pane = name
         for child in self.toggle_area.get_children():
             self.toggle_area.remove(child)
-        content = self.contents[name]
-        self.toggle_area.add(content)
+        pane_loader = self.contents[name]
+        if pane_loader.need_to_load():
+            import pango
+            label = gtk.Label(_('Please wait a few seconds'))
+            label.modify_font(pango.FontDescription('Sans 20'))
+            self.toggle_area.add(label)
+            self.toggle_area.show_all()
+            while gtk.events_pending(): gtk.main_iteration()
+            pane = pane_loader.get_pane() # load pane
+            for child in self.toggle_area.get_children():
+                self.toggle_area.remove(child)
+            if hasattr(pane, 'get_preference_menuitems'): # insert preference_menuitems
+                for item in pane.get_preference_menuitems():
+                    self.menu_preference.append(item)
+                self.menu_preference.show_all()
+        self.toggle_area.add(pane_loader.get_pane())
         self.toggle_area.show_all()
 
     def lock(self):
@@ -339,34 +439,22 @@ class MainView:
         
         from support.windowpos import WindowPos
         WindowPos.save(self.window,'main')
-        
-        for pane in self.contents.values():
-            if hasattr(pane, 'save_state'):
-                pane.save_state()
 
         gtk.main_quit()
         sys.exit()
 
-    def show_day_tip(self, *w):
-        from support.tipoftheday import TipOfTheDay
-        w=TipOfTheDay()
-        w.run()
-        w.destroy()
-
-    def register(self, pane):
-        key = pane.__class__.__name__
-        try:
-            assert not '.' in key, key
-            assert not key in self.contents, key
-            self.contents[key] = pane
-        except:
-            import traceback
-            traceback.print_exc()
+    def register(self, pane_class, content_function = None):
+        import gobject
+        key = pane_class.__name__
+        self.contents[key] = PaneLoader(self, pane_class, content_function)
+        self.ordered_key.append(key)
 
     def __init__(self):
         self.window = None # MainView window
         self.stop_delete_event = False
         self.contents = {}
+        self.ordered_key = [] # contains keys in self.contents, in calling order of self.register
+        self.menu_preference = None # "Preference" menu
         
         self.toggle_area = gtk.VBox()
         self.toggle_area.set_border_width(5)
@@ -377,11 +465,11 @@ class MainView:
         self.toolbar.set_orientation(gtk.ORIENTATION_HORIZONTAL)
         self.toolbar.set_style(gtk.TOOLBAR_BOTH)
         vbox.pack_start(self.toolbar, False)
-        
+        vbox.pack_start(gtk.HSeparator(), False)
         vbox.pack_start(self.toggle_area, True, True)
         
         self.window = window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        window.set_title('Ailurus ' + AILURUS_VERSION)
+        window.set_title('Ailurus')
         self.last_x = self.window.get_size()[0]
         def configure_event(window, event, toolbar):
             if self.last_x != self.window.get_size()[0]:
@@ -393,122 +481,52 @@ class MainView:
 
         from support.windowpos import WindowPos
         WindowPos.load(window,'main')
+        
+        from system_setting_pane import SystemSettingPane
+        from clean_up_pane import CleanUpPane
+        from info_pane import InfoPane
+        from install_remove_pane import InstallRemovePane
+        from computer_doctor_pane import ComputerDoctorPane
+        if UBUNTU or UBUNTU_DERIV:
+            from ubuntu.fastest_mirror_pane import UbuntuFastestMirrorPane
+            from ubuntu.apt_recovery_pane import UbuntuAPTRecoveryPane
+        if FEDORA:
+            from fedora.fastest_mirror_pane import FedoraFastestMirrorPane
+            from fedora.rpm_recovery_pane import FedoraRPMRecoveryPane
 
-import common as COMMON
-DESKTOP = import_desktop_environment()
-DISTRIBUTION = import_distribution()
+        self.register(ComputerDoctorPane, load_cure_objs)
+        self.register(CleanUpPane)
+        if UBUNTU or UBUNTU_DERIV:
+            self.register(UbuntuAPTRecoveryPane)
+            self.register(UbuntuFastestMirrorPane)
+        if FEDORA:
+            self.register(FedoraRPMRecoveryPane)
+            self.register(FedoraFastestMirrorPane)
+        self.register(InstallRemovePane, load_app_objs)
+        self.register(SystemSettingPane, load_setting)
+        self.register(InfoPane, load_info)
+        
+        self.add_quit_button()
+        self.add_study_button_preference_button_other_button()
+        self.add_pane_buttons_in_toolbar()
+        self.window.show_all()
+        
+        if Config.is_long_enough_since_last_check_update():
+            Config.set_last_check_update_time_to_now()
+            from support.checkupdate import check_update
+            import thread
+            thread.start_new_thread(check_update, (True, )) # "True" means "silent"
+
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-
-from optparse import OptionParser
-parser = OptionParser(usage=_('usage: ailurus [options]'))
-parser.add_option('--fast', action='store_false', dest='all', default=True, help=_('do not load all functionality'))
-parser.add_option('--information', action='store_true', dest='information', default=False, help=_('load "information" functionality'))
-parser.add_option('--system-setting', action='store_true', dest='system_setting', default=False, help=_('load "system setting" functionality'))
-parser.add_option('--install-software', action='store_true', dest='install_software', default=False, help=_('load "install software" functionality'))
-parser.add_option('--recovery', action='store_true', dest='recovery', default=False, help=_('load "recovery" functionality'))
-parser.add_option('--clean-up', action='store_true', dest='clean_up', default=False, help=_('load "clean up" functionality'))
-parser.add_option('--fastest-repository', action='store_true', dest='fastest_repository', default=False, help=_('load "fastest repository" functionality'))
-options, args = parser.parse_args()
-if ( options.all == False 
-     and not options.recovery
-     and not options.clean_up
-     and not options.fastest_repository
-     and not options.information
-     and not options.install_software
-     and not options.system_setting ):
-    print _('You did not specify any functionality. :)')
-    print _('For example: ailurus --fast --information')
-    sys.exit()
 change_task_name()
 set_default_window_icon()
-check_dbus_configuration()
+check_required_packages()
+check_dbus_daemon_status()
 
-# show splash window
-from support.splashwindow import SplashWindow
-splash = SplashWindow()
-splash.show_all()
 while gtk.events_pending(): gtk.main_iteration()
-
-# load Linux skills
-tips = load_tips(COMMON, DESKTOP, DISTRIBUTION)
-import support.tipoftheday
-support.tipoftheday.tips = tips
-
-# load main window
 main_view = MainView()
+#splash.destroy()
 
-if options.system_setting or options.all:
-    splash.add_text(_('<span color="grey">Loading system settings pane ... </span>\n'))
-    items = load_setting(COMMON, DESKTOP, DISTRIBUTION)
-    from system_setting_pane import SystemSettingPane
-    pane = SystemSettingPane(items)
-    main_view.register(pane)
-
-if getattr(DISTRIBUTION, '__name__', '') == 'ubuntu':
-    if options.fastest_repository or options.all:
-        from ubuntu.fastest_mirror_pane import UbuntuFastestMirrorPane
-        pane = UbuntuFastestMirrorPane(main_view)
-        main_view.register(pane)
-
-    if options.recovery or options.all:
-        from ubuntu.apt_recovery_pane import UbuntuAPTRecoveryPane
-        pane = UbuntuAPTRecoveryPane(main_view)
-        main_view.register(pane)
-
-if getattr(DISTRIBUTION, '__name__', '') == 'fedora':
-    if options.fastest_repository or options.all:
-        from fedora.fastest_mirror_pane import FedoraFastestMirrorPane
-        pane = FedoraFastestMirrorPane(main_view)
-        main_view.register(pane)
-
-    if options.recovery or options.all:
-        from fedora.rpm_recovery_pane import FedoraRPMRecoveryPane
-        pane = FedoraRPMRecoveryPane(main_view)
-        main_view.register(pane)
-
-if options.clean_up or options.all:
-    from clean_up_pane import CleanUpPane
-    pane = CleanUpPane(main_view)
-    main_view.register(pane)
-
-if options.information or options.all:
-    splash.add_text(_('<span color="grey">Loading information pane ... </span>\n'))
-    hwinfo = load_hardwareinfo(COMMON, DESKTOP, DISTRIBUTION)
-    linuxinfo = load_linuxinfo(COMMON, DESKTOP, DISTRIBUTION)
-    from info_pane import InfoPane
-    pane = InfoPane(main_view, 
-                    ([_('Hardware Information'), D+'sora_icons/m_hardware.png', hwinfo], 
-                    [_('Linux Information'), D+'sora_icons/m_linux.png', linuxinfo]))
-    main_view.register(pane)
-
-if options.install_software or options.all:
-    splash.add_text(_('<span color="grey">Loading applications pane ... </span>\n'))
-    
-    wait_firefox_to_create_profile()
-    
-    if getattr(DISTRIBUTION, '__name__', '') == 'ubuntu':
-        APT.refresh_cache()
-    elif getattr(DISTRIBUTION, '__name__', '') == 'fedora':
-        RPM.refresh_cache()
-    
-    app_objs = load_app_objs(COMMON, DESKTOP, DISTRIBUTION)
-    custom_app_classes = load_custom_app_classes()
-    from install_remove_pane import InstallRemovePane
-    pane = InstallRemovePane(main_view, app_objs + custom_app_classes)
-    main_view.register(pane)
-    main_view.install_remove_pane = pane
-
-main_view.add_quit_button()
-if options.all:
-    main_view.add_study_button_preference_button_other_button()
-main_view.add_pane_buttons_in_toolbar()
-main_view.window.show_all()
-splash.destroy()
-# do not show tip of the day
-# if not Config.get_disable_tip():
-#    main_view.show_day_tip()
-
-# all right
 gtk.gdk.threads_init()
 gtk.gdk.threads_enter()
 gtk.main()

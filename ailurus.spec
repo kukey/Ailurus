@@ -1,23 +1,21 @@
-%define name ailurus
-%define version 10.04.2.3
-%define unmangled_version 10.04.2.3
-%define release 1
-%define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
+%if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
+%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
+%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
+%endif
 
+Name: ailurus
+Version: 10.06.8
+Release: 0%{?dist}
 Summary: makes Linux easier to use
-Name: %{name}
-Version: %{version}
-Release: %{release}
-Source: http://homerxing.fedorapeople.org/%{name}-%{unmangled_version}.tar.gz
-License: GPLv2+
 Group: Applications/System
+License: GPLv2+
+URL: http://ailurus.googlecode.com/
+Source: http://homerxing.fedorapeople.org/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-Prefix: %{_prefix}
+BuildRequires: python-devel python2-devel python-distutils-extra intltool
 BuildArch: noarch
-Vendor: Homer Xing <homer.xing@gmail.com>
-Requires: python pygtk2 notify-python vte rpm-python pygobject2 dbus-python wget unzip xterm
-Url: http://ailurus.googlecode.com/
-BuildRequires: python python-devel python-distutils-extra intltool sed
+# The automatic dependency consists of python and rpmlib only. It is insufficient.
+Requires: polkit pygtk2 notify-python vte rpm-python pygobject2 dbus-python wget unzip xterm gnome-python2-gnomekeyring
 
 %description
 Ailurus is an application which makes Linux easier to use.
@@ -26,21 +24,19 @@ Features:
 * Help users learn some Linux skills
 * Install some nice applications
 * Display basic hardware information
-* Clean APT/YUM cache
-* Backup and recover APT/YUM status
+* Clean YUM cache
+* Backup and recover YUM status
 * Change GNOME settings 
 
 %prep
-%setup -q -n %{name}-%{unmangled_version}
+%setup -q -n %{name}-%{version}
 
 %build
-# "System" for Debian, "System Tools" for Fedora
-sed -e 's/System/System Tools/' -i ailurus.menu
-python setup.py build
+CFLAGS="$RPM_OPT_FLAGS" %{__python} setup.py build
 
 %install
 rm -rf $RPM_BUILD_ROOT
-python setup.py install -O1 --root=$RPM_BUILD_ROOT
+%{__python} setup.py install -O1 --root=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -50,10 +46,9 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/ailurus/
 %{_bindir}/ailurus
 %doc %{_mandir}/man1/ailurus.1*
-%{_datadir}/desktop-directories/ailurus_quick_start.directory
-%{_sysconfdir}/xdg/menus/applications-merged/ailurus.menu
-%{_datadir}/applications/ailurus*.desktop
+%{_datadir}/applications/ailurus.desktop
 %{_datadir}/ailurus/
+%{_datadir}/icons/
 %{_datadir}/dbus-1/system-services/cn.ailurus.service
 %{_sysconfdir}/dbus-1/system.d/cn.ailurus.conf
 %{_datadir}/PolicyKit/policy/cn.ailurus.policy
@@ -63,5 +58,5 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/ailurus*.egg-info
 
 %changelog
-* Sun Apr 25 2010 Homer Xing <homer.xing@gmail.com> 10.04.2.2-1
+* Thu Jun 24 2010 Homer Xing <homer.xing@gmail.com> 10.06.8-1
 - Initial package

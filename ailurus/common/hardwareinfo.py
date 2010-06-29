@@ -21,7 +21,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 from __future__ import with_statement
-import traceback
 import sys, os
 from lib import *
 
@@ -34,45 +33,44 @@ def __bios():
     #The idea of this function is borrowd from cpu-g. Thanks!
     ret = []
     try:
-        ret.append( row(_('BIOS vendor:'), 
-             __read('/sys/devices/virtual/dmi/id/bios_vendor'), 
-             D+'umut_icons/i_bios.png') )
+        string = __read('/sys/devices/virtual/dmi/id/bios_vendor')
+        assert string
+        ret.append( row(_('BIOS vendor:'), string, D+'umut_icons/i_bios.png') )
     except:
-        print >>sys.stderr, 'No such file: bios_vendor'
+        print_traceback()
 
     try:
-        ret.append( row(_('BIOS version:'), 
-             __read('/sys/devices/virtual/dmi/id/bios_version'), 
-             D+'umut_icons/i_bios.png') )
+        string = __read('/sys/devices/virtual/dmi/id/bios_version')
+        assert string
+        ret.append( row(_('BIOS version:'), string, D+'umut_icons/i_bios.png') )
     except:
-        print >>sys.stderr, 'No such file: bios_version'
+        print_traceback()
         
     try:
-        ret.append( row(_('BIOS release date:'), 
-             __read('/sys/devices/virtual/dmi/id/bios_date'), 
-             D+'umut_icons/i_bios.png') )
+        string = __read('/sys/devices/virtual/dmi/id/bios_date')
+        assert string
+        ret.append( row(_('BIOS release date:'), string, D+'umut_icons/i_bios.png') )
     except:
-        print >>sys.stderr, 'No such file: bios_date'
+        print_traceback()
     
     return ret
 
 def __motherboard():
     ret = []
     try:
-        ret.append( row(_('Motherboard name:'), 
-             __read('/sys/devices/virtual/dmi/id/board_name'), 
-             D+'umut_icons/i_motherboard.png') )
+        string = __read('/sys/devices/virtual/dmi/id/board_name')
+        assert string
+        ret.append( row(_('Motherboard name:'), string, D+'umut_icons/i_motherboard.png') )
     except IOError: pass
     except:
-        traceback.print_exc(file=sys.stderr)
+        print_traceback()
         
     try:
-        ret.append( row(_('Motherboard vendor:'), 
-             __read('/sys/devices/virtual/dmi/id/board_vendor'), 
-             D+'umut_icons/i_motherboard.png') )
+        string = __read('/sys/devices/virtual/dmi/id/board_vendor')
+        ret.append( row(_('Motherboard vendor:'), string, D+'umut_icons/i_motherboard.png') )
     except IOError: pass
     except:
-        traceback.print_exc(file=sys.stderr)
+        print_traceback()
     
     return ret
 
@@ -87,21 +85,51 @@ def __cpu():
                 v[0] = v[0].strip()
                 if 'model name'==v[0]: core+=1
         multicore = core>1
+        
+        cache_info = {}
+        for cpu_num in range(0, core):
+            path = "/sys/devices/system/cpu/cpu%d/cache/" % cpu_num
+            cache_info['cpu%s' % cpu_num] = cpus = { 'L1':'','L2':'','L3':'' }
+            indexes = []
+            try:   indexes = os.listdir(path)
+            except: pass # no such folder
+            for index in indexes:
+                subpath = path + index + '/'
+                with open(subpath + 'level') as f:
+                    level = f.read().strip()
+                with open(subpath + 'type') as f:
+                    cache_type = f.read().strip()
+                with open(subpath + 'size') as f:
+                    size = f.read().strip()
+                cpus['L%s' % level] += '%s %s cache. ' % (size, cache_type)   
+                    
         core = 0
         with open('/proc/cpuinfo') as f:
             for line in f:
                 v = line.split(':')
                 v[0] = v[0].strip()
-                if v[0]=='model name':
+                if v[0] == 'model name':
                     core += 1
-                    if multicore: string = _('CPU %s name:')%core
-                    else: string = _('CPU name:')
-                    ret.append( row(string, v[1].strip().replace('  ',' '), D+'umut_icons/i_cpu.png' ) )
-                elif v[0]=='bogomips':
-                    if multicore: string = _('CPU %s Mips:')%core
-                    else: string = _('CPU Mips:')
-                    ret.append( row(string, '%s'%v[1].strip(), D+'umut_icons/i_cpu.png', 
-                         _('It is a measure for the computation speed. "Mips" is short for Millions of Instructions Per Second.' ) ) )
+                    if multicore: name = _('CPU %s name:') % core
+                    else: name = _('CPU name:')
+                    value = v[1].strip().replace('  ',' ')
+                    ret.append(row(name, value, D+'umut_icons/i_cpu.png'))
+                elif v[0] == 'bogomips':
+                    if multicore: 
+                        mips_name = _('CPU %s Mips:') % core
+                        mips_value = v[1].strip()
+                        L1_cache_name = _('CPU %s level 1 cache size:') % core
+                        L2_cache_name = _('CPU %s level 2 cache size:') % core
+                    else: 
+                        mips_name = _('CPU Mips:')
+                        mips_value = v[1].strip()
+                        L1_cache_name = _('Level 1 cache:')
+                        L2_cache_name = _('Level 2 cache:')
+                    L1_cache_value = cache_info['cpu%s' % (core-1)]['L1']
+                    L2_cache_value = cache_info['cpu%s' % (core-1)]['L2']
+                    if L1_cache_value: ret.append(row(L1_cache_name, L1_cache_value, D+'umut_icons/i_cpu.png'))
+                    if L2_cache_value: ret.append(row(L2_cache_name, L2_cache_value, D+'umut_icons/i_cpu.png'))
+                    ret.append(row(mips_name, mips_value, D+'umut_icons/i_cpu.png', _('It is a measure for the computation speed. "Mips" is short for Millions of Instructions Per Second.')))
             
             _64bit = _('No')
             f.seek(0, 0)
@@ -113,7 +141,7 @@ def __cpu():
                         _64bit = _('Yes!')
             ret.append( row(_('64 bit CPU?'), _64bit, D+'umut_icons/i_cpu.png') )
     except:
-        traceback.print_exc(file=sys.stderr)
+        print_traceback()
 
     return ret
 
@@ -135,7 +163,7 @@ def __cpu_temp():
                 v = line.split(':')
             return [row(_('CPU temperature'), v[-1].strip(), D+'umut_icons/i_cpu.png')]
     except:
-        traceback.print_exc(file=sys.stderr)
+        print_traceback()
         return []
 
 def __mem():
@@ -144,11 +172,35 @@ def __mem():
             for line in f:
                 v = line.split(':')
                 if v[0]=='MemTotal':
-                    return [row(_('Total memory:'), v[1].strip(), D+'umut_icons/i_memory.png' )]
+                    string = v[1].strip() # format: YYY KB
+                    value = float(string.split()[0])
+                    if value > 1024*1024:
+                        new_string = '%.1f GB' % (value/1024/1024)
+                    elif value > 1024:
+                        new_string = '%.1f MB' % (value/1024)
+                    else:
+                        new_string = string
+                    return [row(_('Total memory:'), new_string, D+'umut_icons/i_memory.png' )]
     except:
-        traceback.print_exc(file=sys.stderr)
+        print_traceback()
         return []
 
+def __swap():
+    try:
+        total_size = 0
+        with open('/proc/swaps') as f:
+            contents = f.readlines()
+        for line in contents[1:]: # the first line is a text header
+            filename, type, size = line.split()[0:3]
+            total_size += int(size)
+        if total_size:
+            return [row(_('Total swap:'), _('%s MBytes') % (total_size/1000), D+'umut_icons/i_memory.png' )]
+        else:
+            return [] # no swap
+    except:
+        print_traceback()
+        return []
+        
 def __pci():
     ret = []
     try:
@@ -163,7 +215,7 @@ def __pci():
             elif v[0]=='Multimedia audio controller':
                 ret.append( row(_('Audio card:'), v[1].strip(), D+'umut_icons/i_audiocard.png' ) )
     except:
-        traceback.print_exc(file=sys.stderr)
+        print_traceback()
     return ret
 
 def __battery():
@@ -190,9 +242,9 @@ def __battery():
                     ret.append( row(_('Battery full capacity:'), v[1].strip(), D+'umut_icons/i_battery.png') )
     except IOError: pass
     except:
-        traceback.print_exc(file=sys.stderr)
+        print_traceback()
     return ret
 
 def get():
     return [ __motherboard, __bios, __cpu, __cpu_temp,
-             __mem, __pci, __battery ]
+             __mem, __swap, __pci, __battery ]

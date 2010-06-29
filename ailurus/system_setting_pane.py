@@ -27,11 +27,12 @@ from libu import *
 from libsetting import Setting
 
 class SystemSettingPane(gtk.VBox):
-    name = _('System settings')
+    icon = D+'sora_icons/m_linux_setting.png'
+    text = _('System\nSettings')
 
     def __left_pane(self):
         def icon(path):
-            return get_pixbuf(path, 24, 24)
+            return get_pixbuf(path, 28, 28)
         
         existing_categories = []
         for i in self.setting_items:
@@ -42,13 +43,14 @@ class SystemSettingPane(gtk.VBox):
         self.left_store = left_store = gtk.ListStore(gtk.gdk.Pixbuf, str, str) #pixbuf, text, category
         
         for iconpath, text, category in [
-              (D+'other_icons/s_nautilus.png', 'Nautilus', 'nautilus', ), 
-              (D+'other_icons/s_desktop.png', _('Desktop'), 'desktop', ), 
+              (D+'sora_icons/s_nautilus.png', _('Nautilus'), 'nautilus', ), 
+              (D+'sora_icons/s_desktop.png', _('Desktop'), 'desktop', ), 
               (D+'umut_icons/s_window.png', _('Window effect'), 'window', ), 
               (D+'umut_icons/s_menu.png', _('Menu'), 'menu', ), 
               (D+'umut_icons/s_icon.png', _('Icon'), 'icon', ), 
               (D+'umut_icons/s_font.png', _('Font'), 'font', ), 
               (D+'umut_icons/s_session.png', _('GNOME Session'), 'session', ), 
+              (D+'umut_icons/s_panel.png', _('GNOME Panel'), 'panel', ),
               (D+'umut_icons/s_memory.png', _('Memory'), 'memory', ), 
               (D+'umut_icons/s_terminal.png', _('Terminal'), 'terminal', ),
               (D+'umut_icons/s_sound.png', _('Sound'), 'sound', ), 
@@ -57,13 +59,20 @@ class SystemSettingPane(gtk.VBox):
               (D+'umut_icons/s_update.png', _('Update'), 'update', ),
               (D+'umut_icons/s_restriction.png', _('Restriction'), 'restriction', ),
               (D+'umut_icons/s_shortcutkey.png', _('Shortcut key'), 'shortcut', ),
+              (D+'sora_icons/s_firefox.png', _('Configure Firefox'), 'firefox', ),
               (D+'umut_icons/s_host_name.png', _('Host name'), 'host_name', ),
+              (D+'umut_icons/s_login_window.png', _('Login window'), 'login_window', ),
+              (D+'umut_icons/s_compression.png', _('Compression'), 'compression', ),
+              (D+'umut_icons/s_gedit.png', _('GEdit'), 'gedit', ),
+              (D+'umut_icons/s_reset_gnome.png', _('Reset GNOME'), 'reset_gnome', ),
+              (D+'umut_icons/s_screensaver.png', _('Screensaver'), 'screensaver', ),
                 ]:
-            assert category in Setting.categories
             if category in existing_categories:
                 pixbuf = icon(iconpath) 
                 left_store.append([pixbuf, text, category])
-        
+                
+        left_store_sort = gtk.TreeModelSort(left_store)
+        left_store_sort.set_sort_column_id(1, gtk.SORT_ASCENDING)
         render_pixbuf = gtk.CellRendererPixbuf()
         render_text = gtk.CellRendererText()
         column = gtk.TreeViewColumn()
@@ -71,7 +80,7 @@ class SystemSettingPane(gtk.VBox):
         column.add_attribute(render_pixbuf, 'pixbuf', 0)
         column.pack_start(render_text, False)
         column.add_attribute(render_text, 'text', 1)
-        treeview = gtk.TreeView(left_store)
+        treeview = gtk.TreeView(left_store_sort)
         treeview.append_column(column)
         treeview.set_headers_visible(False)
         treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
@@ -111,7 +120,7 @@ class SystemSettingPane(gtk.VBox):
         
         return bigbox
     
-    def __init__(self, setting_items):
+    def __init__(self, main_view, setting_items):
         for i in setting_items:
             assert isinstance(i, Setting)
         

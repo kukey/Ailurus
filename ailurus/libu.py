@@ -22,75 +22,44 @@
 
 from __future__ import with_statement
 
-def get_pixbuf(file, x, y):
-    from lib import D
+def scale_image(old_path, new_path, new_width, new_height):
     import gtk
-    try:
-        return gtk.gdk.pixbuf_new_from_file_at_size(file, x, y)
-    except:
-        import traceback
-        traceback.print_exc()
-        return gtk.gdk.pixbuf_new_from_file_at_size(D + 'other_icons/blank.png', x, y)
+    pixbuf = gtk.gdk.pixbuf_new_from_file(old_path)
+    pixbuf = pixbuf.scale_simple(new_width, new_height, gtk.gdk.INTERP_HYPER)
+    pixbuf.save(new_path, 'png')
+        
+def blank_pixbuf(width, height):
+    import gtk
+    pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width, height)
+    pixbuf.fill(0) # transparent black
+    return pixbuf
+
+def get_pixbuf(path, width, height):
+    import os, gtk
+    if os.path.exists(path): return gtk.gdk.pixbuf_new_from_file_at_size(path, width, height)
+    else:
+        print path, 'is missing'
+        return blank_pixbuf(width, height)
+
+def gray_bg(widget):
+    import gtk
+    if not isinstance(widget, gtk.Entry) and not isinstance(widget, gtk.TextView): raise TypeError
     
-def gray_bg(w):
-    import gtk
-    if not isinstance(w, gtk.Entry) and not isinstance(w, gtk.TextView): raise TypeError
-    
-    def event(w, e):
-        if w.base_color_changed==False:
-            color = w.style.bg[gtk.STATE_NORMAL]
-            w.modify_base(gtk.STATE_NORMAL, color)
-            w.base_color_changed = True
-    w.base_color_changed = False
-    w.connect('expose-event', event)
-    w.connect('map-event', event)
+    def event(widget, e):
+        if widget.base_color_changed==False:
+            color = widget.style.bg[gtk.STATE_NORMAL]
+            widget.modify_base(gtk.STATE_NORMAL, color)
+            widget.base_color_changed = True
+    widget.base_color_changed = False
+    widget.connect('expose-event', event)
+    widget.connect('map-event', event)
 
-def stock_toolitem(stock, callback, text=None, tooltip = None):
-    import gtk
-    image = gtk.image_new_from_stock(stock, gtk.ICON_SIZE_SMALL_TOOLBAR)
-    box = gtk.HBox(False, 3)
-    box.pack_start(image, False)
-    if text:
-        box.pack_start(gtk.Label(text), False)
-    button = gtk.Button()
-    button.add(box)
-    button.set_relief(gtk.RELIEF_NONE)
-    if tooltip: button.set_tooltip_text(tooltip)
-    button.connect('clicked', callback)
-    item = gtk.ToolItem()
-    item.add(button)
-    return item
-
-def image_toolitem(image_path, callback, text=None, tooltip = None):
-    import gtk
-    image = gtk.image_new_from_file(image_path)
-    box = gtk.HBox(False, 3)
-    box.pack_start(image, False)
-    if text:
-        box.pack_start(gtk.Label(text), False)
-    button = gtk.Button()
-    button.add(box)
-    button.set_relief(gtk.RELIEF_NONE)
-    if tooltip: button.set_tooltip_text(tooltip)
-    button.connect('clicked', callback)
-    item = gtk.ToolItem()
-    item.add(button)
-    return item
-
-def separator_toolitem():
-    import gtk
-    w = gtk.Label()
-    w.set_size_request(15,-1)
-    item = gtk.ToolItem()
-    item.add(w)
-    return item
-
-def image_stock_button(stock, label):
+def image_stock_button(stock, text):
     import gtk
     box = gtk.HBox(False, 3)
     box.pack_start(gtk.image_new_from_stock(stock, gtk.ICON_SIZE_BUTTON), False, False)
     l = gtk.Label()
-    l.set_text_with_mnemonic(label)
+    l.set_text_with_mnemonic(text)
     box.pack_start(l, False, False)
     button = gtk.Button()
     button.add(box)
@@ -110,21 +79,17 @@ def image_file_button(label, image_file_name, size):
     button.add(box)
     return button
 
-def image_icon_button(icon_name, label):
-    import gtk
-    box = gtk.HBox(False, 3)
-    box.pack_start(
-        gtk.image_new_from_icon_name(icon_name, gtk.ICON_SIZE_BUTTON), False, False)           
-    l = gtk.Label()
-    l.set_text_with_mnemonic(label)
-    box.pack_start(l, False, False)
-    button = gtk.Button()
-    button.add(box)
-    return button
-
 def stock_image_only_button(stock):
     import gtk
     image = gtk.image_new_from_stock(stock, gtk.ICON_SIZE_BUTTON)
+    button = gtk.Button()
+    button.add(image)
+    return button
+
+def image_file_only_button(image_file_path, size):
+    import gtk
+    pixbuf = get_pixbuf(image_file_path, size, size)
+    image = gtk.image_new_from_pixbuf(pixbuf)
     button = gtk.Button()
     button.add(image)
     return button
@@ -135,19 +100,11 @@ def image_stock_menuitem(image_stock, label):
     item.get_child().set_text(label)
     return item
 
-def image_file_menuitem(label, image_file_name, size, space=10):
+def image_file_menuitem(label, image_file_name, size):
     import gtk
     pixbuf = get_pixbuf(image_file_name, size, size)
     image = gtk.Image()
     image.set_from_pixbuf(pixbuf)
-    item = gtk.ImageMenuItem(stock_id=gtk.STOCK_ABOUT)
-    item.set_image(image)
-    item.get_child().set_text(label)
-    return item
-
-def image_icon_menuitem(label, icon_name, space=10):
-    import gtk
-    image = gtk.image_new_from_icon_name(icon_name, gtk.ICON_SIZE_MENU)
     item = gtk.ImageMenuItem(stock_id=gtk.STOCK_ABOUT)
     item.set_image(image)
     item.get_child().set_text(label)
@@ -207,3 +164,124 @@ def add_expander(vbox, title):
     expander.add(vbox)
     expander.set_expanded(False)
     return expander
+
+def show_text_window(title, content, show_textbox_border = True, show_a_big_window = True):
+    import gtk
+    buffer = gtk.TextBuffer()
+    buffer.set_text(content)
+    textview = gtk.TextView()
+    textview.set_buffer(buffer)
+    textview.set_editable(False)
+    textview.set_cursor_visible(False)
+    textview.set_wrap_mode(gtk.WRAP_WORD)
+    gray_bg(textview)
+    scroll = gtk.ScrolledWindow()
+    scroll.add(textview)
+    scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+    if show_textbox_border:
+        scroll.set_shadow_type(gtk.SHADOW_IN)
+    copy = image_stock_button(gtk.STOCK_COPY, _('Copy text to clipboard'))
+    def clicked():
+        clipboard = gtk.clipboard_get()
+        start = buffer.get_start_iter()
+        end = buffer.get_end_iter()
+        clipboard.set_text(buffer.get_text(start, end))
+    copy.connect('clicked', lambda w: clicked())
+    close_button = image_stock_button(gtk.STOCK_CLOSE, _('Close'))
+    close_button.connect('clicked', lambda *w: window.destroy())
+    buttonbox = gtk.HBox(False, 10)
+    buttonbox.pack_end(close_button, False)
+    buttonbox.pack_end(copy, False)
+    vbox = gtk.VBox(False, 10)
+    vbox.pack_start(scroll)
+    vbox.pack_start(buttonbox, False)
+
+    window = gtk.Window()
+    window.set_title(title)
+    window.add(vbox)
+    if show_a_big_window:
+        window.set_default_size(600, 400)
+    window.set_border_width(10)
+    window.set_position(gtk.WIN_POS_CENTER)
+    window.show_all()
+
+def do_access_denied_error():
+    import gtk
+    message = _('Operation is canceled because you refused authentication.\n'
+                'Authentication is provided by system PolicyKit service.\n'
+                'Ailurus does not know your password at all.')
+    label = gtk.Label(message)
+    label.set_alignment(0, 0.5)
+    button_close = image_stock_button(gtk.STOCK_CLOSE, _('Close'))
+    button_close.connect('clicked', lambda w: window.destroy())
+    vbox = gtk.VBox(False, 5)
+    vbox.pack_start(label, False)
+    vbox.pack_start(right_align(button_close), False)
+    window = gtk.Window()
+    window.set_title(_('Operation is canceled'))
+    window.set_border_width(10)
+    window.set_position(gtk.WIN_POS_CENTER)
+    window.add(vbox)
+    window.show_all()
+    
+def exception_happened(etype, value, tb):
+    import traceback, StringIO, os, sys, platform, gtk
+    from lib import AILURUS_VERSION, D, AccessDeniedError, report_bug
+
+    if etype == KeyboardInterrupt: return
+    if etype == AccessDeniedError: return do_access_denied_error()
+    
+    traceback.print_tb(tb, file=sys.stderr)
+    sys.stderr.flush()
+    msg = StringIO.StringIO()
+    traceback.print_tb(tb, file=msg)
+    print >>msg, etype, ':', value
+    print >>msg, platform.dist()
+    print >>msg, os.uname()
+    print >>msg, 'Ailurus version:', AILURUS_VERSION
+
+    title_box = gtk.HBox(False, 5)
+    if os.path.exists(D+'umut_icons/bug.png'):
+        image = gtk.Image()
+        image.set_from_file(D+'umut_icons/bug.png')
+        title_box.pack_start(image, False)
+    title = label_left_align(_('A bug appears. Would you please tell Ailurus developers? Thank you!') + 
+                             '\n' + _('Please copy and paste following text into bug report web-page.'))
+    title_box.pack_start(title, False)
+    
+    textview_traceback = gtk.TextView()
+    gray_bg(textview_traceback)
+    textview_traceback.set_wrap_mode(gtk.WRAP_WORD)
+    textview_traceback.get_buffer().set_text(msg.getvalue())
+    textview_traceback.set_cursor_visible(False)
+    scroll_traceback = gtk.ScrolledWindow()
+    scroll_traceback.set_shadow_type(gtk.SHADOW_IN)
+    scroll_traceback.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+    scroll_traceback.add(textview_traceback)
+    scroll_traceback.set_size_request(-1, 300)
+    button_copy = image_stock_button(gtk.STOCK_COPY, _('Copy text to clipboard'))
+    def clicked():
+        buffer = textview_traceback.get_buffer()
+        start = buffer.get_start_iter()
+        end = buffer.get_end_iter()
+        clipboard = gtk.clipboard_get()
+        clipboard.set_text(buffer.get_text(start, end))
+    button_copy.connect('clicked', lambda w: clicked())
+    button_report_bug = image_stock_button(gtk.STOCK_DIALOG_WARNING, _('Click here to report bug via web-page') )
+    button_report_bug.connect('clicked', lambda w: report_bug() )
+    button_close = image_stock_button(gtk.STOCK_CLOSE, _('Close'))
+    button_close.connect('clicked', lambda w: window.destroy())
+    bottom_box = gtk.HBox(False, 10)
+    bottom_box.pack_end(button_close, False)
+    bottom_box.pack_end(button_report_bug, False)
+    bottom_box.pack_end(button_copy, False)
+    
+    vbox = gtk.VBox(False, 5)
+    vbox.pack_start(title_box, False)
+    vbox.pack_start(scroll_traceback)
+    vbox.pack_start(bottom_box, False)
+    window = gtk.Window()
+    window.set_title(_('Bug appears!'))
+    window.set_border_width(10)
+    window.add(vbox)
+    window.show_all()

@@ -28,13 +28,12 @@ from libu import *
 from libserver import *
 
 class FedoraFastestMirrorPane(gtk.VBox):
-    name = _('Find fastest repository mirror')
+    icon = D+'sora_icons/m_fastest_repos.png'
+    text = _('Fastest\nRepository')
 
-    COUNTRY = 0
-    ORG = 1
-    URL = 2
-    RESPONSE_TIME = 3
+    COUNTRY, ORG, URL, RESPONSE_TIME = range(4)
     NO_PING_RESPONSE = 10000
+    NOT_DETECTED = NO_PING_RESPONSE + 1
     
     def __repository_visibility_function(self, treestore, iter):
         if self.search_content == None:
@@ -49,10 +48,8 @@ class FedoraFastestMirrorPane(gtk.VBox):
 
     def __fill_candidate_store(self):
         for item in all_candidate_repositories():
-            try:
-                time = ResponseTime.get(item[self.URL])
-            except KeyError:
-                time = self.NO_PING_RESPONSE
+            try: time = ResponseTime.get(item[self.URL])
+            except KeyError: time = self.NOT_DETECTED
             item.append(time)
             self.candidate_store.append(item)
 
@@ -89,6 +86,8 @@ class FedoraFastestMirrorPane(gtk.VBox):
         value = int(value)
         if value == self.NO_PING_RESPONSE: 
             text = _('No response')
+        elif value == self.NOT_DETECTED:
+            text = '' # if the server has not been detected, then show nothing
         else:
             text = '%s ms' % value
         cell.set_property('text', text)
@@ -180,6 +179,9 @@ class FedoraFastestMirrorPane(gtk.VBox):
             _('If some repositories are not listed above, please click here to tell Ailurus developers.') )
         contact_maintainer.connect('activate', lambda w: report_bug() )
         
+        copy_repos = gtk.ImageMenuItem(stock_id = gtk.STOCK_COPY)
+        copy_repos.connect('activate', self.__callback__copy_selected_repos, treeview)
+        
         popupmenu = gtk.Menu()
         popupmenu.append(use_selected)
         popupmenu.append(detect_speed_of_selected_repos)
@@ -191,6 +193,21 @@ class FedoraFastestMirrorPane(gtk.VBox):
         popupmenu.show_all()
         return popupmenu
 
+    def __callback__copy_selected_repos(self, w, treeview):
+        selection = treeview.get_selection()
+        model, pathlist = selection.get_selected_rows()
+        if pathlist == None or len(pathlist)==0: # select nothing
+            return
+        
+        import StringIO
+        msg = StringIO.StringIO()
+        for path in pathlist:
+            iter = model.get_iter(path)
+            print >>msg, model.get_value(iter, self.URL)
+        content = msg.getvalue()
+        clipboard = gtk.clipboard_get()
+        clipboard.set_text(content)
+               
     def __callback__detect_selected_repos_speed(self, w, treeview):
         selection = treeview.get_selection()
         model, pathlist = selection.get_selected_rows()
@@ -284,10 +301,8 @@ class FedoraFastestMirrorPane(gtk.VBox):
     def __update_candidate_store_with_ping_result(self, result):
         for i in result:
             url = i[0]
-            if isinstance(i[1], float):
-                time = int(i[1])
-            else:
-                time = self.NO_PING_RESPONSE
+            if isinstance(i[1], float): time = int(i[1])
+            else: time = self.NO_PING_RESPONSE
             ResponseTime.set(url, time)
         for row in self.candidate_store:
             url = row[self.URL]

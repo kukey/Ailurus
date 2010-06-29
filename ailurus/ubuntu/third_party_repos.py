@@ -24,71 +24,11 @@ from __future__ import with_statement
 import sys, os
 from lib import *
 
-#class Open_Repogen_Website:
-#    __doc__ = _('* Find more repositories on http://repogen.simplylinux.ch')
-#    detail = _('This item is an auxiliary item. It will not install anything. It will open web-page http://repogen.simplylinux.ch/\n'
-#               'http://repogen.simplylinux.ch/ has collected a lot of useful third party repositories.')
-#    category = 'repository'
-#    def installed(self): 
-#        return False
-#    def install(self):
-#        open_web_page('http://repogen.simplylinux.ch/')
-#    def remove(self):
-#        pass
-
 class _repo(I):
     this_is_a_repository = True
     category = 'repository'
-    fresh_cache = False
-
-    @classmethod
-    def refresh_cache(cls):
-        if not _repo.fresh_cache:
-            _repo.source_settings = APTSource.get_source_contents()
-            _repo.fresh_cache = True
-    @classmethod
-    def exists_in_source(cls, seed):
-        assert isinstance(seed, str)
-        seed = seed.split('#')[0].strip()
-        _repo.refresh_cache()
-        for contents in _repo.source_settings.values():
-            for line in contents:
-                if seed in line.split('#')[0]: return True
-        return False
-    @classmethod
-    def add_to_source(cls, file_name, seed):
-        assert isinstance(file_name, str)
-        assert isinstance(seed, str)
-        assert seed[-1]!='\n'
-        _repo.refresh_cache()
-        if not file_name in _repo.source_settings:
-            _repo.source_settings[file_name] = []
-        _repo.source_settings[file_name].append(seed+'\n')
-    @classmethod
-    def remove_from_source(cls, seed):
-        assert isinstance(seed, str)
-        seed = seed.split('#')[0].strip()
-        _repo.refresh_cache()
-        for contents in _repo.source_settings.values():
-            for i in reversed(range(len(contents))):
-                line = contents[i]
-                if seed in line.split('#')[0]:
-                    del contents[i]
-    @classmethod
-    def save_source(cls):
-        for file_path, contents in _repo.source_settings.items():
-            if contents == []:
-                run_as_root("rm -f '%s' "%file_path)
-                continue
-            with TempOwn(file_path) as o:
-                f = open(file_path, 'w')
-                f.writelines(contents)
-                f.close()
     def __init__(self):
-        # check
-        assert isinstance(self.desc, (str,unicode) )
         assert isinstance(self.web_page, str)
-        
         assert isinstance(self.apt_file, str)
         assert isinstance(self.apt_conf, list)
         for i,a in enumerate(self.apt_conf):
@@ -96,7 +36,8 @@ class _repo(I):
             if a.endswith('\n'): raise ValueError(a)
             if '$' in a: #variable substitution
                 assert '$version' in a
-                self.apt_conf[i] = a.replace('$version', Config.get_Ubuntu_version() )
+                self.apt_conf[i] = a.replace('$version', VERSION )
+                assert '$' not in self.apt_conf[i], self.apt_conf[i]
         assert isinstance(self.apt_content, str)
         
         if hasattr(self, 'key_url'):
@@ -108,46 +49,21 @@ class _repo(I):
         
         assert isinstance(self.key_id, str)
         
-        # create detail
-        import StringIO
-        msg = StringIO.StringIO()
-        if self.desc:
-            print >>msg, self.desc, '\n'
-        if self.apt_content:
-            print >>msg, _('<i>Install packages by:</i>'), '<b>sudo apt-get install', self.apt_content, '</b>'
-        print >>msg, _('<i>Web page:</i>'), self.web_page
-        print >>msg, _('<i>Source setting:</i>'),
-        for a in self.apt_conf:
-            print >>msg, a
-        self.__class__.detail = msg.getvalue()
+        self.download_url = self.web_page
+        self.how_to_install = '\n'.join(self.apt_conf)
     def installed(self):
-        _repo.refresh_cache()
-        for seed in self.apt_conf:
-            if not self.exists_in_source(seed):
-                return False
-        return True
+        return APTSource2.all_lines_contain_all_of(self.apt_conf)
     def install(self):
-        # change souce
-        _repo.refresh_cache()
-        for seed in self.apt_conf:
-            self.add_to_source(self.apt_file, seed)
-        self.save_source()
-        _repo.fresh_cache = False
-        # add key
-        if hasattr(self, 'key_url'):
-            if self.key_url: #if has key
+        APTSource2.add_lines_to_file(self.apt_conf, self.apt_file)
+        if hasattr(self, 'key_url') and self.key_url:
+            try: # do not interrupt installation process if download() failed
                 download(self.key_url, '/tmp/key.gpg')
+            except CommandFailError:
+                print_traceback()
+            else:
                 run_as_root('apt-key add /tmp/key.gpg')
-        else:
-            raise NotImplementedError
     def remove(self):
-        # change source
-        _repo.refresh_cache()
-        for seed in self.apt_conf:
-            self.remove_from_source(seed)
-        self.save_source()
-        _repo.fresh_cache = False
-        # remove key
+        APTSource2.remove_snips_from_all_files(self.apt_conf)
         if self.key_id:
             run_as_root('apt-key del '+self.key_id, ignore_error=True)
 
@@ -178,9 +94,8 @@ def get_signing_key(ppa_owner, ppa_name):
         signing_key_fingerprint = re.findall(
             '\"signing_key_fingerprint\": \"(\w*)\"', lp_page)[0]
         return signing_key_fingerprint
-    except URLError, e:
-        import traceback, sys
-        traceback.print_exc(file = sys.stderr)
+    except urllib2.URLError, e:
+        print_traceback()
         return None
 
 def add_signing_key(signing_key_fingerprint):
@@ -195,34 +110,22 @@ class _launchpad(I):
     def __init__(self):
         assert isinstance(self.ppa, str)
         if hasattr(self, 'content'): assert isinstance(self.content, str)
-        if hasattr(self, 'desc'): assert isinstance(self.desc, (unicode, str))
         self.ppa_owner, self.ppa_name = get_owner_and_name(self.ppa)
-        self.deb_config = get_deb_line(self.ppa_owner, self.ppa_name, Config.get_Ubuntu_version())
-        self.repos_file_name = '/etc/apt/sources.list.d/' + get_repos_file_name(self.ppa_owner, self.ppa_name, Config.get_Ubuntu_version())
-
-        import StringIO
-        msg = StringIO.StringIO()
-        if hasattr(self, 'desc'): print >>msg, self.desc
-        if hasattr(self, 'content'):
-            print >>msg, _('<i>Install packages by:</i>'), '<b>sudo apt-get install', self.content, '</b>'
-        print >>msg, _('<i>Web page:</i>'), 'http://launchpad.net/~%s/+archive/%s' % (self.ppa_owner, self.ppa_name)
-        print >>msg, _('<i>Source setting:</i>'), self.deb_config
-        self.__class__.detail = msg.getvalue()
+        self.deb_config = get_deb_line(self.ppa_owner, self.ppa_name, VERSION)
+        self.repos_file_name = '/etc/apt/sources.list.d/' + get_repos_file_name(self.ppa_owner, self.ppa_name, VERSION)
+        self.download_url = 'http://launchpad.net/~%s/+archive/%s' % (self.ppa_owner, self.ppa_name)
+        if VERSION <= 'jaunty':
+            self.how_to_install = self.deb_config
+        else: # >= 'karmic'
+            self.how_to_install = 'add-apt-repository ppa:%s' % self.ppa
     def install(self):
-        _repo.refresh_cache()
-        _repo.add_to_source(self.repos_file_name, self.deb_config)
-        _repo.save_source()
-        _repo.fresh_cache = False
+        APTSource2.add_lines_to_file([self.deb_config], self.repos_file_name)
         signing_key = get_signing_key(self.ppa_owner, self.ppa_name)
         if signing_key: add_signing_key(signing_key)
     def installed(self):
-        _repo.refresh_cache()
-        return _repo.exists_in_source(self.deb_config)
+        return APTSource2.all_lines_contain(self.deb_config)
     def remove(self):
-        _repo.refresh_cache()
-        _repo.remove_from_source(self.deb_config)
-        _repo.save_source()
-        _repo.fresh_cache = False
+        APTSource2.remove_snips_from_all_files([self.deb_config])
         signing_key = get_signing_key(self.ppa_owner, self.ppa_name)
         if signing_key: del_signing_key(signing_key)
 
@@ -232,14 +135,14 @@ class Repo_Firefox_3_6(_launchpad):
     license = TRI_LICENSE(MPL, GPL, LGPL)
     ppa = 'mozillateam/firefox-stable'
     content = 'firefox'
-    def support(self):
-        return Config.get_Ubuntu_version() in ['hardy', 'intrepid', 'jaunty', 'karmic']
+    def visible(self):
+        return VERSION in ['hardy', 'intrepid', 'jaunty', 'karmic']
 
 class Repo_PlayOnLinux(_repo):
     __doc__ = _('PlayOnLinux (stable)')
     license = LGPL
     def __init__(self):
-        self.desc = _('PlayOnLinux is a front-end for wine. '
+        self.detail = _('PlayOnLinux is a front-end for wine. '
             'It helps to install Windows Games and softwares on Linux.')
         self.apt_content = 'playonlinux'
         self.web_page = 'http://www.playonlinux.com/en/download.html'
@@ -253,7 +156,7 @@ class Repo_WINE(_repo):
     __doc__ = _('WINE (beta version)')
     license = LGPL + ' http://wiki.winehq.org/Licensing'
     def __init__(self):
-        self.desc = _('This repository contains the latest version of Wine. '
+        self.detail = _('This repository contains the latest version of Wine. '
             'Wine is for running Windows applications on Linux.')
         self.apt_content = 'wine wine-gecko'
         self.web_page = 'https://launchpad.net/~ubuntu-wine/+archive/ppa'
@@ -272,7 +175,7 @@ class Repo_Ailurus(_launchpad):
 class Repo_AWN_Development(_launchpad):
     __doc__ = _('AWN (beta version)')
     license = GPL
-    desc = _('AWN is a MacOS X like panel for GNOME. '
+    detail = _('AWN is a MacOS X like panel for GNOME. '
             'This repository provides the latest version of AWN.')
     content = 'avant-window-navigator-trunk'
     ppa = 'awn-testing'
@@ -280,50 +183,52 @@ class Repo_AWN_Development(_launchpad):
 class Repo_Blueman(_launchpad):
     __doc__ = _('Blueman (stable)')
     license = GPL
-    desc = _('Blueman is a graphical blue-tooth manager.')
+    detail = _('Blueman is a graphical blue-tooth manager.')
     content = 'blueman'
     ppa = 'blueman'
 
 class Repo_Christine(_launchpad):
     __doc__ = _('Christine (stable)')
     license = GPL
-    desc = _('Christine is a small media player.')
+    detail = _('Christine is a small media player.')
     content = 'christine'
     ppa = 'markuz'
 
 class Repo_Chromium_Daily(_launchpad):
     __doc__ = _('Chromium (beta version)')
     license = BSD
-    desc = _('Chromium is the open source version of Google Chrome.')
+    detail = _('Chromium is the open source version of Google Chrome.')
     content = 'chromium-browser'
     ppa = 'chromium-daily'
 
 class Repo_GTG(_launchpad):
     __doc__ = _('Getting things GNOME (stable)')
     license = GPL
-    desc = _('"Getting things GNOME" is a simple, powerful and flexible organization tool.')
+    detail = _('"Getting things GNOME" is a simple, powerful and flexible organization tool.')
     content = 'gtg'
     ppa = 'gtg'
 
 class Repo_GNOMEColors(_launchpad):
     __doc__ = _('GNOME colors (stable)')
     license = GPL
-    desc = _('This repository contains some themes.')
+    detail = _('This repository contains some themes.')
     content = 'gnome-colors'
+    DE = 'gnome'
     ppa = 'gnome-colors-packagers'
 
 class Repo_GlobalMenu(_launchpad):
     __doc__ = _('GNOME Global Menu (stable)')
     license = GPL
-    desc = _('GNOME Global Menu is the globally-shared menu bar of all applications.')
+    detail = _('GNOME Global Menu is the globally-shared menu bar of all applications.')
     content = 'gnome-globalmenu'
+    DE = 'gnome'
     ppa = 'globalmenu-team'
 
 class Repo_Medibuntu(_repo):
     __doc__ = _('Medibuntu (stable)')
     license = GPL
     def __init__(self):
-        self.desc = _('This is a repository providing packages which cannot be included into the Ubuntu distribution for legal reasons. '
+        self.detail = _('This is a repository providing packages which cannot be included into the Ubuntu distribution for legal reasons. '
             'There are many packages in this repository. The list of packages is in http://packages.medibuntu.org/')
         self.apt_content = ''
         self.web_page = 'http://packages.medibuntu.org/'
@@ -336,34 +241,14 @@ class Repo_Medibuntu(_repo):
 class Repo_Moovida(_launchpad):
     __doc__ = _('Moovida (stable)')
     license = GPL
-    desc = _('Moovida is a cross platform media player.')
+    detail = _('Moovida is a cross platform media player.')
     content = 'moovida'
     ppa = 'moovida-packagers'
-
-class Repo_Shutter(_launchpad):
-    __doc__ = _('Shutter (stable)')
-    license = GPL
-    desc = _('Shutter is a powerful screenshot program.')
-    content = 'shutter'
-    ppa = 'shutter'
     
-#class Repo_Synapse(_repo):
-#    __doc__ = _('Synapse (stable)')
-#    license = GPL
-#    def __init__(self):
-#        self.desc = _('Synapse is an instant messager.')
-#        self.apt_content = 'synapse'
-#        self.web_page = 'http://synapse.im/download/'
-#        self.apt_file = '/etc/apt/sources.list.d/synapse.list'
-#        self.apt_conf = [ 'deb http://ppa.launchpad.net/firerabbit/ppa/ubuntu $version main' ]
-#        self.key_url = 'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x83419668F12469157BCD4BE904508D5C1654E635'
-#        self.key_id = '1654E635'
-#        _repo.__init__(self)
-
 class Repo_X_Server_Updates(_launchpad):
     __doc__ = _('X server updates (stable)')
     license = GPL
-    desc = _('This repository provides latest versions of X.org drivers, libraries.')
+    detail = _('This repository provides latest versions of X.org drivers, libraries.')
     content = ( 'fglrx-installer xfree86-driver-synaptics xserver-xorg-input-vmmouse xserver-xorg-video-ati ' +
                              'xserver-xorg-video-intel xserver-xorg-video-nv' )
     ppa = 'ubuntu-x-swat/x-updates'
@@ -371,14 +256,14 @@ class Repo_X_Server_Updates(_launchpad):
 class Repo_WebkitGTK(_launchpad):
     __doc__ = _('WebkitGTK (stable)')
     license = LGPL
-    desc = _('WebkitGTK is the port of Webkit to the GTK+ platform.')
+    detail = _('WebkitGTK is the port of Webkit to the GTK+ platform.')
     content = 'webkit pywebkitgtk'
     ppa = 'webkit-team'
     
 class Repo_XBMC(_launchpad):
     __doc__ = _('XBMC (stable)')
     license = GPL
-    desc = _('XBMC is an open source software media player and entertainment hub for digital media.')
+    detail = _('XBMC is an open source software media player and entertainment hub for digital media.')
     content = 'xbmc'
     ppa = 'team-xbmc'
 
@@ -387,29 +272,29 @@ class Repo_IBus_Jaunty(_launchpad):
     license = GPL
     content = 'ibus ibus-table ibus-pinyin'
     ppa = 'ibus-dev/ibus-1.2-jaunty'
-    def support(self):
-        return Config.get_Ubuntu_version() == 'jaunty'
+    def visible(self):
+        return VERSION == 'jaunty'
 
 class Repo_IBus_Intrepid(_launchpad):
     __doc__ = _('IBus (stable)')
     license = GPL
     content = 'ibus ibus-table ibus-pinyin'
     ppa = 'ibus-dev/ibus-1.2-intrepid'
-    def support(self):
-        return Config.get_Ubuntu_version() == 'intrepid'
+    def visible(self):
+        return VERSION == 'intrepid'
 
 class Repo_IBus_Karmic(_launchpad):
     __doc__ = _('IBus (stable)')
     license = GPL
     content = 'ibus ibus-table ibus-pinyin'
     ppa = 'ibus-dev/ibus-1.2-karmic'
-    def support(self):
-        return Config.get_Ubuntu_version() == 'karmic'
+    def visible(self):
+        return VERSION == 'karmic'
 
 class Repo_Canonical_Partner(_repo):
     __doc__ = _('Partners of Canonical')
     def __init__(self):
-        self.desc = _('This repository provides many packages from partners of Canonical.')
+        self.detail = _('This repository provides many packages from partners of Canonical.')
         self.apt_content = 'acroread uex symphony accountz-baz'
         self.web_page = 'http://archive.canonical.com/ubuntu/dists/'
         self.apt_file = '/etc/apt/sources.list.d/partners-of-canonical.list'
@@ -422,7 +307,7 @@ class Repo_RSSOwl(_repo):
     __doc__ = _('RSSOwl (stable)')
     license = EPL
     def __init__(self):
-        self.desc = _('RSSOwl is an RSS reader.')
+        self.detail = _('RSSOwl is an RSS reader.')
         self.apt_content = 'rssowl'
         self.web_page = 'http://packages.rssowl.org/README'
         self.apt_file = '/etc/apt/sources.list.d/rssowl.list'
@@ -435,43 +320,44 @@ class Repo_Gmchess(_launchpad):
     __doc__ = _('Gmchess (stable)')
     license = GPL
     Chinese = True
-    desc = _('This is a Chinese chess game.')
+    detail = _('This is a Chinese chess game.')
     content = 'gmchess'
     ppa = 'gmchess'
 
 class Repo_Exaile(_launchpad):
     __doc__ = _('Exaile (beta version)')
     license = GPL
-    desc = _('A music manager and player for GTK+ written in Python.')
+    detail = _('A music manager and player for GTK+ written in Python.')
     content = 'exaile'
     ppa = 'exaile-devel'
 
 class Repo_Audacious(_launchpad):
     __doc__ = _('Audacious (beta version)')
     license = GPL
-    desc = _('An advanced audio player.It focused on audio quality and supporting a wide range of audio codecs.')
+    detail = _('An advanced audio player.It focused on audio quality and supporting a wide range of audio codecs.')
     content = 'audacious audacious-plugins'
     ppa = 'dupondje'
-        
-class Repo_Tor(_repo):
-    __doc__ = _('Tor (stable)')
-    license = BSD
-    def __init__(self):
-        self.desc = _('An open network that helps you defend against a form of network surveillance that threatens personal freedom and privacy, '
-        'confidential business activities and relationships, and state security known as traffic analysis.')
-        self.apt_content = 'tor privoxy vidalia'
-        self.web_page = 'http://deb.torproject.org/'
-        self.apt_file = '/etc/apt/sources.list.d/tor.list'
-        self.apt_conf = [ 'deb http://deb.torproject.org/torproject.org $version main' ]
-        self.key_url = ''
-        self.key_id = '886DDD89'
-        _repo.__init__(self)
+
+# Disable Repo_Tor, because the packages are provided in Ubuntu Lucid and Fedora 12/13
+#class Repo_Tor(_repo):
+#    __doc__ = _('Tor (stable)')
+#    license = BSD
+#    def __init__(self):
+#        self.detail = _('An open network that helps you defend against a form of network surveillance that threatens personal freedom and privacy, '
+#        'confidential business activities and relationships, and state security known as traffic analysis.')
+#        self.apt_content = 'tor privoxy vidalia'
+#        self.web_page = 'http://deb.torproject.org/'
+#        self.apt_file = '/etc/apt/sources.list.d/tor.list'
+#        self.apt_conf = [ 'deb http://deb.torproject.org/torproject.org $version main' ]
+#        self.key_url = ''
+#        self.key_id = '886DDD89'
+#        _repo.__init__(self)
 
 class Repo_RedNoteBook(_repo):
     __doc__ = _('RedNoteBook (stable)')
     license = GPL
     def __init__(self):
-        self.desc = _('This is a desktop diary application.')
+        self.detail = _('This is a desktop diary application.')
         self.apt_content = 'rednotebook'
         self.web_page = 'http://robin.powdarrmonkey.net/ubuntu/'
         self.apt_file = '/etc/apt/sources.list.d/rednotebook.list'
@@ -479,37 +365,28 @@ class Repo_RedNoteBook(_repo):
         self.key_url = 'http://robin.powdarrmonkey.net/ubuntu/repository.key'
         self.key_id = 'FF95D333'
         _repo.__init__(self)
-    def support(self):
-        return Config.get_Ubuntu_version() != 'lucid'
 
 class Repo_Pidgin_Develop(_launchpad):
     __doc__ = _('Pidgin (beta version)')
     license = GPL
-    desc = _('A free chat client used by millions. Connect easily to MSN, Google Talk, Yahoo, AIM and other chat networks all at once.')
+    detail = _('A free chat client used by millions. Connect easily to MSN, Google Talk, Yahoo, AIM and other chat networks all at once.')
     content = 'pidgin'
     ppa = 'pidgin-developers'
-
-class Repo_Songbird(_launchpad):
-    __doc__ = _('Songbird (beta version)')
-    license = GPL
-    desc = _('Music player which integrates with online content via plugins. Site contains project news, download, add-ons directory, help, and how to contribute.')
-    content = 'songbird'
-    ppa = 'songbird-daily'
 
 class Repo_OSD_Lyrics(_launchpad):
     __doc__ = _('OSD-Lyrics (stable)')
     license = GPL
-    desc = _('It displays lyrics. It supports many media players.')
+    detail = _('It displays lyrics. It supports many media players.')
     content = 'osdlyrics'
     ppa = 'osd-lyrics'
 
 class Repo_Mplayer_VOD(_launchpad):
     __doc__ = _('Mplayer-VOD (stable)')
     license = GPL
-    desc = _('A movie player for Linux. Supports reading from network, dvd, vcd, file, pipes, and v4l.')
+    detail = _('A movie player for Linux. Supports reading from network, dvd, vcd, file, pipes, and v4l.')
     content = 'mplayer'
     ppa = 'homer-xing/mplayer-vod'
-    def support(self):
+    def visible(self):
         return False
 
 class Repo_Acire(_launchpad):
@@ -517,3 +394,15 @@ class Repo_Acire(_launchpad):
     license = GPL
     content = 'acire'
     ppa = 'acire-team/acire-releases'
+
+class Repo_ElementaryArtwork(_launchpad):
+    __doc__ = _('Elementary Theme')
+    ppa = 'elementaryart'
+
+class Repo_Docky(_launchpad):
+    'Docky'
+    ppa = 'docky-core'
+
+class Repo_CairoDock(_launchpad):
+    'Cairo Dock'
+    ppa = 'cairo-dock-team/weekly'

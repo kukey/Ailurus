@@ -22,21 +22,69 @@
 
 from __future__ import with_statement
 import sys, os
-import ailurus
-sys.path.insert(0, os.path.dirname(os.path.abspath(ailurus.__file__)))
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+path = os.path.dirname(os.path.abspath(__file__))+'/../'
+sys.path.insert(0, path)
+os.chdir(path)
 from lib import *
 from libu import *
 from libserver import *
+from libapp import *
 import gtk
 
+class Adobe_Flash_plugin(_apt_install):
+    pkgs = 'flashplugin-installer'
+
+if VERSION < 'lucid':
+    class Fix_error_in_49_sansserif_conf(I):
+        def installed(self):
+            try:
+                with open('/etc/fonts/conf.d/49-sansserif.conf') as f:
+                    if '>sans-serif<' in f.read():
+                        return False
+            except IOError: # File does not exist
+                pass
+            return True
+        def install(self):
+            with TempOwn('/etc/fonts/conf.d/49-sansserif.conf') as o:
+                with open('/etc/fonts/conf.d/49-sansserif.conf') as f:
+                    content = f.read()
+                content = content.replace('>sans-serif<', '>sans serif<')
+                with open('/etc/fonts/conf.d/49-sansserif.conf', 'w') as f:
+                    f.write(content)
+
+class Full_Language_Pack(I):
+    def determine_packages(self):
+        lang = Config.get_locale().split('_')[0]
+        list = [
+                'language-pack-' + lang,
+                'language-support-fonts-' + lang,
+                'language-support-input-' + lang,
+                'language-support-translations-' + lang,
+                'language-support-' + lang,
+                'language-support-writing-' + lang,
+                ]
+        if GNOME: list.append('language-pack-gnome-' + lang)
+        if KDE:   list.append('language-pack-kde-' + lang)
+        pkgs = [p for p in list if APT.exist(p) and not APT.installed(p)]
+        self.pkgs = pkgs        
+    def installed(self):
+        self.determine_packages()
+        return self.pkgs == []
+    def install(self):
+        if self.pkgs:
+            APT.install(*self.pkgs)
+                
 WORKS = [
             [_('Search fastest repository'), 'Search_Fastest_Repository', True],
             [_('Full language support and input method'), 'Full_Language_Pack', True],
             [_('Multi-media codec'), 'Multimedia_Codecs', True],
-            [_('Decompression software'), 'Decompression_Capability', True],
+            [_('Decompression software'), 'Enhance_Decompression_Capability', True],
             [_('Stardict'), 'Stardict', True],
-            [_('Flash plugin for web browser'), 'Flash_Player', True],
+            [_(u'Moonlight: an open source implementation of Microsoft® Silverlight'), 'Moonlight', True],
+            [_('Flash plugin for web browser') + ' (GNU Gnash)', 'Gnash', False],
+            [_('Flash plugin for web browser') + ' (Adobe)', 'Adobe_Flash_plugin', True],
+# Some people say that this operation has side effect.
+#            [_('Fix Flash plugin font error'), 'Fix_error_in_49_sansserif_conf', True],
             [_('Install hardware drivers'), 'Install_Hardware_Driver', True],
         ]
 
@@ -45,7 +93,7 @@ class SelectWorksDialog(gtk.Dialog):
         item[2] = check_button.get_active()
         
     def __init__(self):
-        gtk.Dialog.__init__(self, _('Quick setup'), None, gtk.DIALOG_NO_SEPARATOR, 
+        gtk.Dialog.__init__(self, _('Quickly install popular software'), None, gtk.DIALOG_NO_SEPARATOR, 
                             (gtk.STOCK_CANCEL, gtk.RESPONSE_DELETE_EVENT, 
                              gtk.STOCK_OK, gtk.RESPONSE_OK) )
         image = gtk.Image()
@@ -60,7 +108,7 @@ class SelectWorksDialog(gtk.Dialog):
         for item in WORKS:
             name = item[0]
             check_button = gtk.CheckButton(name)
-            check_button.set_active(True)
+            check_button.set_active(item[2])
             check_button.connect('toggled', self.toggled, item)
             check_button_list.append(check_button)
         box = gtk.VBox(False, 5)
@@ -279,18 +327,15 @@ class FastestRepositoryDialog(gtk.Dialog):
                 if e[3] == fastest_server:
                     new_url = e[2]
                     break
-            Config.set_fastest_repository(new_url)
-            Config.set_fastest_repository_response_time(int(min_time))
             #check whether repositories should be changed
-            for repos in get_current_official_repositories():
+            for repos in APTSource2.official_urls():
                 assert ':' in repos
                 if repos != new_url: break
             else:
                 return
             self.change_server(new_url)
         except:
-            import traceback
-            traceback.print_exc()
+            print_traceback()
         finally:
             #destroy dialog
             self.can_exit = True
@@ -300,10 +345,11 @@ class FastestRepositoryDialog(gtk.Dialog):
         'apply the fastest repository'
         run_as_root('cp /etc/apt/sources.list /etc/apt/sources.list.back') # do a back up first
         changes = {}
-        for repos in get_current_official_repositories():
+        for repos in APTSource2.official_urls():
             changes[repos] = fastest_url
         notify( _('Apply the fastest repository:'), fastest_url )
-        change_repositories_in_source_files(changes)
+        APTSource2.remove_official_servers()
+        APTSource2.add_official_url(fastest_url)
         #apt-get update
         self.progress_label.set_text( _('Run command: "sudo apt-get update"') )
         notify(_('Run "apt-get update". Please wait for few minutes.'), ' ')
@@ -348,7 +394,6 @@ class DoStuffDialog(gtk.Dialog):
     def refresh_GUI(self):
         pass
     def start(self, *w):
-        import os, sys, traceback
         try:
             run.terminal = self.terminal
             r,w = os.pipe()
@@ -368,7 +413,7 @@ class DoStuffDialog(gtk.Dialog):
                 except:
                     row[0] = 0
                     print '\x1b[1;31m', _('Failed'), '\x1b[m'
-                    traceback.print_exc()
+                    print_traceback()
                 print
         finally:
             self.can_exit = True
@@ -395,7 +440,7 @@ class DoStuffDialog(gtk.Dialog):
         import os, sys
         self.backup_stdout = os.dup(sys.stdout.fileno())
 
-        gtk.Dialog.__init__(self, _('Quick setup'), None, gtk.DIALOG_NO_SEPARATOR, None )
+        gtk.Dialog.__init__(self, _('Quickly install popular software'), None, gtk.DIALOG_NO_SEPARATOR, None )
         self.connect('delete-event', self._before_delete_event)
         
         self.start_button = gtk.Button()
@@ -410,13 +455,12 @@ class DoStuffDialog(gtk.Dialog):
                 c = get_obj_by_class_name(name, app_objs)
                 task_store.append([1, text, c])
             except:
-                import traceback
-                traceback.print_exc()
+                print_traceback()
 
-        self.pixbuf_fail = get_pixbuf(D+'other_icons/fail.png', 16, 16)
-        self.pixbuf_blank = get_pixbuf(D+'other_icons/blank.png', 16, 16)
-        self.pixbuf_started = get_pixbuf(D+'other_icons/started.png', 16, 16)
-        self.pixbuf_done = get_pixbuf(D+'other_icons/done.png', 16, 16)
+        self.pixbuf_fail = get_pixbuf(D+'sora_icons/quicksetup_fail.png', 16, 16)
+        self.pixbuf_blank = blank_pixbuf(16, 16)
+        self.pixbuf_started = get_pixbuf(D+'sora_icons/quicksetup_start.png', 16, 16)
+        self.pixbuf_done = get_pixbuf(D+'sora_icons/quicksetup_done.png', 16, 16)
 
         render_pixbuf = gtk.CellRendererPixbuf()
         render_text = gtk.CellRendererText()
@@ -458,11 +502,8 @@ def quick_setup():
     WaitNetworkDialog.show_dialog()
     #load app_classes
     window = show_scan_installed_package_splash()
-    import common as COMMON
-    DESKTOP = None
-    import ubuntu as DISTRIBUTION
     from loader import load_app_objs
-    app_objs = load_app_objs(COMMON, DESKTOP, DISTRIBUTION)
+    app_objs = load_app_objs()
     window.destroy()
     #3
     dialog = DoStuffDialog(app_objs)

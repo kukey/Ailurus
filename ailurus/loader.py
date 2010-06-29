@@ -22,127 +22,134 @@
 
 from __future__ import with_statement
 from lib import *
+from libapp import N
+import os, sys, glob, new, ConfigParser, types, gtk
+import strings
 
-categories=('tweak','repository','biology','internet','firefox', 'firefoxdev',
-            'appearance','office','math','latex','dev','em', 'server',
-            'geography','education','media','vm','game', 'statistics', 
-            'eclipse', 'hardware', 'language', 'nautilus', 'embedded',)
-
-class BrokenClass(Exception):
-    pass
-
-def check_class_members(app_class, default_category = 'tweak'):
-    import types
-    if type(app_class)!=types.ClassType: raise TypeError, app_class
-    if type( getattr(app_class,'install',None) ) != types.MethodType: raise BrokenClass, app_class
-    if type( getattr(app_class,'installed',None) ) != types.MethodType: raise BrokenClass, app_class
-    if type( getattr(app_class,'remove',None) ) != types.MethodType: raise BrokenClass, app_class
-    if not hasattr(app_class,'category'): app_class.category = default_category
-    if type( getattr(app_class,'category','') ) != str: raise TypeError, app_class
-    if not app_class.category in categories: raise ValueError, app_class.category
-    if not hasattr(app_class, 'detail'): app_class.detail=''
-    if type( getattr(app_class,'detail','') ) != str: app_class.detail = str( getattr(app_class,'detail','') ) 
-    if app_class.__doc__ is None: app_class.__doc__ = app_class.__name__
-    return app_class
-
-def load_app_objs(common, desktop, distribution):
-    modules = []
-    for module in [common, desktop, distribution]:
-        import types
-        assert module==None or isinstance(module, types.ModuleType)
-        if module and hasattr(module, 'apps'):
-            modules.append(module.apps)
-
-    objs = []
-    names = set()
-    for module in modules:
+class AppObjs:
+    appobjs = []
+    appobjs_names = []
+    basic_modules = [] # used in load_from_basic_modules()
+    extensions = []
+    failed_extensions = []
+    @classmethod
+    def get_icon_path(cls, name):
+        for dir in [D+'appicons/', D+'umut_icons/', D+'sora_icons/',]:
+            path = dir + name + '.png'
+            if os.path.exists(path): return path
+        return D + 'sora_icons/default_application_icon.png'
+    @classmethod
+    def all_objs_reload_icon(cls):
+        for obj in cls.appobjs:
+            name = obj.__class__.__name__
+            obj.logo_pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(cls.get_icon_path(name), 32, 32)
+    @classmethod
+    def all_objs_reset_status(cls):
+        for obj in cls.appobjs:
+            obj.showed_in_toggle = obj.cache_installed = obj.installed()
+    @classmethod
+    def set_basic_modules(cls, common, desktop, distribution):
+        cls.basic_modules = []
+        for module in [common, desktop, distribution]:
+            if module and hasattr(module, 'apps'):
+                cls.basic_modules.append(module.apps)
+    @classmethod
+    def load_from_basic_modules(cls):
+        assert cls.basic_modules
+        for module in cls.basic_modules:
+            cls.load_from(module)
+    @classmethod
+    def load_from(cls, module):
         for name in dir(module):
-            if name in names: continue
-            if name[0]=='_' or name=='I': continue
+            if name in cls.appobjs_names: continue
+            if name.startswith('_') or name=='I' or name=='N': continue
             app_class = getattr(module,name)
-            if not isinstance(app_class, types.ClassType) or not issubclass(app_class, I): continue
-    
+            if not isinstance(app_class, types.ClassType): continue
+            if getattr(app_class, 'this_is_an_installer', False) == False: continue
             try:
-                check_class_members(app_class)
-                app_class_obj = app_class()
-                if hasattr(app_class_obj, 'support') and app_class_obj.support()==False: continue
-                if hasattr(app_class_obj, 'Chinese') and Config.is_Chinese_locale()==False: continue
-                if hasattr(app_class_obj, 'installation_command'):
-                    if app_class_obj.detail and not app_class_obj.detail.endswith('\n'):
-                        app_class_obj.detail += '\n'
-                    app_class_obj.detail += app_class_obj.installation_command()
-                app_class_obj.cache_installed = app_class_obj.installed()
-                if not isinstance(app_class_obj.cache_installed, bool):
-                    raise ValueError, 'Return type of installed() is not bool.'
-                app_class_obj.showed_in_toggle = app_class_obj.cache_installed
-                objs.append(app_class_obj)
-                names.add(name)
+                if not isinstance(app_class.category, str): raise TypeError, app_class
+                if not isinstance(app_class.detail, (str, unicode)): raise TypeError, app_class
+                if app_class.__doc__ is None: app_class.__doc__ = app_class.__name__
+                obj = app_class()
+                obj.self_check()
+                obj.fill()
             except:
-                import sys, traceback
-                print >>sys.stderr, _('Cannot load class %s') % name
-                traceback.print_exc(file=sys.stderr)
+                print 'Cannot load class %s' % name
+                print_traceback()
+            else:
+                cls.appobjs.append(obj)
+                cls.appobjs_names.append(name)
+    @classmethod
+    def get_extension_path(cls):
+        for path in [A+'/../unfree/', Config.get_config_dir()]:
+            if os.path.exists(path): return path
+        raise Exception
+    @classmethod
+    def load_from_extensions(cls):
+        extension_path = cls.get_extension_path()
+        sys.path.insert(0, extension_path)
+        for py in glob.glob(extension_path+'/*.py'):
+            filename = os.path.split(py)[1]
+            basename = os.path.splitext(filename)[0]
+            try:
+                module = __import__(basename)
+                cls.extensions.append(module)
+            except:
+                cls.failed_extensions.append(os.path.abspath(py))
+            else:
+                cls.load_from(module)
+        sys.path.pop(0)
+    @classmethod
+    def load_from_text_file(cls):
+        c = ConfigParser.RawConfigParser()
+        c.optionxform = str # case sensitive in option_name
+        c.read(A+'/native_apps')
+        for section_name in c.sections():
+            try:
+                dict = {}
+                assert hasattr(strings, section_name+'_0'), section_name
+                assert hasattr(strings, section_name+'_1'), section_name
+                dict['__doc__'] = getattr(strings, section_name + '_0')
+                dict['detail'] = getattr(strings, section_name + '_1')
+                for option_name in c.options(section_name):
+                    value = c.get(section_name, option_name)
+                    if option_name == 'ubuntu' and (UBUNTU or UBUNTU_DERIV):
+                        dict['pkgs'] = value
+                    elif option_name == 'fedora' and FEDORA:
+                        dict['pkgs'] = value
+                    elif option_name == 'archlinux' and ARCHLINUX:
+                        dict['pkgs'] = value
+                    elif option_name == 'Chinese' or option_name == 'Poland':
+                        dict[option_name] = True
+                    elif option_name == 'license':
+                        list = [globals()[e] for e in value.split()]
+                        if len(list)==1: dict[option_name] = list[0]
+                        elif len(list)==2: dict[option_name] = DUAL_LICENSE(list[0],list[1])
+                        elif len(list)==3: dict[option_name] = TRI_LICENSE(list[0],list[1],list[2])
+                    else:
+                        dict[option_name] = value
+                if 'pkgs' not in dict: continue
+                obj = new.classobj(section_name, (N,), {})()
+                for key in dict.keys():
+                    setattr(obj,key,dict[key])
+                obj.self_check()
+                obj.fill()
+            except:
+                print 'Cannot load obj %s from native_apps' % section_name
+                print_traceback()
+            else:
+                cls.appobjs.append(obj)
+    @classmethod
+    def strip_invisible(cls):
+        cls.appobjs = [obj for obj in cls.appobjs if obj.visible()]
+    @classmethod
+    def strip_wrong_locale(cls):
+        if not Config.is_Chinese_locale():
+            cls.appobjs = [obj for obj in cls.appobjs if not hasattr(obj, 'Chinese')]
+        if not Config.is_Poland_locale():
+            cls.appobjs = [obj for obj in cls.appobjs if not hasattr(obj, 'Poland')]
 
-    return objs
-
-def load_app_objs_from_extension(extension):
-    from ailurus.lib import I
-    import types
-    classobjs = []
-    names = set()
-    for name in dir(extension):
-        if name[0]=='_' or name=='I': continue
-        if name in names: continue
-        app_class = getattr(extension,name)
-        if not isinstance(app_class, types.ClassType) or not issubclass(app_class, I): continue
-
-        try:
-            check_class_members(app_class)
-            app_class_obj = app_class()
-            if hasattr(app_class_obj, 'support') and app_class_obj.support()==False: continue
-            if hasattr(app_class_obj, 'international') and Config.is_Chinese_locale(): continue
-            if hasattr(app_class_obj, 'Chinese') and Config.is_Chinese_locale()==False: continue
-            app_class_obj.cache_installed = app_class_obj.installed()
-            if not isinstance(app_class_obj.cache_installed, bool):
-                raise ValueError, 'Return type of installed() is not bool.'
-            app_class_obj.showed_in_toggle = app_class_obj.cache_installed
-            names.add(name)
-        except:
-            import sys, traceback
-            print >>sys.stderr, _('Cannot load class %s')%name
-            print >>sys.stderr, _('Traceback:')
-            traceback.print_exc(file=sys.stderr)
-        else:
-            classobjs.append(app_class_obj)
-
-    return classobjs
-
-def load_custom_app_classes():
-    return_value = []
-    # check whether the extension directory exist
-    import os
-    extension_path = Config.get_config_dir()
-    if not os.path.exists(extension_path):
-        return []
-    # add the extension directory to sys.path
-    import sys
-    sys.path.insert(0, extension_path)
-    # try to load extensions
-    import glob
-    pys = glob.glob(extension_path+'/*.py')
-    for py in pys:
-        filename = os.path.split(py)[1]
-        basename = os.path.splitext(filename)[0]
-        try:
-            module = __import__(basename)
-            return_value.extend( load_app_objs_from_extension(module) )
-        except:
-            import traceback
-            traceback.print_exc()
-    # remove the extension directory from sys.path
-    sys.path.pop(0)
-    return return_value
-
-def load_R_objs(common, desktop, distribution):
+def load_R_objs():
     paths = []
     import types
     import os, glob, re
@@ -168,27 +175,20 @@ def load_R_objs(common, desktop, distribution):
     
     return objs
 
-def load_hardwareinfo(common, desktop, distribution):
+def load_info():
     import types
-    ret = []
+    hardware_info = []
+    os_info = []
     for module in [common, desktop, distribution]:
         if module:
             assert isinstance(module, types.ModuleType)
             if hasattr(module, 'hardwareinfo') and hasattr(module.hardwareinfo, 'get'):
-                ret.extend(module.hardwareinfo.get())
-    return ret
-
-def load_linuxinfo(common, desktop, distribution):
-    import types
-    ret = []
-    for module in [common, desktop, distribution]:
-        if module:
-            assert isinstance(module, types.ModuleType)
+                hardware_info.extend(module.hardwareinfo.get())
             if hasattr(module, 'osinfo') and hasattr(module.osinfo, 'get'):
-                ret.extend(module.osinfo.get())
-    return ret
-
-def load_setting(common, desktop, distribution):
+                os_info.extend(module.osinfo.get())
+    return hardware_info, os_info
+    
+def load_setting():
     import types
     ret = []
     for module in [distribution, desktop, common]:
@@ -198,15 +198,7 @@ def load_setting(common, desktop, distribution):
                 ret.extend(module.setting.get())
     return ret
 
-def __create_menu(menuitems):
-    import gtk
-    menu = gtk.Menu()
-    for item in menuitems:
-        menu.append(item)
-    menu.show_all()
-    return menu
-
-def load_study_linux_menu(common, desktop, distribution, main_view):
+def load_study_linux_menuitems():
     import types
     for module in [common, desktop, distribution]:
         assert isinstance(module, types.ModuleType) or module == None
@@ -214,10 +206,10 @@ def load_study_linux_menu(common, desktop, distribution, main_view):
     ret = []
     for module in [common, desktop, distribution]:
         if module and hasattr(module, 'menu') and hasattr(module.menu, 'get_study_linux_menu'):
-            ret.extend(module.menu.get_study_linux_menu(main_view))
-    return __create_menu(ret)
+            ret.extend(module.menu.get_study_linux_menu())
+    return ret
 
-def load_preferences_menu(common, desktop, distribution, main_view):
+def load_preferences_menuitems():
     import types
     for module in [common, desktop, distribution]:
         assert isinstance(module, types.ModuleType) or module == None
@@ -225,21 +217,19 @@ def load_preferences_menu(common, desktop, distribution, main_view):
     ret = []
     for module in [common, desktop, distribution]:
         if module and hasattr(module, 'menu') and hasattr(module.menu, 'get_preferences_menu'):
-            ret.extend(module.menu.get_preferences_menu(main_view))
-    return __create_menu(ret)
+            ret.extend(module.menu.get_preferences_menu())
+    return ret
 
-def load_others_menu(common, desktop, distribution, main_view):
+def load_others_menuitems():
     import types
+    ret = []
     for module in [common, desktop, distribution]:
         assert isinstance(module, types.ModuleType) or module == None
-    
-    ret = []
-    for module in [distribution, common, desktop]: # not [common, desktop, distribution]. Because we show "quick setup" first.
         if module and hasattr(module, 'menu') and hasattr(module.menu, 'get_others_menu'):
-            ret.extend(module.menu.get_others_menu(main_view))
-    return __create_menu(ret)
+            ret.extend(module.menu.get_others_menu())
+    return ret
 
-def load_tips(common, desktop, distribution):
+def load_tips():
     import types
     ret = []
     for module in [common, desktop, distribution]:
@@ -248,3 +238,49 @@ def load_tips(common, desktop, distribution):
             if hasattr(module, 'tips') and hasattr(module.tips, 'get'):
                 ret.extend(module.tips.get())
     return ret
+
+def load_cure_objs():
+    modules = []
+    for module in [common, desktop, distribution]:
+        import types
+        assert module==None or isinstance(module, types.ModuleType)
+        if module and hasattr(module, 'cure'):
+            modules.append(module.cure)
+    
+    objs = []
+    names = set()
+    for module in modules:
+        for name in dir(module):
+            if name in names or name == 'C': continue
+            cure_class = getattr(module,name)
+            if not isinstance(cure_class, types.ClassType) or not issubclass(cure_class, C): continue
+            try:
+                objs.append(cure_class())
+            except:
+                print 'Cannot load class %s' % name
+                print_traceback()
+    
+    return objs
+
+import common
+if GNOME: import gnome as desktop
+else: desktop = None
+if UBUNTU_DERIV or UBUNTU: import ubuntu as distribution
+elif FEDORA: import fedora as distribution
+elif ARCHLINUX: import archlinux as distribution
+else: distribution = None
+
+def load_app_objs():
+    AppObjs.set_basic_modules(common, desktop, distribution)
+
+    AppObjs.load_from_text_file()
+    AppObjs.load_from_basic_modules()
+    AppObjs.load_from_extensions()
+
+    AppObjs.strip_invisible()
+    AppObjs.strip_wrong_locale()
+
+    AppObjs.all_objs_reload_icon()
+    AppObjs.all_objs_reset_status()
+    
+    return AppObjs.appobjs
