@@ -197,15 +197,25 @@ class Config:
         cls.set_bool('show_quick_setup_area', value)
     @classmethod
     def get_show_quick_setup_area(cls):
+<<<<<<< HEAD
         try: return cls.get_bool('show_quick_setup_area')
         except: return True
+=======
+        try:        return cls.get_bool('show_quick_setup_area')
+        except:     return True
+>>>>>>> FETCH_HEAD
     @classmethod
     def set_show_sync_area(cls, value):
         cls.set_bool('show_sync_area', value)
     @classmethod
     def get_show_sync_area(cls):
+<<<<<<< HEAD
         try: return cls.get_bool('show_sync_area')
         except: return True
+=======
+        try:        return cls.get_bool('show_sync_area')
+        except:     return True
+>>>>>>> FETCH_HEAD
     @classmethod
     def set_query_before_exit(cls, value):
         cls.set_bool('query_before_exit', value)
@@ -229,6 +239,32 @@ class Config:
     @classmethod
     def wget_get_triesnum(cls):
         try: value = cls.get_int('wget_triesnum')
+        except: value = 3
+        return value
+    @classmethod
+    def set_default_pane(cls, value):
+        cls.set_string('default_pane', value)
+    @classmethod
+    def get_default_pane(cls):
+        try: value = cls.get_string('default_pane')
+        except: value = 'SystemSettingPane'
+        return value
+    @classmethod
+    def wget_set_timeout(cls, timeout):
+        assert isinstance(timeout, int) and timeout>0, timeout
+        cls.set_int('wget_timeout', timeout)
+    @classmethod
+    def wget_get_timeout(cls):
+        try:       value = cls.get_int('wget_timeout')
+        except: value = 20
+        return value
+    @classmethod
+    def wget_set_triesnum(cls, triesnum):
+        assert isinstance(triesnum, int) and triesnum>0, triesnum
+        cls.set_int('wget_triesnum', triesnum)
+    @classmethod
+    def wget_get_triesnum(cls):
+        try:       value = cls.get_int('wget_triesnum')
         except: value = 3
         return value
     @classmethod
@@ -292,7 +328,11 @@ class Config:
     @classmethod
     def is_YLMF(cls):
         import os
+<<<<<<< HEAD
         if not os.path.exists('/etc/lsb-release'):
+=======
+        if not os.path.exists('/etc/lsb-release'): 
+>>>>>>> FETCH_HEAD
             return False
         with open('/etc/lsb-release') as f:
             c = f.read()
@@ -374,7 +414,11 @@ def get_proxy_string():
     if hasattr(get_proxy_string, 'denied'): # user has denied access before
         raise UserDeniedError
     
+<<<<<<< HEAD
     try: id = Config.get_proxy_string_id_in_keyring()
+=======
+    try:    id = Config.get_proxy_string_id_in_keyring()
+>>>>>>> FETCH_HEAD
     except: return '' # not exist
     
     import gnomekeyring
@@ -403,7 +447,11 @@ def install_locale():
     gettext.translation('ailurus', '/usr/share/locale', fallback=True).install(names=['ngettext'])
 
 def is_legal_license(license):
+<<<<<<< HEAD
     return license in [GPL, LGPL, EPL, MPL, BSD, MIT, CDDL, APL, AL]
+=======
+    return license in [GPL, LGPL, EPL, MPL, BSD, MIT, CDDL, APL, AL] 
+>>>>>>> FETCH_HEAD
 
 def DUAL_LICENSE(A, B):
     assert is_legal_license(A) and is_legal_license(B)
@@ -457,7 +505,11 @@ class CommandFailError(Exception):
 
 def run(command, ignore_error=False):
     is_string_not_empty(command)
+<<<<<<< HEAD
     if not isinstance(ignore_error, bool): raise TypeError
+=======
+    if not isinstance(ignore_error,  bool): raise TypeError
+>>>>>>> FETCH_HEAD
 
     if getattr(run, 'terminal', None):
         assert run.terminal.__class__.__name__ == 'Terminal'
@@ -508,7 +560,11 @@ def daemon():
 
 def get_dbus_daemon_version():
     ret = daemon().get_version(dbus_interface='cn.ailurus.Interface')
+<<<<<<< HEAD
     return ret
+=======
+    return ret    
+>>>>>>> FETCH_HEAD
 
 def restart_dbus_daemon():
     authenticate()
@@ -591,7 +647,11 @@ class TempOwn:
 
 def notify(title, content):
     'Show a notification in the right-upper corner.'
+<<<<<<< HEAD
     # title must not be empty.
+=======
+    # title must not be empty. 
+>>>>>>> FETCH_HEAD
     # otherwise, this error happens. notify_notification_update: assertion `summary != NULL && *summary != '\0'' failed
     assert isinstance(title, str) and title
     assert isinstance(content, str)
@@ -868,7 +928,19 @@ class APT:
         cls.cache_changed()
     @classmethod
     def is_cache_lockable(cls):
+<<<<<<< HEAD
         return daemon().is_apt_cache_lockable(dbus_interface='cn.ailurus.Interface')
+=======
+        import dbus
+        try:
+            daemon().is_apt_cache_lockable(dbus_interface='cn.ailurus.Interface')
+        except dbus.exceptions.DBusException, e:
+            if e.get_dbus_name() == 'cn.ailurus.CannotLockAptCacheError':
+                raise CannotLockAptCacheError(e.get_dbus_message())
+
+class CannotLockAptCacheError(Exception):
+    'Cannot lock apt cache'
+>>>>>>> FETCH_HEAD
 
 class PACMAN:
     fresh_cache = False
@@ -1107,7 +1179,11 @@ class APTSource2:
             cls.re_pattern_server = re.compile(r'^deb(-src)? [a-z]+://([^/]+)/.*$')
         match = cls.re_pattern_server.match(line)
         if match: return match.group(2)
+<<<<<<< HEAD
         else: return None
+=======
+        else:     return None
+>>>>>>> FETCH_HEAD
     @classmethod
     def get_url_from_line(cls, line):
         line = cls.remove_comment(line)
@@ -1116,6 +1192,7 @@ class APTSource2:
             cls.re_pattern_url = re.compile(r'^deb(-src)? (\S+) .*$')
         match = cls.re_pattern_url.match(line)
         if match: return match.group(2)
+<<<<<<< HEAD
         else: return None
     @classmethod
     def official_servers(cls):
@@ -1134,6 +1211,26 @@ class APTSource2:
                 ret.add(url)
         return ret
     @classmethod
+=======
+        else:     return None
+    @classmethod
+    def official_servers(cls):
+        ret = set()
+        for line in cls.iter_all_lines():
+            if cls.is_official_line(line):
+                server = cls.get_server_from_line(line)
+                ret.add(server)
+        return ret
+    @classmethod
+    def official_urls(cls):
+        ret = set()
+        for line in cls.iter_all_lines():
+            if cls.is_official_line(line):
+                url = cls.get_url_from_line(line)
+                ret.add(url)
+        return ret
+    @classmethod
+>>>>>>> FETCH_HEAD
     def third_party_urls(cls):
         offi_urls = cls.official_urls()
         ret = set()
@@ -1265,10 +1362,17 @@ class firefox:
         cls.pattern1 = re.compile('em:name="(.+)"')
         cls.pattern2 = re.compile('<em:name>(.+)</em:name>')
         cls.prefs_js_line_pattern = re.compile(r'''^user_pref\( # begin
+<<<<<<< HEAD
 (['"][^'"]+['"]) # key
 ,\s
 (.+) # value
 \); # end ''', re.VERBOSE)
+=======
+            (['"][^'"]+['"]) # key
+            ,\s
+            (.+) # value
+            \); # end ''', re.VERBOSE)
+>>>>>>> FETCH_HEAD
         cls.load_user_prefs()
         cls.support = True
     @classmethod
@@ -1315,6 +1419,7 @@ class firefox:
         if not os.path.exists(rdf_file): return None
         with open(rdf_file) as f:
             content = f.read()
+<<<<<<< HEAD
         return cls.guess_name_from_content_method1(content) or cls.guess_name_from_content_method2(content)
     @classmethod
     def guess_name_from_content_method1(cls, content):
@@ -1323,6 +1428,16 @@ class firefox:
     @classmethod
     def guess_name_from_content_method2(cls, content):
         try: return cls.pattern2.search(content).group(1)
+=======
+        return cls.guess_name_from_content_method1(content) or cls.guess_name_from_content_method2(content)  
+    @classmethod
+    def guess_name_from_content_method1(cls, content):
+        try:    return cls.pattern1.search(content).group(1)
+        except: return None
+    @classmethod
+    def guess_name_from_content_method2(cls, content):
+        try:    return cls.pattern2.search(content).group(1)
+>>>>>>> FETCH_HEAD
         except: return None
     @classmethod
     def all_user_pref_lines(cls, content):
@@ -1670,11 +1785,19 @@ class FedoraReposSection:
 
     def comment_line(self, i):
         if not self.lines[i].startswith('#'):
+<<<<<<< HEAD
             self.lines[i] = '#' + self.lines[i]
 
     def uncomment_line(self, i):
         if self.lines[i].startswith('#'):
             self.lines[i] = self.lines[i][1:]
+=======
+            self.lines[i] = '#' + self.lines[i] 
+
+    def uncomment_line(self, i):
+        if self.lines[i].startswith('#'):
+            self.lines[i] = self.lines[i][1:] 
+>>>>>>> FETCH_HEAD
 
     def change_baseurl(self, new_url):
         for i, line in enumerate(self.lines):
@@ -1695,6 +1818,7 @@ class FedoraReposSection:
 class FedoraReposFile:
     def __init__(self, path):
         assert isinstance(path, str) and path.endswith('.repo')
+<<<<<<< HEAD
 
         self.path = path
 
@@ -1751,6 +1875,64 @@ def get_ailurus_release_date():
     info = os.stat(path)
     return time.strftime('%Y-%m-%d', time.gmtime(info.st_mtime))
 
+=======
+
+        self.path = path
+
+        self.sections = []
+        with open(path) as f:
+            contents = f.readlines()
+        while contents[0].startswith('#') or contents[0].strip() == '': # skip comments and blank lines at the beginning
+            del contents[0]
+        lines = []
+        for line in contents:
+            if line.startswith('[') and lines:
+                section = FedoraReposSection(lines)
+                self.sections.append(section)
+                lines = []
+            lines.append(line)
+        section = FedoraReposSection(lines)
+        self.sections.append(section)
+
+    def change_baseurl(self, new_url):
+        changed = False
+        for section in self.sections:
+            if section.is_fedora_repos():
+                section.change_baseurl(new_url)
+                changed = True
+
+        if not changed: return
+        with TempOwn(self.path) as o:
+            with open(self.path, 'w') as f:
+                for section in self.sections:
+                    section.write_to_stream(f)
+
+    @classmethod
+    def all_repo_paths(cls):
+        import glob
+        return glob.glob('/etc/yum.repos.d/*.repo')
+
+    @classmethod
+    def all_repo_objects(cls):
+        ret = []
+        for path in cls.all_repo_paths():
+            obj = FedoraReposFile(path)
+            ret.append(obj)
+        return ret
+
+def get_ailurus_version():
+    import os
+    path = A+'/version'
+    with open(path) as f:
+        return f.read().strip()
+    
+def get_ailurus_release_date():
+    import os, time
+    path = A+'/version'
+    info = os.stat(path)
+    return time.strftime('%Y-%m-%d', time.gmtime(info.st_mtime))
+
+>>>>>>> FETCH_HEAD
 try:
     AILURUS_VERSION = get_ailurus_version()
     AILURUS_RELEASE_DATE = get_ailurus_release_date()
