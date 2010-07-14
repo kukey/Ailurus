@@ -7,11 +7,16 @@ msgstr ""
 "Project-Id-Version: Ailurus 9.12\n"
 "Report-Msgid-Bugs-To: Homer Xing <homer.xing@gmail.com>\n"
 <<<<<<< HEAD
+<<<<<<< HEAD
 "POT-Creation-Date: 2010-06-19 12:07+0800\n"
 "PO-Revision-Date: 2010-06-26 04:57+0000\n"
 =======
 "POT-Creation-Date: 2010-06-27 21:17+0800\n"
 "PO-Revision-Date: 2010-06-27 04:27+0000\n"
+>>>>>>> FETCH_HEAD
+=======
+"POT-Creation-Date: 2010-06-29 14:43+0800\n"
+"PO-Revision-Date: 2010-07-09 04:52+0000\n"
 >>>>>>> FETCH_HEAD
 "Last-Translator: Ailurus Developers <Unknown>\n"
 "Language-Team: gnome-cyr\n"
@@ -21,9 +26,13 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 <<<<<<< HEAD
+<<<<<<< HEAD
 "X-Launchpad-Export-Date: 2010-06-27 03:53+0000\n"
 =======
 "X-Launchpad-Export-Date: 2010-06-28 03:55+0000\n"
+>>>>>>> FETCH_HEAD
+=======
+"X-Launchpad-Export-Date: 2010-07-10 04:10+0000\n"
 >>>>>>> FETCH_HEAD
 "X-Generator: Launchpad (build Unknown)\n"
 "Language: ru\n"
@@ -63,7 +72,11 @@ msgstr "Кэш APT"
 #: ../ailurus/lib.py:1010 ../ailurus/lib.py:1301 ../ailurus/lib.py:1311
 =======
 #: ../ailurus/lib.py:469 ../ailurus/lib.py:551 ../ailurus/lib.py:707
+<<<<<<< HEAD
 #: ../ailurus/lib.py:990 ../ailurus/lib.py:1281 ../ailurus/lib.py:1291
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:998 ../ailurus/lib.py:1289 ../ailurus/lib.py:1299
 >>>>>>> FETCH_HEAD
 #: ../ailurus/support/terminal.py:71
 #: ../ailurus/support/terminal_single_thread.py:53
@@ -822,7 +835,7 @@ msgstr "В противном случае, Pydev и CDT не будут раб�
 
 #: ../ailurus/common/cure.py:198
 msgid "Let you be the owner of directory ~/.config/ailurus"
-msgstr ""
+msgstr "Позволяет вам стать владельцем каталога ~/.config/ailurus"
 
 #: ../ailurus/common/hardwareinfo.py:38
 msgid "BIOS vendor:"
@@ -997,12 +1010,12 @@ msgstr "Оставшаяся ёмкость батареи:"
 #: ../ailurus/common/hardwareinfo.py:227
 =======
 msgid "Total swap:"
-msgstr ""
+msgstr "Общий объем подкачки:"
 
 #: ../ailurus/common/hardwareinfo.py:197
 #, python-format
 msgid "%s MBytes"
-msgstr ""
+msgstr "%s МБайт"
 
 #: ../ailurus/common/hardwareinfo.py:212
 msgid "Display card:"
@@ -1417,7 +1430,15 @@ msgstr ""
 msgid "Auto tweak Firefox"
 msgstr "Автоматическая настройка Firefox"
 
+<<<<<<< HEAD
 #: ../ailurus/common/setting.py:190
+=======
+#: ../ailurus/common/setting.py:184
+msgid "Save"
+msgstr "Сохранить"
+
+#: ../ailurus/common/setting.py:194
+>>>>>>> FETCH_HEAD
 msgid "the number of DNS results to cache"
 msgstr "количество результатов DNS в кэш"
 
@@ -2871,6 +2892,11 @@ msgstr "Все репозитории:"
 msgid "No response"
 msgstr "Нет ответа"
 
+#: ../ailurus/fedora/fastest_mirror_pane.py:90
+#: ../ailurus/ubuntu/fastest_mirror_pane.py:158
+msgid "Not detected"
+msgstr "Не обнаружено"
+
 #: ../ailurus/fedora/fastest_mirror_pane.py:97
 #: ../ailurus/ubuntu/fastest_mirror_pane.py:395
 msgid "Country"
@@ -3408,11 +3434,16 @@ msgstr "Расположение кнопок в заголовке окна"
 
 #: ../ailurus/gnome/setting.py:191 ../ailurus/gnome/setting.py:262
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:494 ../ailurus/gnome/setting.py:510
 #: ../ailurus/gnome/setting.py:518 ../ailurus/libsetting.py:38
 =======
 #: ../ailurus/gnome/setting.py:492 ../ailurus/gnome/setting.py:508
 #: ../ailurus/gnome/setting.py:516 ../ailurus/libsetting.py:38
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/gnome/setting.py:493 ../ailurus/gnome/setting.py:509
+#: ../ailurus/gnome/setting.py:517 ../ailurus/libsetting.py:38
 >>>>>>> FETCH_HEAD
 #: ../ailurus/libsetting.py:54 ../ailurus/libsetting.py:99
 #: ../ailurus/libsetting.py:220 ../ailurus/libsetting.py:252
@@ -3793,9 +3824,13 @@ msgid "Login window settings"
 msgstr "Настройки окна входа в систему"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:467
 =======
 #: ../ailurus/gnome/setting.py:465
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/gnome/setting.py:466
 >>>>>>> FETCH_HEAD
 msgid ""
 "The login window background is the gconf value "
@@ -3804,6 +3839,7 @@ msgstr ""
 "Фон окна входа указан в значении gconf "
 "\"/desktop/gnome/background/picture_filename\" пользователя \"gdm\"."
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:473
 msgid "Change login window background"
@@ -3816,28 +3852,40 @@ msgstr "Командная строка"
 #: ../ailurus/gnome/setting.py:477 ../ailurus/gnome/setting.py:490
 =======
 #: ../ailurus/gnome/setting.py:471
+=======
+#: ../ailurus/gnome/setting.py:472
+>>>>>>> FETCH_HEAD
 msgid "Change login window background"
 msgstr "Изменить фоновое изображение окна входа"
 
-#: ../ailurus/gnome/setting.py:474
+#: ../ailurus/gnome/setting.py:475
 msgid "Command line"
 msgstr "Командная строка"
 
+<<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:475 ../ailurus/gnome/setting.py:488
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/gnome/setting.py:476 ../ailurus/gnome/setting.py:489
 >>>>>>> FETCH_HEAD
 #: ../ailurus/system_setting_pane.py:61
 msgid "Shortcut key"
 msgstr "Сочетания клавиш быстрого доступа"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:486
 =======
 #: ../ailurus/gnome/setting.py:484
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/gnome/setting.py:485
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "%2d:"
 msgstr "%2d:"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:493
 msgid "Compression strategy of file-roller:"
@@ -3878,47 +3926,55 @@ msgstr "Настройки GEdit"
 #: ../ailurus/gnome/setting.py:534
 =======
 #: ../ailurus/gnome/setting.py:491
+=======
+#: ../ailurus/gnome/setting.py:492
+>>>>>>> FETCH_HEAD
 msgid "Compression strategy of file-roller:"
 msgstr "Метод сжатия file-roller:"
 
-#: ../ailurus/gnome/setting.py:495
+#: ../ailurus/gnome/setting.py:496
 msgid "Very high speed"
 msgstr "Очень высокая скорость"
 
-#: ../ailurus/gnome/setting.py:495
+#: ../ailurus/gnome/setting.py:496
 msgid "High speed"
 msgstr "Высокая скорость"
 
-#: ../ailurus/gnome/setting.py:495
+#: ../ailurus/gnome/setting.py:496
 msgid "Balanced"
 msgstr "Сбалансированный"
 
-#: ../ailurus/gnome/setting.py:495
+#: ../ailurus/gnome/setting.py:496
 msgid "High compression rate"
 msgstr "Высокая степень сжатия"
 
-#: ../ailurus/gnome/setting.py:500
+#: ../ailurus/gnome/setting.py:501
 msgid "Compression strategy"
 msgstr "Метод сжатия"
 
-#: ../ailurus/gnome/setting.py:507
+#: ../ailurus/gnome/setting.py:508
 msgid "Maximum number of undos:"
 msgstr "Максимальное количество операций для отмены:"
 
-#: ../ailurus/gnome/setting.py:515
+#: ../ailurus/gnome/setting.py:516
 msgid "Maximum number of recent files:"
 msgstr "Максимальное количество недавних файлов:"
 
-#: ../ailurus/gnome/setting.py:522
+#: ../ailurus/gnome/setting.py:523
 msgid "GEdit settings"
 msgstr "Настройки GEdit"
 
+<<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:532
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/gnome/setting.py:533
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "GNOME settings of user %s have been reset."
 msgstr "Настройки GNOME пользователя %s были восстановлены."
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:541
 msgid "Reset GNOME by removing these directories:"
@@ -3932,6 +3988,13 @@ msgstr "Восстановить GNOME удалив следующие ката�
 
 #: ../ailurus/gnome/setting.py:548
 >>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/gnome/setting.py:540
+msgid "Reset GNOME by removing these directories:"
+msgstr "Восстановить GNOME удалив следующие каталоги:"
+
+#: ../ailurus/gnome/setting.py:549
+>>>>>>> FETCH_HEAD
 msgid ""
 "In order to reset GNOME, please logout first, then login GNOME as another "
 "user."
@@ -3940,9 +4003,13 @@ msgstr ""
 "используя другое имя пользователя."
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:551
 =======
 #: ../ailurus/gnome/setting.py:549
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/gnome/setting.py:550
 >>>>>>> FETCH_HEAD
 msgid ""
 "Cannot reset GNOME for current user because above files are being used."
@@ -3950,6 +4017,7 @@ msgstr ""
 "Невозможно восстановить GNOME для текущего пользователя, так как некоторые "
 "файлы используются."
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:552
 msgid "Please be careful."
@@ -3962,19 +4030,27 @@ msgstr "В системе нет другого пользователя"
 #: ../ailurus/gnome/setting.py:566
 =======
 #: ../ailurus/gnome/setting.py:550
+=======
+#: ../ailurus/gnome/setting.py:551
+>>>>>>> FETCH_HEAD
 msgid "Please be careful."
 msgstr "Пожалуйста, будьте осторожны."
 
-#: ../ailurus/gnome/setting.py:559
+#: ../ailurus/gnome/setting.py:560
 msgid "There is no other user"
 msgstr "В системе нет другого пользователя"
 
+<<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:564
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/gnome/setting.py:565
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "Reset user %s"
 msgstr "Восстановить для пользователя %s"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:571 ../ailurus/system_setting_pane.py:67
 msgid "Reset GNOME"
@@ -3999,26 +4075,33 @@ msgstr "Заблокировать экран после выхода из жд�
 #: ../ailurus/gnome/setting.py:587 ../ailurus/system_setting_pane.py:68
 =======
 #: ../ailurus/gnome/setting.py:569 ../ailurus/system_setting_pane.py:67
+=======
+#: ../ailurus/gnome/setting.py:570 ../ailurus/system_setting_pane.py:67
+>>>>>>> FETCH_HEAD
 msgid "Reset GNOME"
 msgstr "Восстановить GNOME"
 
-#: ../ailurus/gnome/setting.py:574
+#: ../ailurus/gnome/setting.py:575
 msgid "Activate screen saver when computer is idle for long time"
 msgstr "Запускать заставку, если компьютер долгое время не активен"
 
-#: ../ailurus/gnome/setting.py:577
+#: ../ailurus/gnome/setting.py:578
 msgid "Lock screen when screen saver is activated"
 msgstr "Заблокировать экран, после запуска заставки"
 
-#: ../ailurus/gnome/setting.py:580
+#: ../ailurus/gnome/setting.py:581
 msgid "Lock screen after hibernating"
 msgstr "Заблокировать экран после выхода из режима гибернации"
 
-#: ../ailurus/gnome/setting.py:582
+#: ../ailurus/gnome/setting.py:583
 msgid "Lock screen after suspending"
 msgstr "Заблокировать экран после выхода из ждущего режима"
 
+<<<<<<< HEAD
 #: ../ailurus/gnome/setting.py:585 ../ailurus/system_setting_pane.py:68
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/gnome/setting.py:586 ../ailurus/system_setting_pane.py:68
 >>>>>>> FETCH_HEAD
 msgid "Screensaver"
 msgstr "Экранная заставка"
@@ -4472,7 +4555,7 @@ msgid "Anti-virus"
 msgstr "Антивирус"
 
 #. others
-#: ../ailurus/install_remove_pane.py:114 ../ailurus/main.py:343
+#: ../ailurus/install_remove_pane.py:114 ../ailurus/main.py:341
 msgid "Others"
 msgstr "Другие"
 
@@ -4668,6 +4751,7 @@ msgid "Failed to remove:"
 msgstr "Не удалось удалить:"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/install_remove_pane.py:455
 msgid "will install"
 msgstr "будет установлено"
@@ -4679,25 +4763,35 @@ msgstr "будет удалено"
 #: ../ailurus/install_remove_pane.py:598
 =======
 #: ../ailurus/install_remove_pane.py:415
+=======
+#: ../ailurus/install_remove_pane.py:416
+>>>>>>> FETCH_HEAD
 msgid ""
 "Check if you are currently running another software management program, e.g. "
 "Synaptic or apt-get. Only one program is allowed to make changes at the same "
 "time."
 msgstr ""
+"Убедитесь, не ли других запущенных приложений по управлению программами, "
+"например Synaptic или apt-get. Разрешается использовать одновременно только "
+"одну программу."
 
-#: ../ailurus/install_remove_pane.py:419
+#: ../ailurus/install_remove_pane.py:423
 msgid "Cannot lock apt cache"
-msgstr ""
+msgstr "Невозможно заблокировать кэш apt"
 
-#: ../ailurus/install_remove_pane.py:467
+#: ../ailurus/install_remove_pane.py:471
 msgid "will install"
 msgstr "будет установлено"
 
-#: ../ailurus/install_remove_pane.py:469
+#: ../ailurus/install_remove_pane.py:473
 msgid "will remove"
 msgstr "будет удалено"
 
+<<<<<<< HEAD
 #: ../ailurus/install_remove_pane.py:607
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/install_remove_pane.py:611
 >>>>>>> FETCH_HEAD
 msgid ""
 "How long after the server does not respond, give up downloading? (in seconds)"
@@ -4706,15 +4800,20 @@ msgstr ""
 "секундах)"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/install_remove_pane.py:604
 =======
 #: ../ailurus/install_remove_pane.py:613
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/install_remove_pane.py:617
 >>>>>>> FETCH_HEAD
 msgid "How many times does Ailurus try to download the same resource?"
 msgstr ""
 "Какое количество раз Ailurus будет повторять загрузку одного и того же "
 "ресурса?"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/install_remove_pane.py:607
 msgid "Set Ailurus download parameter"
@@ -4751,47 +4850,58 @@ msgstr "Синхронизовать"
 #: ../ailurus/install_remove_pane.py:702 ../ailurus/ubuntu/quick_setup.py:96
 =======
 #: ../ailurus/install_remove_pane.py:616
+=======
+#: ../ailurus/install_remove_pane.py:620
+>>>>>>> FETCH_HEAD
 msgid "Set Ailurus download parameter"
 msgstr "Настроить параметры скачивания Ailurus"
 
-#: ../ailurus/install_remove_pane.py:637
+#: ../ailurus/install_remove_pane.py:641
 msgid "Show \"synchronize\" button"
 msgstr "Показывать кнопку \"синхронизировать\""
 
-#: ../ailurus/install_remove_pane.py:644
+#: ../ailurus/install_remove_pane.py:648
 msgid "Show \"quickly install popular software\" button"
 msgstr "Показывать кнопку \"быстрая установка популярных программ\""
 
-#: ../ailurus/install_remove_pane.py:648
+#: ../ailurus/install_remove_pane.py:652
 msgid "Set download parameters"
 msgstr "Установить параметры закачки"
 
-#: ../ailurus/install_remove_pane.py:681
+#: ../ailurus/install_remove_pane.py:685
 msgid "All works finished. "
 msgstr "Все операции завершены. "
 
-#: ../ailurus/install_remove_pane.py:684
+#: ../ailurus/install_remove_pane.py:688
 msgid "Close this terminal"
 msgstr "Закрыть терминал"
 
-#: ../ailurus/install_remove_pane.py:696
+#: ../ailurus/install_remove_pane.py:700
 msgid "_Apply"
 msgstr "Применить"
 
-#: ../ailurus/install_remove_pane.py:699
+#: ../ailurus/install_remove_pane.py:703
 msgid "Synchronize"
 msgstr "Синхронизовать"
 
+<<<<<<< HEAD
 #: ../ailurus/install_remove_pane.py:711 ../ailurus/ubuntu/quick_setup.py:96
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/install_remove_pane.py:715 ../ailurus/ubuntu/quick_setup.py:96
 >>>>>>> FETCH_HEAD
 #: ../ailurus/ubuntu/quick_setup.py:443
 msgid "Quickly install popular software"
 msgstr "Быстрая установка популярных программ"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/install_remove_pane.py:740
 =======
 #: ../ailurus/install_remove_pane.py:749
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/install_remove_pane.py:753
 >>>>>>> FETCH_HEAD
 msgid "Would you like to download latest application data from web?"
 msgstr "Вы действительно хотите загрузить самые новые данные о приложениях?"
@@ -4880,6 +4990,7 @@ msgid "Tri-licensed under %(A)s, %(B)s and %(C)s"
 msgstr "Три лицензии %(A)s, %(B)s и %(C)s"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/lib.py:863 ../ailurus/lib.py:940
 msgid "Installing packages:"
 msgstr "Установка пакетов:"
@@ -4901,77 +5012,109 @@ msgstr "Выполнить \"pacman -Sy\". Пожалуйста, подожди�
 #: ../ailurus/lib.py:984
 =======
 #: ../ailurus/lib.py:843 ../ailurus/lib.py:920
+=======
+#: ../ailurus/lib.py:843 ../ailurus/lib.py:928
+>>>>>>> FETCH_HEAD
 msgid "Installing packages:"
 msgstr "Установка пакетов:"
 
-#: ../ailurus/lib.py:850 ../ailurus/lib.py:933
+#: ../ailurus/lib.py:850 ../ailurus/lib.py:941
 msgid "Removing packages:"
 msgstr "Удаление пакетов:"
 
-#: ../ailurus/lib.py:939
+#: ../ailurus/lib.py:947
 msgid "Run \"pacman -Sy\". Please wait for a few minutes."
 msgstr "Выполнить \"pacman -Sy\". Пожалуйста, подождите несколько минут."
 
+<<<<<<< HEAD
 #: ../ailurus/lib.py:964
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:972
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "%.1f GB"
 msgstr "%.1f ГБ"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/lib.py:986
 =======
 #: ../ailurus/lib.py:966
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:974
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "%.1f MB"
 msgstr "%.1f Мбайт"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/lib.py:988
 =======
 #: ../ailurus/lib.py:968
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:976
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "%.1f KB"
 msgstr "%.1f КБ"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/lib.py:989
 =======
 #: ../ailurus/lib.py:969
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:977
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "%s bytes"
 msgstr "%s байт"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/lib.py:997
 =======
 #: ../ailurus/lib.py:977
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:985
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "%.1f hours"
 msgstr "%.1f часов"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/lib.py:999
 =======
 #: ../ailurus/lib.py:979
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:987
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "%.1f minutes"
 msgstr "%.1f минут"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/lib.py:1000
 =======
 #: ../ailurus/lib.py:980
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:988
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "%d seconds"
 msgstr "%d секунд"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/lib.py:1241 ../ailurus/lib.py:1246
 msgid "Opening web page"
@@ -4988,32 +5131,44 @@ msgstr "Пожалуйста, перезапустит Firefox для завер
 #: ../ailurus/lib.py:1453
 =======
 #: ../ailurus/lib.py:1221 ../ailurus/lib.py:1226
+=======
+#: ../ailurus/lib.py:1229 ../ailurus/lib.py:1234
+>>>>>>> FETCH_HEAD
 msgid "Opening web page"
 msgstr "Открываем страничку в Интернете"
 
-#: ../ailurus/lib.py:1399
+#: ../ailurus/lib.py:1407
 msgid "Please restart Firefox"
 msgstr "Пожалуйста, перезапустите Firefox"
 
-#: ../ailurus/lib.py:1399
+#: ../ailurus/lib.py:1407
 msgid "Please restart Firefox to complete installation."
 msgstr "Пожалуйста, перезапустит Firefox для завершения установки."
 
+<<<<<<< HEAD
 #: ../ailurus/lib.py:1433
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:1441
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "Response time of server %(name)s is %(time).1f ms."
 msgstr "Время отклика сервера %(name)s %(time).1f мс."
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/lib.py:1455
 =======
 #: ../ailurus/lib.py:1435
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:1443
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "Server %s does not respond."
 msgstr "Сервер %s не отвечает."
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/lib.py:1542
 msgid "Checking file integrity ..."
@@ -5026,19 +5181,27 @@ msgstr "Хорошо."
 #: ../ailurus/lib.py:1553
 =======
 #: ../ailurus/lib.py:1522
+=======
+#: ../ailurus/lib.py:1530
+>>>>>>> FETCH_HEAD
 msgid "Checking file integrity ..."
 msgstr "Проверка целостности файла..."
 
-#: ../ailurus/lib.py:1526
+#: ../ailurus/lib.py:1534
 msgid "Good."
 msgstr "Хорошо."
 
+<<<<<<< HEAD
 #: ../ailurus/lib.py:1533
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:1541
 >>>>>>> FETCH_HEAD
 #, python-format
 msgid "Using mirror %(i)s. There are a total of %(total)s mirrors."
 msgstr "Используется зеркало %(i)s. Всего %(total)s зеркал"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/lib.py:1699
 msgid "Inspecting safely deletable packages. Please wait for a few minutes."
@@ -5064,27 +5227,35 @@ msgstr "Публичная Лицензия Mozilla (MPL)"
 #: ../ailurus/lib.py:1862
 =======
 #: ../ailurus/lib.py:1764
+=======
+#: ../ailurus/lib.py:1772
+>>>>>>> FETCH_HEAD
 msgid "GNU General Public License"
 msgstr "GNU General Public License"
 
-#: ../ailurus/lib.py:1765
+#: ../ailurus/lib.py:1773
 msgid "GNU Lesser General Public License"
 msgstr "Стандартная общественная лицензия ограниченного применения GNU"
 
-#: ../ailurus/lib.py:1766
+#: ../ailurus/lib.py:1774
 msgid "Eclipse Public License"
 msgstr "Публичная Лицензия Eclipse (EPL)"
 
-#: ../ailurus/lib.py:1767
+#: ../ailurus/lib.py:1775
 msgid "Mozilla Public License"
 msgstr "Публичная Лицензия Mozilla (MPL)"
 
+<<<<<<< HEAD
 #: ../ailurus/lib.py:1768
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:1776
 >>>>>>> FETCH_HEAD
 msgid "Berkeley Software Distribution License"
 msgstr ""
 "Лицензия на распространение программ Университета Беркли (Калифорния) (BSDL)"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/lib.py:1863
 msgid "MIT License"
@@ -5105,22 +5276,29 @@ msgstr "Творческая Лицензия (Artistic License)"
 #: ../ailurus/lib.py:1910
 =======
 #: ../ailurus/lib.py:1769
+=======
+#: ../ailurus/lib.py:1777
+>>>>>>> FETCH_HEAD
 msgid "MIT License"
 msgstr "Лицензия Массачусетсского Технологического Института (MITL)"
 
-#: ../ailurus/lib.py:1770
+#: ../ailurus/lib.py:1778
 msgid "Common Development and Distribution License"
 msgstr "Общая лицензия на разработку и распространение"
 
-#: ../ailurus/lib.py:1771
+#: ../ailurus/lib.py:1779
 msgid "Aptana Public License"
 msgstr "Публичная Лицензия Aptana"
 
-#: ../ailurus/lib.py:1772
+#: ../ailurus/lib.py:1780
 msgid "Artistic License"
 msgstr "Творческая Лицензия (Artistic License)"
 
+<<<<<<< HEAD
 #: ../ailurus/lib.py:1813
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/lib.py:1821
 >>>>>>> FETCH_HEAD
 msgid "Your Linux distribution is not supported. :("
 msgstr "Ваш дистрибутив Linux не поддерживается. :("
@@ -5239,6 +5417,7 @@ msgstr ""
 "одновременно."
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #: ../ailurus/main.py:127
 msgid "Necessary packages are not installed. Ailurus cannot work."
 msgstr "Необходимые пакеты не установлены. Невозможно запустить Ailurus."
@@ -5250,20 +5429,28 @@ msgstr "Пожалуйста,  установите следующие паке�
 #: ../ailurus/main.py:177
 =======
 #: ../ailurus/main.py:128
+=======
+#: ../ailurus/main.py:126
+>>>>>>> FETCH_HEAD
 msgid "Necessary packages are not installed. Ailurus cannot work."
 msgstr "Необходимые пакеты не установлены. Невозможно запустить Ailurus."
 
-#: ../ailurus/main.py:130
+#: ../ailurus/main.py:128
 msgid "Please install these packages:"
 msgstr "Пожалуйста,  установите следующие пакеты:"
 
+<<<<<<< HEAD
 #: ../ailurus/main.py:179
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/main.py:177
 >>>>>>> FETCH_HEAD
 msgid "Error happened. You cannot install any software by Ailurus. :("
 msgstr ""
 "Произошла ошибка. Вы не можете устанавливать программное обеспечение в "
 "Ailurus. :("
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/main.py:180
 msgid "System configuration file should be updated."
@@ -5277,10 +5464,18 @@ msgstr "Файл конфигурации системы должен быть �
 
 #: ../ailurus/main.py:183
 >>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/main.py:180
+msgid "System configuration file should be updated."
+msgstr "Файл конфигурации системы должен быть обновлен."
+
+#: ../ailurus/main.py:181
+>>>>>>> FETCH_HEAD
 msgid "Please run these commands using <b>su</b> or <b>sudo</b>:"
 msgstr ""
 "Пожалуйста, выполните эти команды, используя <b>su</b> или <b>sudo</b>:"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/main.py:188
 =======
@@ -5334,52 +5529,63 @@ msgstr "Настройки"
 
 #: ../ailurus/main.py:349
 =======
-msgid "Because file contents are different:"
-msgstr ""
+=======
+#: ../ailurus/main.py:188
+msgid "Please re-install Ailurus."
+msgstr "Пожалуйста, переустановите Ailurus."
 
-#: ../ailurus/main.py:196
+#: ../ailurus/main.py:189
+>>>>>>> FETCH_HEAD
+msgid "Because file contents are different:"
+msgstr "Так-как различно содержание файла:"
+
+#: ../ailurus/main.py:194
 msgid "We need to restart Ailurus daemon."
 msgstr "Нам необходимо перезапустить службу Ailurus."
 
-#: ../ailurus/main.py:197
+#: ../ailurus/main.py:195
 #, python-format
 msgid "Old version is %s."
 msgstr "Устаревшая версия %s."
 
-#: ../ailurus/main.py:197
+#: ../ailurus/main.py:195
 #, python-format
 msgid "New version is %s"
 msgstr "Новая версия %s"
 
-#: ../ailurus/main.py:199
+#: ../ailurus/main.py:197
 msgid "Press this button to restart daemon. Require authentication."
 msgstr ""
 "Нажмите эту кнопку, если хотите перезапустить службу. Необходима "
 "аутентификация."
 
-#: ../ailurus/main.py:203
+#: ../ailurus/main.py:201
 msgid "Ailurus daemon successfully restarted. Ailurus will work fine."
 msgstr "Служба Ailurus успешно перезапущена. Ailurus готов к работе."
 
-#: ../ailurus/main.py:205
+#: ../ailurus/main.py:203
 msgid "Cannot restart Ailurus daemon. Please restart your computer."
 msgstr ""
 "Невозможно перезапустить службу Ailurus. Пожалуйста, перезапустите ваш "
 "компьютер."
 
-#: ../ailurus/main.py:339
+#: ../ailurus/main.py:337
 msgid "Quit"
 msgstr "Выход"
 
-#: ../ailurus/main.py:347
+#: ../ailurus/main.py:345
 msgid "Default pane"
 msgstr "Окно по-умолчанию"
 
-#: ../ailurus/main.py:351
+#: ../ailurus/main.py:349
 msgid "Preferences"
 msgstr "Настройки"
 
+<<<<<<< HEAD
 #: ../ailurus/main.py:354
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/main.py:352
 >>>>>>> FETCH_HEAD
 msgid ""
 "Study\n"
@@ -5388,6 +5594,7 @@ msgstr ""
 "Изучайте\n"
 "Linux"
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 #: ../ailurus/main.py:392
 msgid "Please wait a few seconds"
@@ -5400,14 +5607,21 @@ msgstr "Вы действительно хотите выйти?"
 #: ../ailurus/main.py:419
 =======
 #: ../ailurus/main.py:397
+=======
+#: ../ailurus/main.py:395
+>>>>>>> FETCH_HEAD
 msgid "Please wait a few seconds"
 msgstr "Пожалуйста, подождите несколько секунд"
 
-#: ../ailurus/main.py:423
+#: ../ailurus/main.py:421
 msgid "Are you sure to exit?"
 msgstr "Вы действительно хотите выйти?"
 
+<<<<<<< HEAD
 #: ../ailurus/main.py:424
+>>>>>>> FETCH_HEAD
+=======
+#: ../ailurus/main.py:422
 >>>>>>> FETCH_HEAD
 msgid "Do not query me any more."
 msgstr "Не спрашивать в дальнейшем"
@@ -6583,9 +6797,13 @@ msgstr ""
 msgid "Ubuntu Archive Automatic Signing Key <ftpmaster@ubuntu.com>"
 >>>>>>> FETCH_HEAD
 msgstr ""
+<<<<<<< HEAD
 "Программа часто уведомляет вас о том, что вам необходимо отдохнуть от "
 "компьютера, сделать небольшой перерыв, ограничивает ваше время дневного "
 "пребывания за компьютером."
+=======
+"Ключ для автоматический подписи архивов Ubuntu <ftpmaster@ubuntu.com>"
+>>>>>>> FETCH_HEAD
 
 <<<<<<< HEAD
 #: ../ailurus/strings.py:301 ../ailurus/ubuntu/apps.py:33
@@ -6619,7 +6837,11 @@ msgstr ""
 #: ../ailurus/strings.py:310
 msgid "Notebook software which helps you create a wiki to your desktop"
 msgstr ""
+<<<<<<< HEAD
 "Программа для ноутбука, позволяющая вам создать wiki на вашем рабочем столе"
+=======
+"Ключ для автоматический подписи образов дисков Ubuntu <cdimage@ubuntu.com>"
+>>>>>>> FETCH_HEAD
 
 #: ../ailurus/support/checkupdate.py:88
 msgid "New version available"
@@ -6715,6 +6937,7 @@ msgstr "Людей, которые обслуживают PPA репозитор
 msgid "The people who provide a lot of Linux skills:"
 msgstr "Люди, которые обучают Linux:"
 
+<<<<<<< HEAD
 #: ../ailurus/support/checkupdate.py:200
 msgid "The people who provide a lot of Debian packages:"
 msgstr "Людей, которые обеспечивают множеством Дебиан пакетов:"
@@ -6722,6 +6945,15 @@ msgstr "Людей, которые обеспечивают множеством
 #: ../ailurus/support/checkupdate.py:203
 msgid "The people who provide a lot of translation:"
 msgstr "Людей, которые обеспечивают переводы:"
+=======
+#: ../ailurus/support/checkupdate.py:201
+msgid "The people who help translate Ailurus"
+msgstr "Люди, которые помогают переводить Ailurus"
+
+#: ../ailurus/support/checkupdate.py:203
+msgid "The people who report bugs"
+msgstr "Люди, которые сообщают об ошибках"
+>>>>>>> FETCH_HEAD
 
 #: ../ailurus/support/checkupdate.py:205 ../ailurus/support/checkupdate.py:209
 #: ../ailurus/support/checkupdate.py:216
@@ -7954,6 +8186,7 @@ msgstr "Интервал (в днях) между проверками обно�
 msgid "Ubuntu update manager setting"
 msgstr "Настройка диспетчера обновлений Ubuntu"
 
+<<<<<<< HEAD
 #: ../ailurus/ubuntu/third_party_repos.py:134
 msgid "Firefox 3.6 (stable)"
 msgstr "Firefox 3.6 (stable)"
@@ -7963,10 +8196,18 @@ msgid "PlayOnLinux (stable)"
 msgstr "PlayOnLinux (стабильная версия)"
 
 #: ../ailurus/ubuntu/third_party_repos.py:145
+=======
+#: ../unfree/for_fedora.py:301
+msgid "Google Chrome browser"
+msgstr "Вэб-обозреватель Google Chrome"
+
+#: ../unfree/for_fedora.py:303
+>>>>>>> FETCH_HEAD
 msgid ""
 "PlayOnLinux is a front-end for wine. It helps to install Windows Games and "
 "softwares on Linux."
 msgstr ""
+<<<<<<< HEAD
 "PlayOnLinux проект на основе wine. Он поможет вам устанавливать программы и "
 "игры Windows в Linux."
 
@@ -7975,6 +8216,25 @@ msgid "WINE (beta version)"
 msgstr "WINE (бета версия)"
 
 #: ../ailurus/ubuntu/third_party_repos.py:159
+=======
+"﻿Это веб-обозреватель от Google. \n"
+"Вы можете изменить темы, открыв в Google Chrome вэб-сайт "
+"https://tools.google.com/chrome/intl/pt/themes/index.html."
+
+#: ../unfree/for_fedora.py:318
+msgid "You have installed \"google-chrome-unstable\"."
+msgstr "У вас установлен \"google-chrome-unstable\"."
+
+#: ../unfree/for_fedora.py:320
+msgid "You have installed \"google-chrome-beta\"."
+msgstr "У вас установлен \"google-chrome-beta\"."
+
+#: ../unfree/for_fedora.py:323 ../unfree/for_ubuntu.py:197
+msgid "Google Earth"
+msgstr "Google Планета Земля"
+
+#: ../unfree/for_fedora.py:324 ../unfree/for_ubuntu.py:198
+>>>>>>> FETCH_HEAD
 msgid ""
 "This repository contains the latest version of Wine. Wine is for running "
 "Windows applications on Linux."
@@ -7982,6 +8242,7 @@ msgstr ""
 "Репозиторий содержит последнюю версию Wine. Wine помогает запускать "
 "приложения Windows в Linux."
 
+<<<<<<< HEAD
 #: ../ailurus/ubuntu/third_party_repos.py:170
 msgid "Ailurus (stable)"
 msgstr "Ailurus (стабильная версия)"
@@ -7991,6 +8252,18 @@ msgid "AWN (beta version)"
 msgstr "AWN (бета версия)"
 
 #: ../ailurus/ubuntu/third_party_repos.py:178
+=======
+#: ../unfree/for_fedora.py:337
+msgid ""
+"It is the only professional virtual machine which is freely available under "
+"the terms of GPL. Official site: http://www.virtualbox.org/wiki/Downloads"
+msgstr ""
+"Это единственная профессиональная виртуальная машина, которая "
+"распространяется бесплатно по условиям GPL. Официальный сайт: "
+"http://www.virtualbox.org/wiki/Downloads"
+
+#: ../unfree/for_fedora.py:346
+>>>>>>> FETCH_HEAD
 msgid ""
 "AWN is a MacOS X like panel for GNOME. This repository provides the latest "
 "version of AWN."
@@ -7998,6 +8271,7 @@ msgstr ""
 "AWN это панель для GNOME, похожая на панель в MacOS X. Этот репозиторий "
 "предоставляет последнюю версию AWN."
 
+<<<<<<< HEAD
 #: ../ailurus/ubuntu/third_party_repos.py:184
 msgid "Blueman (stable)"
 msgstr "Blueman (стабильная версия)"
@@ -8009,6 +8283,19 @@ msgstr "Blueman - графическая диспетчер управления
 #: ../ailurus/ubuntu/third_party_repos.py:191
 msgid "Christine (stable)"
 msgstr "Christine (стабильная версия)"
+=======
+#: ../unfree/for_fedora.py:355
+msgid "Open source web browser"
+msgstr "Вэб-обозреватель с открытым исходным кодом"
+
+#: ../unfree/for_fedora.py:376 ../unfree/for_ubuntu.py:289
+msgid "ESET NOD32"
+msgstr "ESET NOD32"
+
+#: ../unfree/for_fedora.py:377 ../unfree/for_ubuntu.py:290
+msgid "Anti virus and anti spyware"
+msgstr "Антивирусное и анти шпионское ПО"
+>>>>>>> FETCH_HEAD
 
 #: ../ailurus/ubuntu/third_party_repos.py:193
 msgid "Christine is a small media player."
@@ -13137,6 +13424,13 @@ msgstr ""
 #~ msgstr ""
 #~ "Этот репозиторий предоставляет VirtualBox.\n"
 #~ "Вэб-сайт: http://www.virtualbox.org/wiki/Linux_Downloads"
+
+#~ msgid ""
+#~ "If you cannot play RMVB video, try this application! You can launch "
+#~ "RealPlayer by \"/opt/real/RealPlayer/realplay\"."
+#~ msgstr ""
+#~ "Если вы не можете воспроизвести RMVB видео, попробуйте эту программу! Вы "
+#~ "можете запустить RealPlayer используя \"/opt/real/RealPlayer/realplay\"."
 
 #~ msgid "Egypt"
 #~ msgstr "Египет"

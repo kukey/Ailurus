@@ -1,10 +1,9 @@
-#!/usr/bin/env python
 #-*- coding: utf-8 -*-
 #
 # Ailurus - make Linux easier to use
 #
+# Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
-# Copyright (C) 2009-2010, Ailurus Developers Team
 #
 # Ailurus is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,7 +31,7 @@ class FedoraFastestMirrorPane(gtk.VBox):
     text = _('Fastest\nRepository')
 
     COUNTRY, ORG, URL, RESPONSE_TIME = range(4)
-    NO_PING_RESPONSE = 10000
+    NO_PING_RESPONSE = 100000000
     NOT_DETECTED = NO_PING_RESPONSE + 1
     
     def __repository_visibility_function(self, treestore, iter):
@@ -87,7 +86,7 @@ class FedoraFastestMirrorPane(gtk.VBox):
         if value == self.NO_PING_RESPONSE: 
             text = _('No response')
         elif value == self.NOT_DETECTED:
-            text = '' # if the server has not been detected, then show nothing
+            text = _('Not detected')
         else:
             text = '%s ms' % value
         cell.set_property('text', text)
