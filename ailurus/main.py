@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -89,10 +89,6 @@ def check_required_packages():
         ubuntu_missing.append('wget')
         fedora_missing.append('wget')
         archlinux_missing.append('wget')
-    if not os.path.exists('/usr/bin/xterm'):
-        ubuntu_missing.append('xterm')
-        fedora_missing.append('xterm')
-        archlinux_missing.append('xterm')
 
     try: # detect policykit version 0.9.x
         import dbus
@@ -501,11 +497,11 @@ class MainView:
         if UBUNTU or UBUNTU_DERIV:
             self.register(UbuntuAPTRecoveryPane)
             self.register(UbuntuFastestMirrorPane)
-            self.register(ReposConfigPane)
+#            self.register(ReposConfigPane)
         if FEDORA:
             self.register(FedoraRPMRecoveryPane)
             self.register(FedoraFastestMirrorPane)
-        self.register(InstallRemovePane, load_app_objs)
+        self.register(InstallRemovePane)
         self.register(SystemSettingPane, load_setting)
         self.register(InfoPane, load_info)
         
@@ -520,14 +516,41 @@ class MainView:
             import thread
             thread.start_new_thread(check_update, (True, )) # "True" means "silent"
 
+def show_agreement():
+    message = ('Ailurus CANNOT install w32codecs/w64codecs, libdvdcss2 or close source software.\n'
+        '\n'
+        '<span color="red">Please NOTE that <b>downloading and installing w32codecs/w64codecs '
+        'and libdvdcss2 violates the Digital Millennium Copyright Act(DMCA) and other laws regarding '
+        'anti-piracy/copyright violation in the United States of America</b>.</span>\n'
+        '\n'
+        'Under NO circumstances, will the Ailurus developers be responsible for your actions which includes, '
+        'but not limited to, downloading and installing these codecs or close source software.')
+    label = gtk.Label(_('Do you agree?'))
+    checkbox = gtk.CheckButton(_('I agree. Do not ask me again.'))
+    checkbox.set_active(not Config.get_show_agreement())
+    checkbox.connect('toggled', lambda w: Config.set_show_agreement(not w.get_active()))
+    dialog = gtk.MessageDialog(buttons=gtk.BUTTONS_YES_NO, type=gtk.MESSAGE_WARNING)
+    dialog.set_markup(message)
+    dialog.set_title(_('Warning'))
+    dialog.vbox.pack_start(label, False)
+    dialog.vbox.pack_start(left_align(checkbox), False)
+    dialog.vbox.show_all()
+    ret = dialog.run()
+    dialog.destroy()
+    if ret != gtk.RESPONSE_YES:
+        sys.exit()
+
+if Config.get_show_agreement():
+    show_agreement()
+
 TimeStat.begin(_('start up'))
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 change_task_name()
 set_default_window_icon()
 check_required_packages()
 check_dbus_daemon_status()
-from support.clientlib import try_send_delayed_data
-try_send_delayed_data()
+#from support.clientlib import try_send_delayed_data
+#try_send_delayed_data()
 
 while gtk.events_pending(): gtk.main_iteration()
 main_view = MainView()

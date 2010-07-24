@@ -1,7 +1,60 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
+2010-07-23 Homer Xing <homer.xing@gmail.com>
+
+    * Prompt to do synchronization if new icon pack is available.
+    * Add Gajim and PSI, two GTalk clients. Issue 979.
+
+2010-07-23 MA Yue <velly.empire@gmail.com>
+
+    * Add 31 applications icons
+
+2010-07-22 Homer Xing <homer.xing@gmail.com>
+
+    * Fix issue 986. for row in func.result: 'NoneType' object is not iterable
+    * Add wxmaxima, a Computer Algebra System.
+    * Add scilab, one of several open source alternatives to MATLAB.
+    * Add rkward, A graphic user interface to the R programming language.
+    * Add qBittorrent, featureful open source equivalent to utorrent.
+    * Add DeaDBeeF, ultimate music player.
+    * Add Fatrat, a feature rich download manager.
+    * Add Mobloquer, protect internet privacy.
+    * Add JabRef, bibliography reference manager.
+    * Fix depencency error (if any) before installing.
+    * Fix issue 692, broken link error.
+
+2010-07-21 Homer Xing <homer.xing@gmail.com>
+
+    * Add a new tip: view the IP address outside the local network
+    * Do not raise error if any software item raise error from installed()
+    * Do not raise error if tty conf file does not exist.
+    * Fix bug about space in path
+    * Show agreement at start up. Issue 900.
+    * Re-write InfoPane to get rid of "rows[index]" bug. Issue 689.
+    * Fix trailing \n missing error. Issue 949.
+
+2010-07-20 Homer Xing <homer.xing@gmail.com>
+
+    * Raise CannotDownloadError from download(), rather than raise CommandFailError.
+    * Raise CannotDownloadError from R.download().
+    * Let class I be able to detect CannotDownloadError.
+    * Remove InstallRemovePane.app_objs. Use AppObjs.appobjs directly.
+    * Rewrite InstallRemovePane.show_error. Do not treat CannotDownloadError as bug.
+    * Do not treat CannotDownloadError as bug in APT.install().
+    * Do not use xterm. Detect return value of run_as_root_in_terminal().
+    * Completely remove app_obj.sane attribute.
+    * Do not treat UserCancelInstallation as bug.
+
+2010-07-19 Homer Xing <homer.xing@gmail.com>
+
+    * Also install qcad-data when install qcad.
+    * Update url of sweethome
+    * User can disable confirm dialog which appears before installing
+    * Re-write the introduction of texlive
+    * Can refresh installing state of software items
+    * Config.get_login_window_background() return None rather than raise exception
+    * Ignore FetchFailedException in apt_update()
+    * Download icon pack using proxy server
+    * Prompt syntax error in source configuration
+
 2010-07-10 CHEN Yangyang <skabyy@gmail.com>
 
     * Finish a simple version of AilurusServer and upload it to google appengine.
@@ -36,7 +89,6 @@
 
     * Fix Issue 729: load panel failed when there is no selinx on Fedora
 
->>>>>>> FETCH_HEAD
 2010-06-29 Homer Xing <homer.xing@gmail.com>
 
     * Display lock path if failed to lock.
@@ -45,7 +97,6 @@
     * Do not install Realplayer. It cannot be removed by yum.
     * Fedora server response time may exceed 10 seconds. 
 
->>>>>>> FETCH_HEAD
 2010-06-27 Homer Xing <homer.xing@gmail.com>
 
     * Try to lock apt cache before install software

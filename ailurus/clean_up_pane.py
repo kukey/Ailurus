@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -71,7 +71,7 @@ class CleanUpPane(gtk.VBox):
         button.set_sensitive(bool(self.get_folder_size('/var/cache/apt/archives',please_return_integer=True)))
         def __clean_up(button, label):
             notify(_('Run command:'), 'apt-get clean')
-            run_as_root_in_terminal('apt-get clean')
+            run_as_root_in_terminal('apt-get clean', ignore_error=True)
             label.set_text(self.get_button_text(_('APT cache'), '/var/cache/apt/archives'))
             button.set_sensitive(bool(self.get_folder_size('/var/cache/apt/archives',please_return_integer=True)))
         button.connect('clicked', __clean_up, label)
@@ -275,7 +275,10 @@ class UbuntuCleanKernelBox(gtk.HBox):
         files = glob.glob('/boot/*%s*' % version) + glob.glob('/lib/modules/%s' % version)
         ret = 0
         for file in files:
-            ret += os.stat(file).st_size
+            try:
+                ret += os.stat(file).st_size
+            except: # Broken soft link
+                pass
         return ret
     
     def text_data_func(self, column, cell, model, iter):

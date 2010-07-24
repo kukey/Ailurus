@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -26,27 +25,28 @@ from lib import *
 from libapp import *
 assert FEDORA
 
-worldofpadman = 'ftp://ftp.snt.utwente.nl/pub/games/worldofpadman/linux/worldofpadman.run'
-worldofpadman_patch = 'ftp://ftp.snt.utwente.nl/pub/games/worldofpadman/linux/wop_patch_1_2.run'
-realplayer = 'http://software-dl.real.com/079f1e1c74ca25924402/unix/RealPlayer11GOLD.rpm'
-eset_antivirus_32 = 'http://download.eset.com/special/eav_linux/ueav.i386.linux'
-eset_antivirus_64 = 'http://download.eset.com/special/eav_linux/ueav.x86_64.linux'
-google_earch = 'http://dl.google.com/earth/client/current/GoogleEarthLinux.bin'
-google_chrome_32 = 'http://dl.google.com/linux/direct/google-chrome-stable_current_i386.rpm'
-google_chrome_64 = 'http://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm'
-alipay = 'http://blog.alipay.com/wp-content/2008/10/aliedit.tar.gz'
-amenace = 'http://www.viewizard.com/download/amenace12.tar.bz2'
-hittex = 'http://plutothesis.googlecode.com/files/PlutoThesis_UTF8_1.9.2.20090424.zip'
-eioffice = 'http://evermoresw.com.cn/EverMore/EIOPersonal/EIOffice_Personal_Lin.tar.gz'
-eioffice_clipart = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_Clipart.tar.gz'
-eioffice_help = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_HelpFiles.tar.gz'
-eioffice_scienceeditor = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_ScienceEditorImages.tar.gz'
-eioffice_templates = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_Templates.tar.gz'
-adobe_repos_rpm = 'http://linuxdownload.adobe.com/linux/i386/adobe-release-i386-1.0-1.noarch.rpm'
-rpmfusion_repos_free = 'http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm'
-rpmfusion_repos_nonfree = 'http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-stable.noarch.rpm'
-nvidia_32 = 'ftp://download.nvidia.com/XFree86/Linux-x86/195.36.24/NVIDIA-Linux-x86-195.36.24-pkg1.run'
-nvidia_64 = 'ftp://download.nvidia.com/XFree86/Linux-x86_64/195.36.24/NVIDIA-Linux-x86_64-195.36.24-pkg2.run'
+class urls:
+    realplayer = 'http://software-dl.real.com/079f1e1c74ca25924402/unix/RealPlayer11GOLD.rpm'
+    eset_antivirus_32 = 'http://download.eset.com/special/eav_linux/ueav.i386.linux'
+    eset_antivirus_64 = 'http://download.eset.com/special/eav_linux/ueav.x86_64.linux'
+    google_earch = 'http://dl.google.com/earth/client/current/GoogleEarthLinux.bin'
+    google_chrome_32 = 'http://dl.google.com/linux/direct/google-chrome-stable_current_i386.rpm'
+    google_chrome_64 = 'http://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm'
+    alipay = 'http://blog.alipay.com/wp-content/2008/10/aliedit.tar.gz'
+    amenace = 'http://www.viewizard.com/download/amenace12.tar.bz2'
+    hittex = 'http://plutothesis.googlecode.com/files/PlutoThesis_UTF8_1.9.2.20090424.zip'
+    eioffice = 'http://evermoresw.com.cn/EverMore/EIOPersonal/EIOffice_Personal_Lin.tar.gz'
+    eioffice_clipart = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_Clipart.tar.gz'
+    eioffice_help = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_HelpFiles.tar.gz'
+    eioffice_scienceeditor = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_ScienceEditorImages.tar.gz'
+    eioffice_templates = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_Templates.tar.gz'
+    adobe_repos_rpm = 'http://linuxdownload.adobe.com/linux/i386/adobe-release-i386-1.0-1.noarch.rpm'
+    rpmfusion_repos_free = 'http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm'
+    rpmfusion_repos_nonfree = 'http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-stable.noarch.rpm'
+    nvidia_32 = 'ftp://download.nvidia.com/XFree86/Linux-x86/195.36.24/NVIDIA-Linux-x86-195.36.24-pkg1.run'
+    nvidia_64 = 'ftp://download.nvidia.com/XFree86/Linux-x86_64/195.36.24/NVIDIA-Linux-x86_64-195.36.24-pkg2.run'
+    picasa_32 = 'http://dl.google.com/linux/rpm/testing/i386/picasa-3.0-current.i386.rpm'
+    adobeair_32 = 'http://airdownload.adobe.com/air/lin/download/latest/adobeair.i386.rpm'
 
 class _repo(I):
     this_is_a_repository = True
@@ -274,13 +274,13 @@ class GStreamer_Codecs (_rpm_install) :
             'gstreamer-plugins-good gstreamer-plugins-ugly')
 
 class Adobe_Flash_Player(_rpm_install):
-    __doc__ = _(u'Adobe® Flash plugin for web browser')
+    __doc__ = _('Adobe Flash plugin for web browser')
     category = 'flash'
     depends = Repo_Adobe
     pkgs = 'flash-plugin'
 
 class AdobeReader(_rpm_install):
-    __doc__ = _(u'Adobe® PDF Reader')
+    __doc__ = _('Adobe PDF Reader')
     download_url = 'http://get.adobe.com/reader/'
     category = 'business'
     depends = Repo_Adobe
@@ -306,19 +306,6 @@ class AdobeReader(_rpm_install):
         return is32()
 
 # Do not install Realplayer. It cannot be removed by yum :(
-#class Realplayer32(I):
-#    'RealPlayer® 11'
-#    detail = _('If you cannot play RMVB video, try this application! '
-#       'You can launch RealPlayer by "/opt/real/RealPlayer/realplay".')
-#    download_url = 'http://www.real.com/linux'
-#    category = 'player'
-#    def install(self):
-#        f = R(urls.realplayer).download()
-#        RPM.install_local(f)
-#    def installed(self):
-#        return RPM.installed('RealPlayer')
-#    def remove(self):
-#        RPM.remove('RealPlayer')
 
 class GoogleChrome(I):
     __doc__ = _('Google Chrome browser')
@@ -356,7 +343,7 @@ class GoogleEarth(I):
         run_as_root_in_terminal('/opt/google-earth/uninstall')
            
 class VirtualBox(_rpm_install):
-    'SUN® VirtualBox 3'
+    'SUN VirtualBox 3'
     detail = _('It is the only professional virtual machine which is freely available '
        'under the terms of GPL. '
        'Official site: http://www.virtualbox.org/wiki/Downloads')
@@ -396,7 +383,7 @@ class Repo_Chromium(I):
             _repo.disable(self.path)
 
 class ESETNOD32(I):
-    __doc__ = _('ESET NOD32')
+    __doc__ = 'ESET NOD32'
     detail = _('Anti virus and anti spyware')
     download_url = 'http://beta.eset.com/linux'
     category = 'antivirus'
@@ -422,13 +409,31 @@ class ESETNOD32(I):
         run_as_root('/opt/eset/esets/bin/esets_gil')
 
 class AdobeAIR(I):
-    __doc__ = ('Adobe AIR: use HTML, JavaScript and Flash to build desktop applications')
+    __doc__ = 'Adobe AIR'
+    detail = _('Use HTML, JavaScript and Flash to build desktop applications')
     download_url = 'http://get.adobe.com/air/'
     category = 'ide'
     def install(self):
-        f = R('http://airdownload.adobe.com/air/lin/download/latest/adobeair.i386.rpm').download()
+        f = R(urls.adobeair_32).download()
         RPM.install_local(f)
     def installed(self):
         return RPM.installed('adobeair')
     def remove(self):
         RPM.remove('adobeair')
+    def visible(self):
+        return is32()
+
+class Picasa(I):
+    __doc__ = 'Picasa'
+    detail = _('An image organizer and image viewer, plus photo-sharing function')
+    download_url = urls.picasa_32
+    category = 'photo'
+    def install(self):
+        f = R(urls.picasa_32).download()
+        RPM.install_local(f)
+    def installed(self):
+        return RPM.installed('picasa')
+    def remove(self):
+        RPM.remove('picasa')
+    def visible(self):
+        return is32()

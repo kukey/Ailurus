@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -35,11 +35,7 @@ except ImportError: # This is not Debian or Ubuntu
 else:
     apt_pkg.init()
 
-<<<<<<< HEAD
-version = 8 # must be integer
-=======
-version = 10 # must be integer
->>>>>>> FETCH_HEAD
+version = 12 # must be integer
 
 class AccessDeniedError(dbus.DBusException):
     _dbus_error_name = 'cn.ailurus.AccessDeniedError'
@@ -59,6 +55,9 @@ class LocalDebPackageResolutionError(dbus.DBusException):
 class CannotUpdateAptCacheError(dbus.DBusException):
     _dbus_error_name = 'cn.ailurus.CannotUpdateAptCacheError'
 
+class CannotDownloadError(dbus.DBusException):
+    _dbus_error_name = 'cn.ailurus.CannotDownloadError'
+
 class AilurusFulgens(dbus.service.Object):
     @dbus.service.method('cn.ailurus.Interface', 
                                           in_signature='ss', 
@@ -69,7 +68,10 @@ class AilurusFulgens(dbus.service.Object):
         command = command.encode('utf8')
         env_string = env_string.encode('utf8')
         env = self.__get_dict(env_string)
-        os.chdir(env['PWD'])
+        try: 
+            os.chdir(env['PWD'])
+        except KeyError:
+            raise KeyError(env, env_string) # help to fix issue 850
         task = subprocess.Popen(command, shell=True, env=env)
         task.wait()
         if task.returncode:
@@ -209,26 +211,15 @@ class AilurusFulgens(dbus.service.Object):
             self.apt_window.destroy()
             self.apt_window = self.apt_progress = None
     
-<<<<<<< HEAD
-    def apt_lock_cache(self):
-        # /var/lib/apt/lists/lock, 
-        # locked by apt-get update
-        lockfile = apt_pkg.Config.FindDir("Dir::State::Lists") + "lock"
-=======
     def lock_apt(self, path):
         if not os.path.exists(path):
             os.mkdir(path)
         lockfile = path + 'lock'
->>>>>>> FETCH_HEAD
         # This will create an empty file of the given name and lock it. 
         # Once this is done all other calls to GetLock in any other process will fail with -1. 
         # The return result is the fd of the file, the call should call close at some time
         lock = apt_pkg.GetLock(lockfile)
         if lock < 0:
-<<<<<<< HEAD
-            raise CannotLockAptCacheError
-        self.lock1_fd = lock
-=======
             raise CannotLockAptCacheError(lockfile)
         return lock
     
@@ -236,29 +227,16 @@ class AilurusFulgens(dbus.service.Object):
         # /var/lib/apt/lists/lock, 
         # locked by apt-get update
         self.lock1_fd = self.lock_apt(apt_pkg.Config.FindDir("Dir::State::Lists"))
->>>>>>> FETCH_HEAD
         # /var/cache/apt/archives/lock,
         # try the lock in /var/cache/apt/archive/lock first
         # this is because apt-get install will hold it all the time
         # while the dpkg lock is briefly given up before dpkg is
         # forked off. this can cause a race (LP: #437709)
-<<<<<<< HEAD
-        lockfile = apt_pkg.Config.FindDir("Dir::Cache::Archives") + "lock"
-        lock = apt_pkg.GetLock(lockfile)
-        if lock < 0:
-            raise CannotLockAptCacheError
-        self.lock2_fd = lock
-        try:
-            apt_pkg.PkgSystemLock()
-        except SystemError:
-            raise CannotLockAptCacheError
-=======
         self.lock2_fd = self.lock_apt(apt_pkg.Config.FindDir("Dir::Cache::Archives"))
         try:
             apt_pkg.PkgSystemLock()
         except SystemError:
             raise CannotLockAptCacheError('apt_pkg.PkgSystemLock')
->>>>>>> FETCH_HEAD
         self.holding_apt_lock = True
     
     @dbus.service.method('cn.ailurus.Interface', in_signature='', out_signature='b')
@@ -268,11 +246,6 @@ class AilurusFulgens(dbus.service.Object):
         try:
             self.apt_lock_cache()
             return True
-<<<<<<< HEAD
-        except:
-            return False
-=======
->>>>>>> FETCH_HEAD
         finally:
             self.apt_unlock_cache()
 
@@ -327,8 +300,12 @@ class AilurusFulgens(dbus.service.Object):
                 raise AptPackageNotExistError(pkg_name)
             pkg.mark_install()
         self.unlock_apt_pkg_global_lock()
-        self.apt_cache.commit(self.apt_progress.fetch, self.apt_progress.install)
-        apt_pkg.PkgSystemLock()
+        try:
+            self.apt_cache.commit(self.apt_progress.fetch, self.apt_progress.install)
+        except apt.cache.FetchFailedException, e:
+            raise CannotDownloadError(*e.args)
+        finally:
+            apt_pkg.PkgSystemLock()
 
     def apt_remove(self, package_names):
         '''package_names -- package names concatenated by comma (,)'''
@@ -359,6 +336,9 @@ class AilurusFulgens(dbus.service.Object):
         try:
             self.apt_cache.update(self.apt_progress.fetch)
         except SystemError, e: raise CannotUpdateAptCacheError(e.message)
+        except apt.cache.FetchFailedException, e: pass # not a perfect solution
+        # FetchFailedException raised if some URL of ppa failed.
+        # Sometimes it can be ignored. Sometimes it cannot be ignored.
 
     def create_apt_window(self):
         import gtk

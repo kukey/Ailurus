@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -22,7 +22,7 @@
 from __future__ import with_statement
 from lib import *
 from libapp import N
-import os, sys, glob, new, ConfigParser, types, gtk
+import os, sys, glob, new, ConfigParser, types, gtk, gobject
 import strings
 
 class AppObjs:
@@ -31,6 +31,7 @@ class AppObjs:
     basic_modules = [] # used in load_from_basic_modules()
     extensions = []
     failed_extensions = []
+    list_store = gtk.ListStore(gobject.TYPE_PYOBJECT)
     @classmethod
     def get_icon_path(cls, name):
         'return (icon path, whether it is default icon)'
@@ -45,8 +46,21 @@ class AppObjs:
             obj.logo_pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(icon_path, 32, 32)
     @classmethod
     def all_objs_reset_status(cls):
+        failed = []
         for obj in cls.appobjs:
-            obj.showed_in_toggle = obj.cache_installed = obj.installed()
+            try:
+                obj.showed_in_toggle = obj.cache_installed = obj.installed()
+            except:
+                print_traceback()
+                failed.append(obj)
+        for o in failed:
+            cls.appobjs.remove(o)
+            iter = cls.list_store.get_iter_first()
+            while iter:
+                if cls.list_store.get_value(iter, 0) == o:
+                    cls.list_store.remove(iter)
+                    break
+                iter = cls.list_store.iter_next(iter)
     @classmethod
     def set_basic_modules(cls, common, desktop, distribution):
         cls.basic_modules = []
@@ -78,6 +92,7 @@ class AppObjs:
                 print_traceback()
             else:
                 cls.appobjs.append(obj)
+                cls.list_store.append([obj])
                 cls.appobjs_names.append(name)
     @classmethod
     def all_installer_names_in_module(cls, module):
@@ -113,8 +128,11 @@ class AppObjs:
             try:
                 module = __import__(basename)
                 cls.extensions.append(module)
+                print 'Extension', basename, 'sucessfully loaded.'
             except:
                 cls.failed_extensions.append(os.path.abspath(py))
+                print 'Failed to load extension', basename, '.'
+                print_traceback()
             else:
                 cls.load_from(module)
         sys.path.pop(0)
@@ -158,15 +176,26 @@ class AppObjs:
                 print_traceback()
             else:
                 cls.appobjs.append(obj)
+                cls.list_store.append([obj])
     @classmethod
     def strip_invisible(cls):
         cls.appobjs = [obj for obj in cls.appobjs if obj.visible()]
+        cls.list_store.clear()
+        for obj in cls.appobjs:
+            cls.list_store.append([obj])
     @classmethod
     def strip_wrong_locale(cls):
+        changed = False
         if not Config.is_Chinese_locale():
             cls.appobjs = [obj for obj in cls.appobjs if not hasattr(obj, 'Chinese')]
+            changed = True
         if not Config.is_Poland_locale():
             cls.appobjs = [obj for obj in cls.appobjs if not hasattr(obj, 'Poland')]
+            changed = True
+        if changed:
+            cls.list_store.clear()
+            for obj in cls.appobjs:
+                cls.list_store.append([obj])
 
 def load_R_objs():
     paths = []
@@ -319,5 +348,3 @@ def load_app_objs():
     TimeStat.end('reset_status')
     
     TimeStat.end('load_app_objs')
-    
-    return AppObjs.appobjs

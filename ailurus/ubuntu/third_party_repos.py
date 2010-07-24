@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -141,22 +141,19 @@ class Repo_Firefox_3_6(_launchpad):
     def visible(self):
         return VERSION in ['hardy', 'intrepid', 'jaunty', 'karmic']
 
-# Cannot install PlayOnLinux. Because its repository content cannot be verified.
-# There is no public GPG key.
-# 
-#class Repo_PlayOnLinux(_repo):
-#    __doc__ = _('PlayOnLinux (stable)')
-#    license = LGPL
-#    def __init__(self):
-#        self.detail = _('PlayOnLinux is a front-end for wine. '
-#            'It helps to install Windows Games and softwares on Linux.')
-#        self.apt_content = 'playonlinux'
-#        self.web_page = 'http://www.playonlinux.com/en/download.html'
-#        self.apt_file = '/etc/apt/sources.list.d/playonlinux.list'
-#        self.apt_conf = [ 'deb http://deb.playonlinux.com/ $version main' ]
-#        self.key_url = '' #no key
-#        self.key_id = '' #no key
-#        _repo.__init__(self)
+class Repo_PlayOnLinux(_repo):
+    __doc__ = _('PlayOnLinux (stable)')
+    license = LGPL
+    def __init__(self):
+        self.detail = _('PlayOnLinux is a front-end for wine. '
+            'It helps to install Windows Games and softwares on Linux.')
+        self.apt_content = 'playonlinux'
+        self.web_page = 'http://www.playonlinux.com/en/download.html'
+        self.apt_file = '/etc/apt/sources.list.d/playonlinux.list'
+        self.apt_conf = [ 'deb http://deb.playonlinux.com/ $version main' ]
+        self.key_url = '' #no key
+        self.key_id = '' #no key
+        _repo.__init__(self)
 
 class Repo_WINE(_launchpad):
     __doc__ = _('WINE (beta version)')

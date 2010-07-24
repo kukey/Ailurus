@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -99,6 +99,8 @@ Evolution_0 = 'Evolution'
 Evolution_1 = _('Email client, calendar, contact manager and address manager')
 Extcalc_0 = 'Extcalc'
 Extcalc_1 = _('Multifunctional graphic calculator')
+Fatrat_0 = 'Fatrat'
+Fatrat_1 = _('A download manager supporting RapidShare.com, YouTube and remote control')
 Fcitx_0 = 'Fcitx'
 Fcitx_1 = _('Popular Chinese input method')
 FileZilla_0 = 'FileZilla'
@@ -111,6 +113,8 @@ FreeGLut3_0 = _('OpenGL library')
 FreeGLut3_1 = _('This is a library for writing OpenGL programs.')
 FrozenBubble_0 = _('Frozen Bubble')
 FrozenBubble_1 = _('Open source clone of the popular "Puzzle Bobble" game')
+Gajim_0 = 'Gajim'
+Gajim_1 = _('an light-weight XMPP client, supporting GTalk. GTK version')
 GCompris_0 = 'GCompris'
 GCompris_1 = _('Educational games for children aged 2 to 10')
 GCstar_0 = 'GCstar'
@@ -157,6 +161,8 @@ ImageMagick_0 = 'ImageMagick'
 ImageMagick_1 = _('Help you edit images. You can launch it by /usr/bin/display')
 Inkscape_0 = 'Inkscape'
 Inkscape_1 = _('Vector image designer. It is the open source substitution of CorelDraw.')
+JabRef_0 = 'JabRef'
+JabRef_1 = _('Bibliography reference manager. File format is BibTeX, the standard LaTeX bibliography format.')
 K3B_0 = 'K3B'
 K3B_1 = _('Burn DVD/VCD')
 Kadu_0 = 'Kadu'
@@ -175,6 +181,8 @@ LinuxDCPP_0 = 'Linuxdcpp'
 LinuxDCPP_1 = _('Connect to a central hub then share files and chat with other people.')
 MACChanger_0 = 'MACChanger'
 MACChanger_1 = _('Change the MAC address of network interfaces')
+Maxima_0 = 'Maxima'
+Maxima_1 = _('Maxima is a system for the manipulation of symbolic and numerical expressions, including differentiation, integration, Taylor series, Laplace transforms, ordinary differential equations, systems of linear equations, polynomials, and sets, lists, vectors, matrices, and tensors.')
 Midori_0 = 'Midori'
 Midori_1 = _('Lightweight web browser')
 MiniCom_Ckermit_0 = _('Minicom and Kermit')
@@ -217,8 +225,6 @@ OpenJDK_0 = _('OpenJDK 6')
 OpenJDK_1 = _('Open source implementation of Java')
 Openshot_0 = 'Openshot'
 Openshot_1 = _('Popular non-linear video editor')
-POSIX_ManPages_0 = _('POSIX library manual pages')
-POSIX_ManPages_1 = _('Install manual pages about Linux system calls, library calls, and POSIX libraries.')
 Parcellite_0 = 'Parcellite'
 Parcellite_1 = _('This is a powerful clipboard manager. It can preserve 25 strings concurrently.')
 PiTiVi_0 = 'PiTiVi'
@@ -229,6 +235,12 @@ Pino_0 = 'Pino'
 Pino_1 = _('Twitter and Identi.ca client')
 PowerTop_0 = 'PowerTop'
 PowerTop_1 = _('Help you save power for your laptop.')
+POSIX_ManPages_0 = _('POSIX library manual pages')
+POSIX_ManPages_1 = _('Install manual pages about Linux system calls, library calls, and POSIX libraries.')
+PSI_0 = 'PSI'
+PSI_1 = _('An XMPP client, supporting GTalk. QT version')
+QBittorrent_0 = 'qBittorrent'
+QBittorrent_1 = _('Lightweight, featureful open source equivalent to utorrent')
 QCad_0 = 'QCad'
 QCad_1 = _('Open source substitution of AutoCAD')
 QT_Creator_0 = _('Qt Creator')
@@ -241,12 +253,16 @@ QutIM_0 = 'qutIM'
 QutIM_1 = _('Lightweight messaging program')
 R_Language_Basic_0 = _('R language')
 R_Language_Basic_1 = _('A powerful statistical computation language and a graphics system.')
+RKWard_0 = 'RKWard'
+RKWard_1 = _('A graphic user interface to the R programming language')
 SDL_0 = _('SDL library')
 SDL_1 = _('A cross-platform multimedia library designed to provide low level access to hardware.')
 SMPlayer_0 = 'SMPlayer'
 SMPlayer_1 = _('Qt frontend for MPlayer')
 ScienceBiology_0 = 'Med-bio'
 ScienceBiology_1 = _('A lot of software for molecular biology, structural biology and bioinformatics.')
+Scilab_0 = 'Scilab'
+Scilab_1 = _('An open source alternatives to MATLAB. MATLAB code can be converted to Scilab.')
 Screenlets_0 = 'Screenlets'
 Screenlets_1 = _('Add eye candy gadgets on desktop, such as sticky notes, clocks, weather forecasts and so on.')
 Scribus_0 = 'Scribus'
@@ -264,7 +280,7 @@ StartupManager_1 = _('Change GRUB settings and themes')
 Svn_Git_bzr_0 = _('Subversion, Git and Bzr')
 Svn_Git_bzr_1 = _('Popular version control systems')
 TeXLive_0 = 'TeXLive'
-TeXLive_1 = _('Create a file "example.tex", then compile it by "xelatex example.tex".')
+TeXLive_1 = _('A popular digital typographical system which can typeset complex mathematical formulae')
 TheManaWorld_0 = _('The Mana World')
 TheManaWorld_1 = _('2D MMORPG')
 Thunderbird_0 = 'Thunderbird'

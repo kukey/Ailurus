@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -330,7 +330,6 @@ def latest(id): # used in all subclasses of _ff_extension, to construct download
 class _ff_extension(I):
     'Firefox Extension'
     category = 'firefox_extension'
-    sane = False # FIXME: we don't know how to remove Firefox extensions
     def self_check(self):
         assert self.name
         assert isinstance(self.name, unicode)

@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -39,7 +39,6 @@ def row(text, value, icon, tooltip = None): # only used in hardwareinfo.py and o
 class I:
     this_is_an_installer = True
     this_is_a_repository = False
-    sane = True # False means installed() == False after calling install()
     category = 'others'
     detail = ''
     how_to_install = ''
@@ -47,6 +46,7 @@ class I:
     cache_installed = showed_in_toggle = None # boolean
     logo_pixbuf = None # gtk.gdk.Pixbuf
     use_default_icon = None # boolean
+    installing_error = [] # list
     def self_check(self):
         'check errors in source code'
     def fill(self):
@@ -61,6 +61,33 @@ class I:
         'Add repository before installing me'
     def clean_temp_repository(self):
         'Remove repository after installing me'
+    def clean_installing_error(self):
+        self.installing_error = []
+    def has_installing_error(self):
+        return bool(self.installing_error)
+    def add_installing_error(self, error):
+        assert isinstance(error, tuple) and len(error) == 3
+        import types
+        assert isinstance(error[0], types.TypeType)
+        assert isinstance(error[1], types.ObjectType)
+        assert isinstance(error[2], types.ObjectType)
+        self.installing_error.append(error)
+    def print_installing_error(self, stream):
+        import traceback
+        print >>stream, self.__doc__
+        for exc in self.installing_error:
+            traceback.print_exception(exc[0], exc[1], exc[2], file=stream)
+        print >>stream
+    def fail_by_download_error(self):
+        for error in self.installing_error:
+            if error[0] == CannotDownloadError:
+                return True
+        return False
+    def fail_by_user_cancel(self):
+        for error in self.installing_error:
+            if error[0] == UserCancelInstallation:
+                return True
+        return False
     def visible(self):
         return True
 
@@ -82,8 +109,7 @@ class Config:
         import os
         dir = os.path.expanduser('~/.config/ailurus/')
         if not os.path.exists(dir): # make directory
-            try: os.makedirs(dir)
-            except: pass # directory exists
+            os.makedirs(dir)
     @classmethod
     def get_config_dir(cls):
         return cls.config_dir
@@ -107,7 +133,7 @@ class Config:
     @classmethod
     def set_string(cls, key, value):
         assert isinstance(key, str) and key
-        assert isinstance(value, (str,unicode)) and value
+        assert isinstance(value, (str,unicode))  and value
         cls.parser.set('DEFAULT', key, value)
         cls.save()
     @classmethod
@@ -149,12 +175,20 @@ class Config:
         value = str(value)
         return value=='True' or value=='true'
     @classmethod
+    def set_do_query_before_install(cls, value):
+        cls.set_bool('do_query_before_install', value)
+    @classmethod
+    def get_do_query_before_install(cls):
+        try: return cls.get_bool('do_query_before_install')
+        except: return True
+    @classmethod
     def set_login_window_background(cls, value):
         'just a cache. value may be wrong. cache the gconf value "/desktop/gnome/background/picture_filename" of user "gdm".'
         cls.set_string('login_window_background', value)
     @classmethod
     def get_login_window_background(cls):
-        return cls.get_string('login_window_background') # please do not catch exception
+        try: return cls.get_string('login_window_background')
+        except: return None # please do not return ''. 
     @classmethod
     def set_username_of_suggestion_window(cls, value):
         cls.set_string('username_of_suggestion_window', value)
@@ -181,12 +215,12 @@ class Config:
         one_day = 3600 * 24
         return now - last_check_time > one_day * 14
     @classmethod
-    def set_synced(cls): # has synchronized latest application data?
-        cls.set_bool('synced', True)
+    def set_last_synced_data_version(cls, value):
+        cls.set_int('last_synced_data_version', value)
     @classmethod
-    def get_synced(cls):
-        try: return cls.get_bool('synced')
-        except: return False
+    def get_last_synced_data_version(cls):
+        try: return cls.get_int('last_synced_data_version')
+        except: return 0
     @classmethod
     def set_use_proxy(cls, value):
         cls.set_bool('use_proxy', value)
@@ -206,15 +240,22 @@ class Config:
         cls.set_bool('query_before_exit', value)
     @classmethod
     def get_query_before_exit(cls):
-        try: return cls.get_bool('query_before_exit')
-        except: return True
+        try:       return cls.get_bool('query_before_exit')
+        except:    return True
+    @classmethod
+    def set_show_agreement(cls, value):
+        cls.set_bool('show_agreement', value)
+    @classmethod
+    def get_show_agreement(cls):
+        try:       return cls.get_bool('show_agreement')
+        except:    return True
     @classmethod
     def wget_set_timeout(cls, timeout):
         assert isinstance(timeout, int) and timeout>0, timeout
         cls.set_int('wget_timeout', timeout)
     @classmethod
     def wget_get_timeout(cls):
-        try: value = cls.get_int('wget_timeout')
+        try:       value = cls.get_int('wget_timeout')
         except: value = 20
         return value
     @classmethod
@@ -223,7 +264,7 @@ class Config:
         cls.set_int('wget_triesnum', triesnum)
     @classmethod
     def wget_get_triesnum(cls):
-        try: value = cls.get_int('wget_triesnum')
+        try:       value = cls.get_int('wget_triesnum')
         except: value = 3
         return value
     @classmethod
@@ -253,7 +294,7 @@ class Config:
     @classmethod
     def is_Ubuntu(cls):
         import os
-        if not os.path.exists('/etc/lsb-release'):
+        if not os.path.exists('/etc/lsb-release'): 
             return False
         with open('/etc/lsb-release') as f:
             c = f.read()
@@ -287,7 +328,7 @@ class Config:
     @classmethod
     def is_YLMF(cls):
         import os
-        if not os.path.exists('/etc/lsb-release'):
+        if not os.path.exists('/etc/lsb-release'): 
             return False
         with open('/etc/lsb-release') as f:
             c = f.read()
@@ -343,10 +384,10 @@ class Config:
         return False
     @classmethod
     def is_XFCE(cls):
-        try:
+        try:  
             get_output('pgrep -u $USER xfce4-session')
             return True
-        except:
+        except: 
             return False
 
 def set_proxy_string(proxy_string):
@@ -369,7 +410,7 @@ def get_proxy_string():
     if hasattr(get_proxy_string, 'denied'): # user has denied access before
         raise UserDeniedError
     
-    try: id = Config.get_proxy_string_id_in_keyring()
+    try:    id = Config.get_proxy_string_id_in_keyring()
     except: return '' # not exist
     
     import gnomekeyring
@@ -398,7 +439,7 @@ def install_locale():
     gettext.translation('ailurus', '/usr/share/locale', fallback=True).install(names=['ngettext'])
 
 def is_legal_license(license):
-    return license in [GPL, LGPL, EPL, MPL, BSD, MIT, CDDL, APL, AL]
+    return license in [GPL, LGPL, EPL, MPL, BSD, MIT, CDDL, APL, AL] 
 
 def DUAL_LICENSE(A, B):
     assert is_legal_license(A) and is_legal_license(B)
@@ -452,7 +493,7 @@ class CommandFailError(Exception):
 
 def run(command, ignore_error=False):
     is_string_not_empty(command)
-    if not isinstance(ignore_error, bool): raise TypeError
+    if not isinstance(ignore_error,  bool): raise TypeError
 
     if getattr(run, 'terminal', None):
         assert run.terminal.__class__.__name__ == 'Terminal'
@@ -503,7 +544,7 @@ def daemon():
 
 def get_dbus_daemon_version():
     ret = daemon().get_version(dbus_interface='cn.ailurus.Interface')
-    return ret
+    return ret    
 
 def restart_dbus_daemon():
     authenticate()
@@ -581,7 +622,7 @@ class TempOwn:
 
 def notify(title, content):
     'Show a notification in the right-upper corner.'
-    # title must not be empty.
+    # title must not be empty. 
     # otherwise, this error happens. notify_notification_update: assertion `summary != NULL && *summary != '\0'' failed
     assert isinstance(title, str) and title
     assert isinstance(content, str)
@@ -661,7 +702,7 @@ def file_remove(path, *lines):
         contents = f.readlines()
     for line in lines:
         if line[-1]!='\n': line+='\n'
-        try:
+        try: 
             contents.remove(line)
         except ValueError: pass
     with open(path, "w") as f:
@@ -691,16 +732,12 @@ def is_pkg_list(packages):
         if package[0]=='-': raise ValueError
         if ' ' in package: raise ValueError
 
-def run_as_root_in_terminal(command):
+def run_as_root_in_terminal(command, ignore_error=False):
     import dbus
     is_string_not_empty(command)
     print '\x1b[1;33m', _('Run command:'), command, '\x1b[m'
 
-    import tempfile
-    t = tempfile.NamedTemporaryFile('w')
-    t.write(command)
-    t.flush()
-    string = 'LANG=C xterm -T "Ailurus Terminal" -e bash %s' % t.name
+    string = 'python "%s/support/term.py" %s' % (A, command)
 
     authenticate()
     try:
@@ -708,7 +745,7 @@ def run_as_root_in_terminal(command):
     except dbus.exceptions.DBusException, e:
         if e.get_dbus_name() == 'cn.ailurus.AccessDeniedError': raise AccessDeniedError(*e.args)
         elif e.get_dbus_name() == 'cn.ailurus.CommandFailError':
-            if not ignore_error: raise CommandFailError(cmd)
+            if not ignore_error: raise CommandFailError(command)
         else: raise
 
 class RPM:
@@ -764,38 +801,51 @@ class RPM:
         return package_name in cls.__set1
     @classmethod
     def install(cls, *package):
-        run_as_root_in_terminal('yum install %s -y' % ' '.join(package))
         cls.cache_changed()
+        run_as_root_in_terminal('yum install %s' % ' '.join(package))
     @classmethod
     def install_local(cls, path):
         assert isinstance(path, str)
         import os
         assert os.path.exists(path)
-        run_as_root_in_terminal('yum localinstall --nogpgcheck -y %s' % path)
         cls.cache_changed()
+        run_as_root_in_terminal('yum localinstall "%s"' % path)
     @classmethod
     def remove(cls, *package):
-        run_as_root_in_terminal('yum remove %s -y' % ' '.join(package))
         cls.cache_changed()
+        run_as_root_in_terminal('yum remove %s' % ' '.join(package))
     @classmethod
     def import_key(cls, path):
         assert isinstance(path, str)
         run_as_root_in_terminal('rpm --import %s' % path)
 
+class APTSourceSyntaxError(Exception):
+    pass
+
 class APT:
     fresh_cache = False
     apt_get_update_is_called = False
-    apt_cache = None
+    apt_cache = None # instance of apt.cache.Cache
     @classmethod
     def cache_changed(cls):
         cls.fresh_cache = False
+    @classmethod
+    def has_broken_dependency(cls):
+        cls.refresh_cache()
+        try:
+            return bool(cls.apt_cache.broken_count)
+        except AttributeError: # ubuntu hardy
+            return False # not a good solution
     @classmethod
     def refresh_cache(cls):
         if cls.fresh_cache: return
         cls.fresh_cache = True
         TimeStat.begin(_('scan packages'))
         import apt
-        cls.apt_cache = apt.cache.Cache()
+        try:
+            cls.apt_cache = apt.cache.Cache()
+        except SystemError, e: # syntax error in source config
+            raise APTSourceSyntaxError(*e.args)
         TimeStat.end(_('scan packages'))
     @classmethod
     def get_installed_pkgs_set(cls):
@@ -836,34 +886,43 @@ class APT:
         return package_name in cls.apt_cache
     @classmethod
     def install(cls, *packages):
+        import dbus
         is_pkg_list(packages)
         cls.apt_get_update()
-        print '\x1b[1;32m', _('Installing packages:'), ' '.join(packages), '\x1b[m'
-        daemon().apt_command('install', ','.join(packages),
-                             packed_env_string(), timeout=3600, dbus_interface='cn.ailurus.Interface')
         cls.cache_changed()
+        run_as_root_in_terminal('apt-get install %s' % ' '.join(packages))
+#        print '\x1b[1;32m', _('Installing packages:'), ' '.join(packages), '\x1b[m'
+#        try:
+#            daemon().apt_command('install', ','.join(packages),
+#                                 packed_env_string(), timeout=3600, dbus_interface='cn.ailurus.Interface')
+#        except dbus.exceptions.DBusException, e:
+#            if e.get_dbus_name() == 'cn.ailurus.CannotDownloadError':
+#                raise CannotDownloadError(*packages)
     @classmethod
     def remove(cls, *packages):
         is_pkg_list(packages)
-        print '\x1b[1;31m', _('Removing packages:'), ' '.join(packages), '\x1b[m'
-        daemon().apt_command('remove', ','.join(packages),
-                             packed_env_string(), timeout=3600, dbus_interface='cn.ailurus.Interface')
         cls.cache_changed()
+        run_as_root_in_terminal('apt-get remove %s' % ' '.join(packages))
+#        print '\x1b[1;31m', _('Removing packages:'), ' '.join(packages), '\x1b[m'
+#        daemon().apt_command('remove', ','.join(packages),
+#                             packed_env_string(), timeout=3600, dbus_interface='cn.ailurus.Interface')
     @classmethod
     def neet_to_run_apt_get_update(cls):
         cls.apt_get_update_is_called = False
     @classmethod
     def apt_get_update(cls):
         if cls.apt_get_update_is_called == False:
-            daemon().apt_command('update', '', packed_env_string(), timeout=3600, dbus_interface='cn.ailurus.Interface')
+            run_as_root_in_terminal('apt-get update', ignore_error = True)
+#            daemon().apt_command('update', '', packed_env_string(), timeout=3600, dbus_interface='cn.ailurus.Interface')
             cls.apt_get_update_is_called = True
             cls.cache_changed()
     @classmethod
     def install_local(cls, *packages):
-        for package in packages:
-            daemon().apt_command('install_local', package,
-                                 packed_env_string(), timeout=3600, dbus_interface='cn.ailurus.Interface')
         cls.cache_changed()
+        for package in packages:
+            run_as_root_in_terminal('dpkg -i "%s"' % package)
+#            daemon().apt_command('install_local', package,
+#                                 packed_env_string(), timeout=3600, dbus_interface='cn.ailurus.Interface')
     @classmethod
     def is_cache_lockable(cls):
         import dbus
@@ -886,7 +945,7 @@ class PACMAN:
         cls.fresh_cache = False
     @classmethod
     def refresh_cache(cls):
-        if getattr(cls, 'fresh_cache', False): return
+        if cls.fresh_cache: return
         cls.fresh_cache = True
         cls.__pkgs = set()
         cls.__allpkgs = set()
@@ -914,7 +973,6 @@ class PACMAN:
         return cls.__allpkgs
     @classmethod
     def installed(cls, package_name):
-        is_pkg_list([package_name])
         cls.refresh_cache()
         return package_name in cls.__pkgs
     @classmethod
@@ -926,23 +984,21 @@ class PACMAN:
         is_pkg_list(packages)
         if not cls.pacman_sync_called:
             cls.pacman_sync()
-        print '\x1b[1;32m', _('Installing packages:'), ' '.join(packages), '\x1b[m'
-        run_as_root_in_terminal('pacman -S --noconfirm %s' % ' '.join(packages))
         cls.cache_changed()
+        run_as_root_in_terminal('pacman -S %s' % ' '.join(packages))
     @classmethod
     def install_local(cls, path):
         assert isinstance(path, str)
         import os
         assert os.path.exists(path)
-        run_as_root_in_terminal('pacman -U --noconfirm %s' % path)
         cls.cache_changed()
+        run_as_root_in_terminal('pacman -U "%s"' % path)
     @classmethod
     def remove(cls, *packages):
         is_pkg_list(packages)
-        print '\x1b[1;31m', _('Removing packages:'), ' '.join(packages), '\x1b[m'
         packages = [p for p in packages if PACMAN.installed(p)]
-        run_as_root_in_terminal('pacman -R --noconfirm %s' % ' '.join(packages))
         cls.cache_changed()
+        run_as_root_in_terminal('pacman -R %s' % ' '.join(packages))
     @classmethod
     def pacman_sync(cls):
         print '\x1b[1;36m', _('Run "pacman -Sy". Please wait for a few minutes.'), '\x1b[m'
@@ -996,7 +1052,7 @@ class KillWhenExit:
         if not isinstance(task, (str, unicode, subprocess.Popen)): raise TypeError
         if isinstance(task, (str, unicode)):
             assert task!=''
-            print '\x1b[1;33m', _('Run command:'), task, '\x1b[m'
+            print '\x1b[1;33m', _('Run command:'), task, '\x1b[m' 
             task=subprocess.Popen(task, shell=True)
         cls.task_list.append(task)
     @classmethod
@@ -1009,7 +1065,14 @@ class KillWhenExit:
                 print_traceback()
         cls.task_list = []
 
+class CannotDownloadError(Exception):
+    pass
+
+class UserCancelInstallation(Exception):
+    pass
+
 def download(url, filename):
+    import os
     is_string_not_empty(url)
     assert url[0]!='-'
     is_string_not_empty(filename)
@@ -1020,9 +1083,8 @@ def download(url, filename):
         run("wget --timeout=%(timeout)s --tries=%(tries)s '%(url)s' -O '%(filename)s'"
             %{'timeout':timeout, 'tries':tries, 'url':url, 'filename':filename} )
     except:
-        import os
         if os.path.exists(filename): os.unlink(filename)
-        raise
+        raise CannotDownloadError(url)
     
 def reset_dir():
     import os, sys
@@ -1116,7 +1178,7 @@ class APTSource2:
             cls.re_pattern_server = re.compile(r'^deb(-src)? [a-z]+://([^/]+)/.*$')
         match = cls.re_pattern_server.match(line)
         if match: return match.group(2)
-        else: return None
+        else:     return None
     @classmethod
     def get_url_from_line(cls, line):
         line = cls.remove_comment(line)
@@ -1125,7 +1187,7 @@ class APTSource2:
             cls.re_pattern_url = re.compile(r'^deb(-src)? (\S+) .*$')
         match = cls.re_pattern_url.match(line)
         if match: return match.group(2)
-        else: return None
+        else:     return None
     @classmethod
     def official_servers(cls):
         ret = set()
@@ -1274,10 +1336,10 @@ class firefox:
         cls.pattern1 = re.compile('em:name="(.+)"')
         cls.pattern2 = re.compile('<em:name>(.+)</em:name>')
         cls.prefs_js_line_pattern = re.compile(r'''^user_pref\( # begin
-(['"][^'"]+['"]) # key
-,\s
-(.+) # value
-\); # end ''', re.VERBOSE)
+            (['"][^'"]+['"]) # key
+            ,\s
+            (.+) # value
+            \); # end ''', re.VERBOSE)
         cls.load_user_prefs()
         cls.support = True
     @classmethod
@@ -1322,14 +1384,14 @@ class firefox:
         if not os.path.exists(rdf_file): return None
         with open(rdf_file) as f:
             content = f.read()
-        return cls.guess_name_from_content_method1(content) or cls.guess_name_from_content_method2(content)
+        return cls.guess_name_from_content_method1(content) or cls.guess_name_from_content_method2(content)  
     @classmethod
     def guess_name_from_content_method1(cls, content):
-        try: return cls.pattern1.search(content).group(1)
+        try:    return cls.pattern1.search(content).group(1)
         except: return None
     @classmethod
     def guess_name_from_content_method2(cls, content):
-        try: return cls.pattern2.search(content).group(1)
+        try:    return cls.pattern2.search(content).group(1)
         except: return None
     @classmethod
     def all_user_pref_lines(cls, content):
@@ -1453,7 +1515,7 @@ class R:
         if self.sorted: return
         self.sorted = True
         
-        if isinstance(self.url, str):
+        if isinstance(self.url, str): 
             self.sorted_url = [self.url]
         elif isinstance(self.url, list):
             if len(self.url)>1:
@@ -1476,7 +1538,7 @@ class R:
         #check url
         assert url_list
         assert isinstance(url_list, (str,list))
-        if isinstance(url_list, str):
+        if isinstance(url_list, str): 
             url_list = [ url_list ]
         for e in url_list:
             assert isinstance(e, str), e
@@ -1523,12 +1585,12 @@ class R:
         if self.size:
             import os
             filesize=os.path.getsize(path)
-            if filesize!=self.size:
+            if filesize!=self.size: 
                 raise CommandFailError('File is broken. Expected file length is %s, but real length is %s.'%(self.size, filesize) )
         if self.hash:
             print _('Checking file integrity ...'),
             filehash = sha1(path)
-            if filehash!=self.hash:
+            if filehash!=self.hash: 
                 raise CommandFailError('File is broken. Expected hash is %s, but real hash is %s.'%(self.hash, filehash) )
             print _('Good.')
     def download(self):
@@ -1547,7 +1609,7 @@ class R:
             except:
                 print_traceback()
         
-        raise CommandFailError(self.url)
+        raise CannotDownloadError(self.url)
 
 class ETCEnvironment:
     def __init__(self):
@@ -1564,13 +1626,13 @@ class ETCEnvironment:
             if value[0]==value[-1]=='\'' or value[0]==value[-1]=='\"': value = value[1:-1]
             self.values[key] = value.split(':')
     def add(self, key, *values):
-        assert key and isinstance(key, str), key
+        assert key and isinstance(key, str),    key
         
         values = list(values)
         assert values
         for v in values:
-            assert v and isinstance(v, str), v
-            assert not ':' in v, v
+            assert v and isinstance(v, str),    v
+            assert not ':' in v,     v
         
         if not key in self.keys:
             self.keys.append(key)
@@ -1578,17 +1640,17 @@ class ETCEnvironment:
         else:
             self.values[key] = values+self.values[key]
     def remove(self, key, *values):
-        assert key and isinstance(key, str), key
+        assert key and isinstance(key, str),    key
         for v in values:
-            assert v and isinstance(v, str), v
-            assert not ':' in v, v
+            assert v and isinstance(v, str),    v
+            assert not ':' in v,     v
 
         if not key in self.keys: return
-        if not values:
+        if not values: 
             # delete it directly
-            try: self.keys.remove(key)
+            try:    self.keys.remove(key)
             except: pass
-            try: del self.values[key]
+            try:    del self.values[key]
             except: pass
         else:
             List = self.values[key]
@@ -1677,11 +1739,11 @@ class FedoraReposSection:
 
     def comment_line(self, i):
         if not self.lines[i].startswith('#'):
-            self.lines[i] = '#' + self.lines[i]
+            self.lines[i] = '#' + self.lines[i] 
 
     def uncomment_line(self, i):
         if self.lines[i].startswith('#'):
-            self.lines[i] = self.lines[i][1:]
+            self.lines[i] = self.lines[i][1:] 
 
     def change_baseurl(self, new_url):
         for i, line in enumerate(self.lines):
@@ -1753,7 +1815,7 @@ class TimeStat:
     @classmethod
     def begin(cls, name):
         assert isinstance(name, str) and name
-        assert name not in cls.__open_stat_names
+        assert name not in cls.__open_stat_names, name
         cls.__open_stat_names.add(name)
         import time
         cls.__begin_time[name] = time.time()

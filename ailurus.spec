@@ -6,7 +6,7 @@
 Name: ailurus
 Version: 10.06.93
 Release: 0%{?dist}
-Summary: A simple software center and GNOME tweaker
+Summary: A simple application installer and GNOME tweaker
 Group: Applications/System
 License: GPLv2+
 URL: http://ailurus.googlecode.com/
@@ -15,10 +15,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: python-devel python2-devel python-distutils-extra intltool
 BuildArch: noarch
 # The automatic dependency consists of python and rpmlib only. It is insufficient.
-Requires: polkit pygtk2 notify-python vte rpm-python pygobject2 dbus-python wget unzip xterm gnome-python2-gnomekeyring
+Requires: polkit pygtk2 notify-python vte rpm-python pygobject2 dbus-python wget unzip gnome-python2-gnomekeyring
 
 %description
-Ailurus is a simple software center and GNOME tweaker.
+Ailurus is a simple application installer and GNOME tweaker.
 
 Features:
 * Help users learn some Linux skills

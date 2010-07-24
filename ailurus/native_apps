@@ -97,6 +97,17 @@ license = GPL
 ubuntu = qtoctave
 archlinux = qtoctave
 
+[Maxima]
+category = math
+ubuntu = wxmaxima
+fedora = wxMaxima
+archlinux = wxmaxima
+
+[Scilab]
+category = math
+ubuntu = scilab
+archlinux = scilab
+
 [Avidemux]
 category = media_editor
 fedora = avidemux
@@ -536,7 +547,7 @@ archlinux = wesnoth
 category = mechanics
 fedora = qcad
 license = GPL
-ubuntu = qcad
+ubuntu = qcad qcad-data
 archlinux = qcad
 
 [EasyTAG]
@@ -684,6 +695,11 @@ archlinux = nautilus-actions
 category = statistics
 license = GPL
 ubuntu = r-base-core
+
+[RKWard]
+category = statistics
+ubuntu = rkward
+fedora = rkward
 
 [Kadu]
 category = chat
@@ -856,3 +872,29 @@ ubuntu = unetbootin
 [Pino]
 category = blog
 fedora = pino
+
+[QBittorrent]
+category = file_sharing
+ubuntu = qbittorrent
+fedora = qbittorrent
+archlinux = qbittorrent
+
+[Fatrat]
+category = file_sharing
+ubuntu = fatrat
+
+[JabRef]
+category = latex
+ubuntu = jabref
+archlinux = jabref
+
+[Gajim]
+category = chat
+ubuntu = gajim
+fedora = gajim
+archlinux = gajim
+
+[PSI]
+category = chat
+ubuntu = psi
+archlinux = psi

@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+#coding: utf8
 #
-# Ailurus - make Linux easier to use
+# Ailurus - a simple application installer and GNOME tweaker
 #
 # Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
 # Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
@@ -32,7 +32,6 @@ class Generic_Genome_Browser(I):
                '"Generic Genome Browser" cannot be detected or removed by Ailurus.</span>')
     license = AL
     category='biology'
-    sane = False # FIXME: don't know how to remove
     def install(self):
         if FEDORA:
             for package in ['perl-libwww-perl', 'perl-CPAN']:
