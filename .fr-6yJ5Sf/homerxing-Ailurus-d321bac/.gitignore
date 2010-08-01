@@ -1,0 +1,12 @@
+MANIFEST
+build/
+dist/
+installed_files
+
+po/*.pot
+.project
+.pydevproject
+.settings/
+.metadata
+*.pyc
+*~

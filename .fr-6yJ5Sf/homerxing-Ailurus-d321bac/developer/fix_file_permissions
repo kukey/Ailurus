@@ -1,0 +1,13 @@
+#!/bin/bash
+
+find . -type f -exec chmod 644 \{\} \;
+
+chmod 755 bin/ailurus \
+          ailurus/main.py \
+          developer/* \
+          setup.py \
+          support/ailurus-daemon \
+          support/show-a-linux-skill-bubble \
+          support/enable_sudo \
+          support/disable_sudo \
+          uninstall
