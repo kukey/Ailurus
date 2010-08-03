@@ -1111,3 +1111,18 @@ debian = kstars
 fedora = kdeedu-kstars
 archlinux = kdeedu-kstars
 
+[Samba]
+category=file_sharing
+license=GPL
+ubuntu=
+debian=
+fedora=samba
+archlinux=
+
+[system-config-samba]
+category=others
+ubuntu=
+debian=
+fedora=sys-config-samba
+archlinux=
+
