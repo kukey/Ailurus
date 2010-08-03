@@ -1,3 +1,0 @@
-?package(ailurus):needs="X11" \
-	section="Applications/System/Administration"\
-	title="ailurus" command="/usr/bin/ailurus"
