@@ -888,19 +888,31 @@ class APT:
         cls.refresh_cache()
         ret = []
         for pkg in cls.apt_cache:
-            if hasattr(pkg, 'isAutoRemovable'): auto_removable = pkg.isAutoRemovable
+            if hasattr(pkg, 'is_auto_removable'): auto_removable = pkg.is_auto_removable
+            elif hasattr(pkg, 'isAutoRemovable'): auto_removable = pkg.isAutoRemovable # deprecated
             elif pkg.isInstalled and pkg._depcache.IsGarbage(pkg._pkg): auto_removable = True
-            else: auto_removable = True
+            else: auto_removable = False
             
             if auto_removable:
-                ret.append([pkg.name, long(pkg.installedSize), pkg.summary.replace('\n', ' ')])
+                if hasattr(pkg, 'versions'): # recommended
+                    version = pkg.versions[0]
+                    installed_size = version.installed_size
+                    summary = version.summary
+                else: # deprecated
+                    installed_size = pkg.installedSize
+                    summary = pkg.summary
+                ret.append([pkg.name, long(installed_size), summary.replace('\n', ' ')])
         return ret
     @classmethod
     def installed(cls, package_name):
         cls.refresh_cache()
         if not package_name in cls.apt_cache:
             return False
-        return cls.apt_cache[package_name].isInstalled
+        p = cls.apt_cache[package_name]
+        if hasattr(p, 'is_installed'):
+            return p.is_installed # recommended attribute 
+        else:
+            return p.isInstalled # deprecated attribute
     @classmethod
     def exist(cls, package_name):
         cls.refresh_cache()
