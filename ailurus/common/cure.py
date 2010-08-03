@@ -71,8 +71,6 @@ class Create_Imagemagick_shortcut(C):
         if FEDORA:
             return RPM.installed('ImageMagick') and not os.path.exists(self.file)
     def cure(self):
-        path = D + 'umut_icons/imagemagick.png'
-        run_as_root('cp %s /usr/share/icons/ ' % path)
         create_file(self.file, '[Desktop Entry]\n'
                                'Name=ImageMagick\n'
                                'Exec=display %f\n'    
@@ -80,8 +78,7 @@ class Create_Imagemagick_shortcut(C):
                                'StartupNotify=true\n'
                                'Terminal=false\n'
                                'Type=Application\n'
-                               'Categories=GNOME;GTK;Graphics;\n'
-                               'Icon=/usr/share/icons/imagemagick.png\n')
+                               'Categories=GNOME;GTK;Graphics;\n')
 
 class Create_softlink_to_desktop_folder(C):
     __doc__ = _('Create a directory "Desktop" linked to the desktop in your home folder')
@@ -159,7 +156,8 @@ class Query_before_remove_a_lot_of_files(C) :
 class Show_a_Linux_skill_bubble(C):
     __doc__ = _('Show a random Linux skill after you log in to GNOME')
     detail = _('Create file:') + ' ~/.config/autostart/show-a-linux-skill-bubble.desktop'
-    file = os.path.expanduser('~/.config/autostart/show-a-linux-skill-bubble.desktop')
+    autostart_path = os.path.expanduser('~/.config/autostart/')
+    file = autostart_path + 'show-a-linux-skill-bubble.desktop'
     content = ('[Desktop Entry]\n'
                'Name=Show a random Linux skill after logging in.\n'
                'Comment=Show a random Linux skill after you log in to GNOME. Help you learn Linux.\n'
@@ -175,6 +173,8 @@ class Show_a_Linux_skill_bubble(C):
             if f.read() != self.content: return True
         return False
     def cure(self):
+        if not os.path.exists(self.autostart_path):
+            run('mkdir -p "%s"' % self.autostart_path)
         with open(self.file, 'w') as f:
             f.write(self.content)
 
@@ -198,8 +198,16 @@ class Own_config_dir_by_user(C):
     detail = _('Command:') + ' chown -R $USER:$USER ~/.config/ailurus'
     type = C.MUST_FIX
     def exists(self):
-        dir = Config.get_config_dir()
+        dir = Config.config_dir
         if os.stat(dir).st_uid != os.getuid():
             return True
     def cure(self):
-        run_as_root('chown -R $USER:$USER "%s"' % Config.get_config_dir())
+        run_as_root('chown -R $USER:$USER "%s"' % Config.config_dir)
+
+class Completely_remove_var_cache_ailurus(C):
+    __doc__ = _('Remove directory /var/cache/ailurus/')
+    detail = _('This directory is obsolete. Remove this directory to free disk space.')
+    def exists(self):
+        return os.path.exists('/var/cache/ailurus')
+    def cure(self):
+        run_as_root('rm -rf /var/cache/ailurus')

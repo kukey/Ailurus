@@ -20,104 +20,13 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 from __future__ import with_statement
-import gtk
+
+import gtk, os, sys
 from lib import *
 from libu import *
 from libapp import *
-from loader import AppObjs, load_app_objs
-
-class Category:
-    def __init__(self, text, icon_path, category, class_name):
-        '''category equals "category" attribute value of application class
-        class_name is used in left_treeview only'''
-        assert isinstance(text, (str, unicode)) and text
-        assert isinstance(icon_path, str) and icon_path
-        assert isinstance(category, str) and category
-        assert isinstance(class_name, str) and class_name
-        self.text, self.icon_path, self.category, self.class_name = text, icon_path, category, class_name
-        self.icon = get_pixbuf(icon_path, 24, 24)
-        self.visible = False
-    def to_list(self):
-        'Return a list. Add the list into gtk.Liststore'
-        return [self.text, self.icon, self.category, self.class_name]
-    @classmethod
-    def all_left_class(cls):
-        'return a list which consists of "text, class_name, icon_path"'
-        return [
-            (_('Science'), 'science', D+'umut_icons/p_science.png'),
-            (_('Develop'), 'develop', D+'sora_icons/p_develop.png'),
-            (_('Home'), 'home', D+'sora_icons/p_home.png'),
-            (_('Other'), 'other', D+'sora_icons/p_others.png'),
-            (_('All'), 'all', D+'sora_icons/p_all.png'),
-                ]
-    m_all = None
-    @classmethod
-    def all(cls):
-        if cls.m_all: return cls.m_all
-        cls.m_all = [
-            Category(_('All'), D+'sora_icons/p_all.png', 'all', 'all'),
-            # internet
-            Category(_('Browser'), D+'sora_icons/p_browser.png', 'browser', 'home'),
-            Category(_('Email'), D+'sora_icons/p_email.png', 'email', 'home'),
-            Category(_('File sharing'), D+'sora_icons/p_file_sharing.png', 'file_sharing', 'home'),
-            Category(_('Chat'), D+'umut_icons/p_chat.png', 'chat', 'home'),
-            Category(_('Firefox extension'), D+'umut_icons/p_firefox_extension.png', 'firefox_extension', 'home'),
-            Category(_('Flash'), D+'sora_icons/p_flash.png', 'flash', 'home'),
-            Category(_('Blog'), D+'sora_icons/p_blog.png', 'blog', 'home'),
-            Category(_('RSS'), D+'sora_icons/p_rss.png', 'rss', 'home'),
-            Category(_('Internet'), D+'sora_icons/p_internet.png', 'internet', 'home'),
-            Category(_('Photo'), D+'sora_icons/p_photo.png', 'photo', 'home'),
-            # multimedia
-            Category(_('Player'), D+'sora_icons/p_player.png', 'player', 'home'),
-            Category(_('CD burner'), D+'sora_icons/p_cd_burner.png', 'cd_burner', 'home'),
-            Category(_('Media editor'), D+'sora_icons/p_media_editor.png', 'media_editor', 'home'),
-            # appearance
-            Category(_('Panel'), D+'sora_icons/p_panel.png', 'panel', 'home'),
-            Category(_('Theme'), D+'sora_icons/p_theme.png', 'theme', 'home'),
-            Category(_('Screen widget'), D+'umut_icons/p_candy.png', 'candy', 'home'),
-            Category(_('Compiz setting'), D+'sora_icons/p_compiz_setting.png', 'compiz_setting', 'home'),
-            # science
-            Category(_('Math'), D+'umut_icons/p_math.png', 'math', 'science'),
-            Category(_('Statistics'), D+'umut_icons/p_statistics.png', 'statistics', 'science'),
-            Category(_('Electronics'), D+'umut_icons/p_electronics.png', 'electronics', 'science'),
-            Category(_('Mechanics'), D+'umut_icons/p_mechanics.png', 'mechanics', 'science'),
-            Category(_('Geography'), D+'sora_icons/p_geography.png', 'geography', 'science'),
-            Category(_('Biology'), D+'sora_icons/p_biology.png', 'biology', 'science'),
-            Category(_('LaTeX'), D+'umut_icons/p_latex.png', 'latex', 'science'),
-            # programming
-            Category(_('IDE'), D+'sora_icons/p_ide.png', 'ide', 'develop'),
-            Category(_('Version control'), D+'sora_icons/p_version_control.png', 'version_control', 'develop'),
-            Category(_('Library'), D+'sora_icons/p_library.png', 'library', 'develop'),
-            Category(_('Embedded system'), D+'umut_icons/p_embedded_system.png', 'embedded_system', 'develop'),
-            Category(_('Text editor'), D+'umut_icons/p_text_editor.png', 'text_editor', 'develop'),
-            Category(_('Eclipse extension'), D+'sora_icons/p_eclipse_extension.png', 'eclipse_extension', 'develop'),
-            Category(_('Programming tool'), D+'sora_icons/p_saber.png', 'saber', 'develop'),
-            # business
-            Category(_('Business'), D+'sora_icons/p_business.png', 'business', 'home'),
-            # design
-            Category(_('Design'), D+'sora_icons/p_design.png', 'design', 'develop'),
-            Category(_('Drawing'), D+'umut_icons/p_drawing.png', 'drawing', 'develop'),
-            Category(_('Typesetting'), D+'umut_icons/p_typesetting.png', 'typesetting', 'develop'),
-            # gnome_dedicated
-            Category(_('GNOME dedicated'), D+'sora_icons/p_gnome_dedicated.png', 'gnome_dedicated', 'other'),
-            # nautilus
-            Category(_('Nautilus extension'), D+'sora_icons/p_nautilus_extension.png', 'nautilus_extension', 'other'),
-            # simulator
-            Category(_('Simulator'), D+'sora_icons/p_simulator.png', 'simulator', 'other'),
-            # education
-            Category(_('Education'), D+'umut_icons/p_education.png', 'education', 'home'),
-            # game
-            Category(_('Game'), D+'sora_icons/p_game.png', 'game', 'home'),
-            # antivirus
-            Category(_('Anti-virus'), D+'sora_icons/p_antivirus.png', 'antivirus', 'home'),
-            # others
-            Category(_('Others'), D+'sora_icons/p_others.png', 'others', 'other'),
-            # tasksel
-            Category(_('Establish a server'), D+'umut_icons/p_establish_a_server.png', 'establish_a_server', 'other'),
-            # repository
-            Category(_('Repository'), D+'sora_icons/p_repository.png', 'repository', 'other'),
-                 ]
-        return cls.m_all
+from loader import AppObjs, load_app_objs, CustomApps
+from support.add_custom_app import AddCustomAppDialog
 
 class Area(gtk.HBox):
     def __init__(self):
@@ -138,11 +47,108 @@ class Area(gtk.HBox):
 class InstallRemovePane(gtk.VBox):
     icon = D+'sora_icons/m_install_remove.png'
     text = _('Install\nSoftware')
-    
+
+    def __left_treeview_add_software(self, widget):
+        treestore,iter = self.left_treeview.get_selection().get_selected()
+        if not iter or not treestore: return
+
+        category = treestore.get_value(iter,2)
+        dict = {'category':category}
+        dialog = AddCustomAppDialog(dict)
+        dialog.run()
+        dialog.destroy()
+
+    def __right_treeview_add_software(self, widget):
+        treestore, iter = self.left_treeview.get_selection().get_selected()
+        if not iter or not treestore: return
+
+        category = treestore.get_value(iter,2)
+        dict = {'category':category}
+        dialog = AddCustomAppDialog(dict)
+        dialog.run()
+        dialog.destroy()
+
+    def __right_treeview_edit_software(self, widget):
+        treestore, iter = self.right_treeview.get_selection().get_selected()
+        appobj = treestore.get_value(iter, 0)
+        if not isinstance(appobj, N):
+            # TODO: just edit __doc__, detail, category.
+            dialog = gtk.MessageDialog(message_format = 'This item will be editable soon. Sorry. :(',
+                                       buttons = gtk.BUTTONS_OK)
+            dialog.run()
+            dialog.destroy()
+        else:
+            dict = {'appobj': appobj,
+                    'classname': appobj.__class__.__name__,
+                    'category': appobj.category,
+                    '__doc__': appobj.__doc__,
+                    'detail': appobj.detail,
+                    DISTRIBUTION: appobj.pkgs,}
+            dialog = AddCustomAppDialog(dict)
+            dialog.run()
+            dialog.destroy()
+
+    def __right_treeview_delete_software(self, widget):
+        dict = {}
+        treestore, iter = self.right_treeview.get_selection().get_selected()
+        appobj = treestore.get_value(iter,0)
+        if not isinstance(appobj, N):
+            # TODO: remove it?
+            dialog = gtk.MessageDialog(message_format = 'This item will be removable soon. Sorry. :(',
+                                       buttons = gtk.BUTTONS_OK)
+            dialog.run()
+            dialog.destroy()            
+            return
+        else:
+            dict = {'classname': appobj.__class__.__name__,
+                    'hide': True}
+            CustomApps.add_appobj_from_dict(dict)
+
+            # shall we realize the following code as a method of AppObjs? :)
+            AppObjs.appobjs.remove(appobj) # shall we use this line?
+            appstore = AppObjs.list_store
+            iter = appstore.get_iter_root()
+            while iter:
+                if appstore.get_value(iter, 0) == appobj:
+                    appstore.remove(iter)
+                iter = appstore.iter_next(iter)
+        
+    def __add_software_to_favourite(self, widget):
+        treestore, iter = self.right_treeview.get_selection().get_selected()
+        appobj = treestore.get_value(iter, 0)
+        if not isinstance(appobj, N):
+            dialog = gtk.MessageDialog(message_format = 'This item will be able to be added in favourite soon. Sorry. :(',
+                                       buttons = gtk.BUTTONS_OK)
+            dialog.run()
+            dialog.destroy()
+            return
+        category_list = appobj.category.split()
+        if 'favourite' not in category_list:
+            category_list.append('favourite')
+            dict = {'classname': appobj.__class__.__name__,
+                    'category': ' '.join(category_list)}
+            CustomApps.add_appobj_from_dict(dict)
+
+    def __remove_software_from_favourite(self, widget):
+        treestore, iter = self.right_treeview.get_selection().get_selected()
+        appobj = treestore.get_value(iter, 0)
+        if not isinstance(appobj, N):
+            dialog = gtk.MessageDialog(message_format = 'This item will be able to be removed from favourite soon. Sorry. :(',
+                                       buttons = gtk.BUTTONS_OK)
+            dialog.run()
+            dialog.destroy()
+            return
+        category_list = appobj.category.split()
+        if 'favourite' in category_list:
+            category_list.remove('favourite')
+            dict = {'classname': appobj.__class__.__name__,
+                    'category': ' '.join(category_list)}
+            CustomApps.add_appobj_from_dict(dict)
+                
     def __left_tree_view_default_select(self):
         self.left_treeview.get_selection().unselect_all()
         self.left_treeview.expand_all()
-        self.left_treeview.get_selection().select_path('1')
+        self.left_treeview.get_selection().select_path('2')
 
     def __left_pane_changed ( self, treeselection, treeview ):
         model, parent = treeselection.get_selected()
@@ -200,6 +206,32 @@ class InstallRemovePane(gtk.VBox):
         scrollwindow.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scrollwindow.set_shadow_type(gtk.SHADOW_IN)
 
+        def left_treeview_button_press_event(treeview, event):
+            # first try to select the item at mouse position
+            if event.type == gtk.gdk.BUTTON_PRESS and event.button == 3:
+                selection = treeview.get_selection()
+                path_tuple = treeview.get_path_at_pos(int(event.x), int(event.y))
+                
+                if path_tuple:
+                    selection.select_path(path_tuple[0])
+                    item_selected = True
+                else:
+                    item_selected = False
+                
+                # if any item is selected, then pop up menu
+                if item_selected:
+                    add_software = image_stock_menuitem(gtk.STOCK_ADD, _('Add software into this category'))
+                    add_software.connect("activate", self.__left_treeview_add_software)
+                    popupmenu = gtk.Menu()
+                    popupmenu.append(add_software)
+                    popupmenu.show_all()
+                    if event.type == gtk.gdk.BUTTON_PRESS and event.button == 3:
+                        popupmenu.popup(None, None, None, event.button, event.time)
+                        return True
+            return False
+        
+        treeview.connect('button_press_event', left_treeview_button_press_event)
+        
         vbox = gtk.VBox(False, 5)
         vbox.pack_start(toolbar, False)
         vbox.pack_start(scrollwindow)
@@ -264,7 +296,7 @@ class InstallRemovePane(gtk.VBox):
             for obj in failed_install:
                 print >>message, obj.__doc__,
                 if obj.fail_by_download_error():
-                    print >>message, _('(network fault. not bug)')
+                    print >>message, _('(network failure. not bug)')
                 elif obj.fail_by_user_cancel():
                     print >>message, _('(cancelled by you. not bug)')
                 else:
@@ -453,14 +485,14 @@ class InstallRemovePane(gtk.VBox):
         import thread
         thread.start_new_thread(self.__apply_change_thread, () )
     
-    def __right_sort ( self, model, iter1, iter2 ):
-        obj1 = model.get_value ( iter1, 0 )
-        obj2 = model.get_value ( iter2, 0 )
-        import types
-        assert isinstance ( obj1 , types.InstanceType )
-        assert isinstance ( obj2 , types.InstanceType )        
-        str1, str2 = obj1.__doc__, obj2.__doc__
-        return cmp(str1, str2)
+    def __right_sort(self, model, iter1, iter2):
+        obj1 = model.get_value(iter1, 0)
+        obj2 = model.get_value(iter2, 0)
+        cmp_state = cmp(obj1.cache_installed, obj2.cache_installed)
+        if cmp_state:
+            return cmp_state
+        else:
+            return cmp(obj1.__doc__, obj2.__doc__)
 
     def __right_toggled(self, render_toggle,path,treestore,treemodelsort,treestorefilter):
         path1 = treemodelsort.convert_path_to_child_path(path)
@@ -506,7 +538,7 @@ class InstallRemovePane(gtk.VBox):
         if 'all' == self.right_pane_visible_category:
             visible1 = not obj.this_is_a_repository
         else:
-            visible1 = obj.category == self.right_pane_visible_category
+            visible1 = self.right_pane_visible_category in obj.category.split()
 
         if self.filter_text == '':
             visible2 = True
@@ -527,16 +559,24 @@ class InstallRemovePane(gtk.VBox):
         appobj = model.get_value(iter, 0)
         cell.set_property('pixbuf', appobj.logo_pixbuf)
         
-    def __right_DE_pixbuf_data_func(self, column, cell, model, iter):
-        class0 = model.get_value ( iter, 0 )
-        if hasattr(class0, 'DE'):
-            if class0.DE == 'gnome':
-                cell.set_property('pixbuf', self.DE_GNOME)
-            elif class0.DE == 'kde':
-                cell.set_property('pixbuf', self.DE_KDE)
+#    def __right_DE_pixbuf_data_func(self, column, cell, model, iter):
+#        class0 = model.get_value ( iter, 0 )
+#        if hasattr(class0, 'DE'):
+#            if class0.DE == 'gnome':
+#                cell.set_property('pixbuf', self.DE_GNOME)
+#            elif class0.DE == 'kde':
+#                cell.set_property('pixbuf', self.DE_KDE)
+#        else:
+#            cell.set_property('pixbuf', self.DE_DEFAULT)
+
+    def software_state_pixbuf_data_func(self, column, cell, model, iter):
+        class0 = model.get_value(iter, 0)
+        if class0.cache_installed:
+            pixbuf = self.STATE_INSTALLED
         else:
-            cell.set_property('pixbuf', self.DE_DEFAULT)
-            
+            pixbuf = self.STATE_NOTINSTALLED
+        cell.set_property('pixbuf', pixbuf)
+
     def __launch_quick_setup(self, *w):
         self.parentwindow.lock()
         self.set_sensitive(False)
@@ -553,10 +593,55 @@ class InstallRemovePane(gtk.VBox):
         import thread
         thread.start_new_thread(launch, ())
 
+    def save_softwarelist(self):
+        dialog = gtk.FileChooserDialog(title=_('Record the software items you have installed'),
+                                       action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                       buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OK, gtk.RESPONSE_OK,))
+        dialog.set_current_folder(os.environ['HOME'])
+        dialog.set_select_multiple(False)
+        ret = dialog.run()
+        if ret == gtk.RESPONSE_OK:
+            path = dialog.get_filename()
+            AppObjs.save_installed_items_to_file(path)
+            dialog.destroy()
+            dialog2 = gtk.MessageDialog(buttons=gtk.BUTTONS_OK,
+                                        message_format=_('Successfully record the software items to file %s') % path)
+            dialog2.run()
+            dialog2.destroy()
+        else:
+            dialog.destroy()
+    
+    def load_softwarelist(self):
+        dialog = gtk.FileChooserDialog(_('Select a software items list'),
+                                       action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                       buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OK, gtk.RESPONSE_OK,))
+        dialog.set_current_folder(os.environ['HOME'])
+        dialog.set_select_multiple(False)
+        ret = dialog.run()
+        if ret == gtk.RESPONSE_OK:
+            path = dialog.get_filename()
+            AppObjs.load_selection_state_from_file(path)
+            self.right_treeview.queue_draw()
+            dialog.destroy()
+            dialog2 = gtk.MessageDialog(buttons=gtk.BUTTONS_OK,
+                                        message_format=_('Successfully load file %s') % path)
+            dialog2.run()
+            dialog2.destroy()
+        else:
+            dialog.destroy()
+
     def __right_pane(self):
         self.sync_button = button_sync = image_file_only_button(D+'sora_icons/synchronize.png', 24)
         button_sync.set_tooltip_text(_('Synchronize'))
         button_sync.connect('clicked', lambda w: self.synchronize())
+
+        button_save = image_file_only_button(D+'sora_icons/softwarelist_save.png', 24)
+        button_save.set_tooltip_text(_('Record the software items you have installed'))
+        button_save.connect('clicked', lambda w: self.save_softwarelist())
+
+        button_load = image_file_only_button(D+'sora_icons/softwarelist_load.png', 24)
+        button_load.set_tooltip_text(_('Select the software items according to a saved list'))
+        button_load.connect('clicked', lambda w: self.load_softwarelist())
 
         from support.searchbox import SearchBoxForApp
         searchbox = SearchBoxForApp()
@@ -567,7 +652,6 @@ class InstallRemovePane(gtk.VBox):
         quick_setup_button.connect('clicked', self.__launch_quick_setup)
 
         self.quick_setup_area = Area()
-        self.quick_setup_area.pack_start(gtk.VSeparator(), False)
         self.quick_setup_area.pack_start(quick_setup_button, False)
         self.quick_setup_area.content_visible(UBUNTU or UBUNTU_DERIV)
 
@@ -576,16 +660,18 @@ class InstallRemovePane(gtk.VBox):
 
         toolbar = gtk.HBox(False, 3)
         toolbar.pack_start(gtk.VSeparator(), False)
-        toolbar.pack_start(button_sync, False)
+        toolbar.pack_start(button_apply, False)
         toolbar.pack_start(gtk.VSeparator(), False)
         toolbar.pack_start(searchbox, False)
-        toolbar.pack_start(self.quick_setup_area, False)
         toolbar.pack_start(gtk.VSeparator(), False)
-        toolbar.pack_start(button_apply, False)
+        toolbar.pack_start(button_sync, False)
+        toolbar.pack_start(button_save, False)
+        toolbar.pack_start(button_load, False)
+        toolbar.pack_start(self.quick_setup_area, False)
         
         import gobject, pango
+
         self.right_store = treestore = AppObjs.list_store
-        
         self.right_store_filter = treestorefilter = treestore.filter_new()
         treestorefilter.set_visible_func(self.__right_visible_func)
         
@@ -596,8 +682,9 @@ class InstallRemovePane(gtk.VBox):
         render_toggle = gtk.CellRendererToggle()
         render_toggle.connect('toggled',self.__right_toggled, treestore, treemodelsort, treestorefilter)
         render_pixbuf = gtk.CellRendererPixbuf()
-        render_DE_pixbuf = gtk.CellRendererPixbuf()
-        render_DE_pixbuf.set_property('yalign', 0)
+        render_software_state_pixbuf = gtk.CellRendererPixbuf()
+#        render_DE_pixbuf = gtk.CellRendererPixbuf()
+#        render_DE_pixbuf.set_property('yalign', 0)
         render_text = gtk.CellRendererText()
         render_text.set_property('ellipsize', pango.ELLIPSIZE_END)
 
@@ -608,10 +695,12 @@ class InstallRemovePane(gtk.VBox):
         col_text = gtk.TreeViewColumn()
         col_text.pack_start(render_pixbuf, False)
         col_text.set_cell_data_func(render_pixbuf, self.__right_pixbuf_data_func)
-        col_text.pack_start (render_text, True)
+        col_text.pack_start(render_text, True)
         col_text.set_cell_data_func(render_text, self.__right_text_data_func)
-        col_text.pack_end(render_DE_pixbuf, False)
-        col_text.set_cell_data_func(render_DE_pixbuf, self.__right_DE_pixbuf_data_func)
+        col_text.pack_start(render_software_state_pixbuf, False)
+        col_text.set_cell_data_func(render_software_state_pixbuf, self.software_state_pixbuf_data_func)
+#        col_text.pack_end(render_DE_pixbuf, False)
+#        col_text.set_cell_data_func(render_DE_pixbuf, self.__right_DE_pixbuf_data_func)
         col_text.set_sort_column_id(1000)
 
         self.right_treeview = treeview = gtk.TreeView(treemodelsort)
@@ -626,6 +715,43 @@ class InstallRemovePane(gtk.VBox):
         scroll.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scroll.set_shadow_type(gtk.SHADOW_IN)
         
+        def left_treeview_button_press_event(treeview, event):
+            if event.type == gtk.gdk.BUTTON_PRESS and event.button == 3:
+                # first select the item at mouse position
+                selection = treeview.get_selection()
+                path_tuple = treeview.get_path_at_pos(int(event.x), int(event.y))
+            
+                if path_tuple:
+                    selection.select_path(path_tuple[0])
+                    item_selected = True
+                else:
+                    item_selected = False
+
+                # then pop up menu
+                add_software = image_stock_menuitem(gtk.STOCK_ADD, _('Add a software item'))
+                add_software.connect("activate", self.__right_treeview_add_software)
+                edit_software = image_stock_menuitem(gtk.STOCK_EDIT, _('Edit'))
+                edit_software.connect("activate", self.__right_treeview_edit_software)
+                remove_software = image_stock_menuitem(gtk.STOCK_REMOVE, _('Delete'))
+                remove_software.connect("activate", self.__right_treeview_delete_software)
+                add_to_favourite = image_file_menuitem(_('Add To Favourite'), D+'sora_icons/favourite.png', 16)
+                add_to_favourite.connect("activate", self.__add_software_to_favourite)
+                remove_from_favourite = gtk.MenuItem(_('Remove From Favourite'))
+                remove_from_favourite.connect("activate", self.__remove_software_from_favourite)
+
+                popupmenu = gtk.Menu()
+                popupmenu.append(add_software)
+                if item_selected:
+                    popupmenu.append(edit_software)
+                    popupmenu.append(remove_software)
+                    popupmenu.append(add_to_favourite)
+                    popupmenu.append(remove_from_favourite)
+                popupmenu.show_all()
+                popupmenu.popup(None, None, None, event.button, event.time)
+                return True
+            return False
+        
+        treeview.connect('button_press_event', left_treeview_button_press_event)
         vbox = gtk.VBox(False, 5)
         vbox.pack_start(toolbar, False)
         vbox.pack_start(scroll)
@@ -716,9 +842,11 @@ class InstallRemovePane(gtk.VBox):
         self.parentwindow = parentwindow
         from support.terminal import Terminal
         self.terminal = Terminal()
-        self.DE_KDE = get_pixbuf(D + 'umut_icons/kde.png', 16, 16)
-        self.DE_GNOME = get_pixbuf(D + 'umut_icons/gnome.png', 16, 16)
-        self.DE_DEFAULT = blank_pixbuf(16, 16)
+#        self.DE_KDE = get_pixbuf(D + 'umut_icons/kde.png', 16, 16)
+#        self.DE_GNOME = get_pixbuf(D + 'umut_icons/gnome.png', 16, 16)
+#        self.DE_DEFAULT = blank_pixbuf(16, 16)
+        self.STATE_INSTALLED = get_pixbuf(D + 'sora_icons/software_installed.png', 24, 24)
+        self.STATE_NOTINSTALLED = get_pixbuf(D + 'sora_icons/software_not_installed.png', 24, 24)
 
         import os, sys
         self.backup_stdout = os.dup(sys.stdout.fileno())
@@ -736,8 +864,7 @@ class InstallRemovePane(gtk.VBox):
         self.pack_start(self.status_label, False)
         self.show_all()
     
-        import thread
-        thread.start_new_thread(self.notify_sync, ())
+        self.notify_sync()
     
     def show_status(self):
         num = len(AppObjs.appobjs)
@@ -747,7 +874,8 @@ class InstallRemovePane(gtk.VBox):
     def notify_sync(self):
         from download_icons import icons_pack_version
         if icons_pack_version > Config.get_last_synced_data_version():
-            gtk.gdk.threads_enter()
+            Config.set_last_synced_data_version(icons_pack_version) # do not ask again and again.
+            # TODO: display main_view window before dialog
             dialog = gtk.MessageDialog(buttons=gtk.BUTTONS_YES_NO,
                                        message_format=
                                        _('Would you like to download latest application data from web?'))
@@ -755,14 +883,15 @@ class InstallRemovePane(gtk.VBox):
             dialog.destroy()
             if ret == gtk.RESPONSE_YES:
                 self.synchronize()
-            gtk.gdk.threads_leave()
-
+        
     def synchronize(self):
-        from download_icons import icons_pack_version
+        import download_icons
+        Config.set_last_synced_data_version(download_icons.icons_pack_version)
+
         import subprocess
         task = subprocess.Popen(['python', A+'/download_icons.py'])
-        Config.set_last_synced_data_version(icons_pack_version)
         task.wait()
+
         self.do_refresh_icon()
 
     def left_class_choose_button_clicked(self, button):
@@ -780,7 +909,11 @@ class InstallRemovePane(gtk.VBox):
         return button
 
     def fill_left_treestore(self):
-        all_categories = [obj.category for obj in AppObjs.appobjs]
+        all_categories = set()
+        for obj in AppObjs.appobjs:
+            for c in obj.category.split():
+                all_categories.add(c)
+        all_categories.add('favourite') # always visible favourite category
         items = Category.all()
         assert items[0].category == 'all'
         items[0].visible = True
@@ -792,5 +925,6 @@ class InstallRemovePane(gtk.VBox):
         
         right_categories = [item.category for item in items]
         for obj in AppObjs.appobjs:
-            if obj.category not in right_categories:
-                print obj.__class__.__name__, 'category is wrong'
+            for c in obj.category.split():
+                if c not in right_categories:
+                    print obj.__class__.__name__, 'category is wrong'

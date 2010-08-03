@@ -111,9 +111,6 @@ class Config:
         if not os.path.exists(dir): # make directory
             os.makedirs(dir)
     @classmethod
-    def get_config_dir(cls):
-        return cls.config_dir
-    @classmethod
     def init(cls):
         assert not hasattr(cls, 'inited')
         cls.inited = True
@@ -122,14 +119,17 @@ class Config:
         cls.parser = ConfigParser.RawConfigParser()
         # read configuration file if it exists
         cls.make_config_dir()
-        path = cls.get_config_dir() + 'conf'
+        path = cls.config_dir + 'conf'
         if os.path.exists(path):
             cls.parser.read(path)
     @classmethod
     def save(cls):
         cls.make_config_dir()
-        with open(cls.get_config_dir() + 'conf' , 'w') as f:
-            cls.parser.write(f)
+        try:
+            with open(cls.config_dir + 'conf' , 'w') as f:
+                cls.parser.write(f)
+        except:
+            print_traceback()
     @classmethod
     def set_string(cls, key, value):
         assert isinstance(key, str) and key
@@ -175,6 +175,15 @@ class Config:
         value = str(value)
         return value=='True' or value=='true'
     @classmethod
+    def get_custom_appobj_counter_value(cls):
+        try: return cls.get_int('custom_app_count')
+        except: return 0
+    @classmethod
+    def increase_customapp_counter_value(cls):
+        value = cls.get_custom_appobj_counter_value()
+        value += 1
+        cls.set_int('custom_app_count', value)
+    @classmethod
     def set_do_query_before_install(cls, value):
         cls.set_bool('do_query_before_install', value)
     @classmethod
@@ -190,11 +199,12 @@ class Config:
         try: return cls.get_string('login_window_background')
         except: return None # please do not return ''. 
     @classmethod
-    def set_username_of_suggestion_window(cls, value):
-        cls.set_string('username_of_suggestion_window', value)
+    def set_contact(cls, value):
+        cls.set_string('contact', value)
     @classmethod
-    def get_username_of_suggestion_window(cls):
-        try: return cls.get_string('username_of_suggestion_window')
+    def get_contact(cls):
+        try:
+            return cls.get_string('contact')
         except:
             import os
             return os.environ['USER']
@@ -364,6 +374,15 @@ class Config:
         import os
         return os.path.exists('/etc/arch-release')
     @classmethod
+    def is_Debian(cls):
+        import platform
+        return platform.dist()[0] == 'debian'
+    @classmethod
+    def get_Debian_version(cls):
+        'return "5.*"'
+        import platform
+        return platform.dist()[1]
+    @classmethod
     def is_GNOME(cls):
         if cls.is_XFCE(): return False
         try:
@@ -456,7 +475,7 @@ class ResponseTime:
     def load(cls):
         import os
         try:
-            path = Config.get_config_dir() + 'response_time_3'
+            path = Config.config_dir + 'response_time_3'
             if not os.path.exists(path): return
             with open(path) as f:
                 lines = f.readlines()
@@ -470,7 +489,7 @@ class ResponseTime:
     def save(cls):
         if not cls.changed: return
         try:
-            path = Config.get_config_dir() + 'response_time_3'
+            path = Config.config_dir + 'response_time_3'
             with open(path, 'w') as f:
                 for key, value in cls.map.items():
                     print >>f, key
@@ -763,25 +782,23 @@ class RPM:
         cls.__set2 = set()
         import subprocess, os
 
-        TimeStat.begin(_('scan installed packages'))
-        path = A+'/support/dump_rpm_installed.py'
-        task = subprocess.Popen(['python', path],
-            stdout=subprocess.PIPE,
-            )
-        for line in task.stdout:
-            cls.__set1.add(line.strip())
-        task.wait()
-        TimeStat.end(_('scan installed packages'))
+        with TimeStat(_('scan installed packages')):
+            path = A+'/support/dump_rpm_installed.py'
+            task = subprocess.Popen(['python', path],
+                stdout=subprocess.PIPE,
+                )
+            for line in task.stdout:
+                cls.__set1.add(line.strip())
+            task.wait()
         
-        TimeStat.begin(_('scan available packages'))
-        path = A+'/support/dump_rpm_existing_new.py'
-        task = subprocess.Popen(['python', path],
-            stdout=subprocess.PIPE,
-            )
-        for line in task.stdout:
-            cls.__set2.add(line.strip())
-        task.wait()
-        TimeStat.end(_('scan available packages'))
+        with TimeStat(_('scan available packages')):
+            path = A+'/support/dump_rpm_existing_new.py'
+            task = subprocess.Popen(['python', path],
+                stdout=subprocess.PIPE,
+                )
+            for line in task.stdout:
+                cls.__set2.add(line.strip())
+            task.wait()
     @classmethod
     def get_installed_pkgs_set(cls):
         cls.refresh_cache()
@@ -802,18 +819,18 @@ class RPM:
     @classmethod
     def install(cls, *package):
         cls.cache_changed()
-        run_as_root_in_terminal('yum install %s' % ' '.join(package))
+        run_as_root_in_terminal('yum install %s -y' % ' '.join(package))
     @classmethod
     def install_local(cls, path):
         assert isinstance(path, str)
         import os
         assert os.path.exists(path)
         cls.cache_changed()
-        run_as_root_in_terminal('yum localinstall "%s"' % path)
+        run_as_root_in_terminal('yum localinstall "%s" --nogpgcheck -y' % path)
     @classmethod
     def remove(cls, *package):
         cls.cache_changed()
-        run_as_root_in_terminal('yum remove %s' % ' '.join(package))
+        run_as_root_in_terminal('yum remove %s -y' % ' '.join(package))
     @classmethod
     def import_key(cls, path):
         assert isinstance(path, str)
@@ -830,6 +847,11 @@ class APT:
     def cache_changed(cls):
         cls.fresh_cache = False
     @classmethod
+    def get_pkg_summary(cls, name):
+        assert isinstance(name, str) and name
+        cls.refresh_cache()
+        return cls.apt_cache[name].summary
+    @classmethod
     def has_broken_dependency(cls):
         cls.refresh_cache()
         try:
@@ -840,13 +862,12 @@ class APT:
     def refresh_cache(cls):
         if cls.fresh_cache: return
         cls.fresh_cache = True
-        TimeStat.begin(_('scan packages'))
-        import apt
-        try:
-            cls.apt_cache = apt.cache.Cache()
-        except SystemError, e: # syntax error in source config
-            raise APTSourceSyntaxError(*e.args)
-        TimeStat.end(_('scan packages'))
+        with TimeStat(_('scan packages')):
+            import apt
+            try:
+                cls.apt_cache = apt.cache.Cache()
+            except SystemError, e: # syntax error in source config
+                raise APTSourceSyntaxError(*e.args)
     @classmethod
     def get_installed_pkgs_set(cls):
         cls.refresh_cache()
@@ -920,7 +941,8 @@ class APT:
     def install_local(cls, *packages):
         cls.cache_changed()
         for package in packages:
-            run_as_root_in_terminal('dpkg -i "%s"' % package)
+            run_as_root('gdebi-gtk "%s"' % package)
+#            run_as_root_in_terminal('dpkg -i "%s"' % package)
 #            daemon().apt_command('install_local', package,
 #                                 packed_env_string(), timeout=3600, dbus_interface='cn.ailurus.Interface')
     @classmethod
@@ -949,24 +971,22 @@ class PACMAN:
         cls.fresh_cache = True
         cls.__pkgs = set()
         cls.__allpkgs = set()
-        TimeStat.begin(_('scan installed packages'))
-        import subprocess, os
-        task = subprocess.Popen(['pacman', '-Q'],
-            stdout=subprocess.PIPE,
-            )
-        for line in task.stdout:
-            cls.__pkgs.add(line.split()[0])
-        task.wait()
-        TimeStat.end(_('scan installed packages'))
+        with TimeStat(_('scan installed packages')):
+            import subprocess, os
+            task = subprocess.Popen(['pacman', '-Q'],
+                stdout=subprocess.PIPE,
+                )
+            for line in task.stdout:
+                cls.__pkgs.add(line.split()[0])
+            task.wait()
         
-        TimeStat.begin(_('scan available packages'))
-        task = subprocess.Popen(['pacman', '-Sl'],
-            stdout=subprocess.PIPE,
-            )
-        for line in task.stdout:
-            cls.__allpkgs.add(line.split()[1])
-        task.wait()
-        TimeStat.end(_('scan available packages'))
+        with TimeStat(_('scan available packages')):
+            task = subprocess.Popen(['pacman', '-Sl'],
+                stdout=subprocess.PIPE,
+                )
+            for line in task.stdout:
+                cls.__allpkgs.add(line.split()[1])
+            task.wait()
     @classmethod
     def get_existing_pkgs_set(cls):
         cls.refresh_cache()
@@ -1290,7 +1310,31 @@ class PingThread(threading.Thread):
 def open_web_page(page):
     is_string_not_empty(page)
     notify( _('Opening web page'), page)
-    KillWhenExit.add('xdg-open %s'%page)
+    KillWhenExit.add('xdg-open "%s"'%page)
+
+def url_button(url, text=None): # put here because of open_web_page :(
+    if text == None: text = url
+    import gtk, pango
+    def func(w, url): open_web_page(url)
+    def enter(w, e): 
+        try: w.get_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.HAND2))
+        except AttributeError: pass
+    def leave(w, e): 
+        try: w.get_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.LEFT_PTR))
+        except AttributeError: pass
+    label = gtk.Label()
+    label.set_markup("<span color='blue'><u>%s</u></span>" % text)
+    font = pango.FontDescription('Georgia')
+    label.modify_font(font)
+    button = gtk.Button()
+    button.connect('clicked', func, url)
+    button.connect('enter-notify-event', enter)
+    button.connect('leave-notify-event', leave)
+    button.set_relief(gtk.RELIEF_NONE)
+    button.add(label)
+    align = gtk.Alignment(0, 0.5)
+    align.add(button)
+    return align
 
 def report_bug(*w):
     page = 'http://code.google.com/p/ailurus/issues/entry'
@@ -1312,6 +1356,9 @@ class firefox:
     def init(cls):
         'may raise exception'
         ini_file = os.path.expanduser('~/.mozilla/firefox/profiles.ini')
+        if not os.path.exists(ini_file):
+            print '[x] Firefox profiles.ini missing'
+            return
         with open(ini_file) as f:
             lines = f.readlines()
         for i, line in enumerate(lines):
@@ -1543,18 +1590,19 @@ class R:
         for e in url_list:
             assert isinstance(e, str), e
             assert e.startswith('http://') or e.startswith('https://') or e.startswith('ftp://')
+        self.url = self.delete_duplicate(url_list)
+
         #check size
         if size!=None:
             assert size>0
             assert isinstance(size, int) or isinstance(size, long), size
+        self.size = size
         #check hash
         if hash:
             assert isinstance(hash, str), hash
             assert len(hash)==40, hash
-
-        self.url = self.delete_duplicate(url_list)
-        self.size = size
         self.hash = hash
+
         if filename:
             self.filename = filename
         else:
@@ -1574,13 +1622,6 @@ class R:
             except:
                 pass
         return False
-    @classmethod
-    def create_tmp_dir(cls):
-        dir = '/var/cache/ailurus/'
-        import os
-        if not os.path.exists(dir):
-            run_as_root('mkdir %s -p'%dir)
-        own_by_user(dir)
     def check(self, path):
         if self.size:
             import os
@@ -1595,14 +1636,13 @@ class R:
             print _('Good.')
     def download(self):
         self.sort()
-        dest = '/var/cache/ailurus/'+self.filename
+        dest = '/tmp/'+self.filename
         import os, sys
         assert isinstance(self.sorted_url, list)
         for i, url in enumerate(self.sorted_url):
             print '\x1b[1;36m', _('Using mirror %(i)s. There are a total of %(total)s mirrors.') % {'i' : i+1, 'total' : len(self.sorted_url)}, '\x1b[m'
             assert isinstance(url, str)
             try:
-                R.create_tmp_dir()
                 download(url, dest)
                 self.check(dest)
                 return dest
@@ -1812,26 +1852,71 @@ class TimeStat:
     __open_stat_names = set()
     __begin_time = {}
     result = {}
-    @classmethod
-    def begin(cls, name):
+    def __init__(self, name):
         assert isinstance(name, str) and name
-        assert name not in cls.__open_stat_names, name
-        cls.__open_stat_names.add(name)
+        assert name not in TimeStat.__open_stat_names, name
+        TimeStat.__open_stat_names.add(name)
         import time
-        cls.__begin_time[name] = time.time()
-    @classmethod
-    def end(cls, name):
+        TimeStat.__begin_time[name] = time.time()
+        self.name = name
+    def __enter__(self):
+        return None
+    def __exit__(self, type, value, traceback):
+        name = self.name
         assert isinstance(name, str) and name
-        assert name in cls.__open_stat_names
+        assert name in TimeStat.__open_stat_names
         import time
-        length = time.time() - cls.__begin_time[name]
-        cls.result[name] = length
-        cls.__open_stat_names.remove(name)
+        length = time.time() - TimeStat.__begin_time[name]
+        TimeStat.result[name] = length
+        TimeStat.__open_stat_names.remove(name)
     @classmethod
     def clear(cls):
         cls.__open_stat_names.clear()
         cls.__begin_time.clear()
         cls.result.clear()
+
+def add_linuxskill(linux_skill, how_to_contact_the_submitter=None):
+    assert isinstance(linux_skill, (str, unicode)) and linux_skill
+    assert how_to_contact_the_submitter is None or isinstance(how_to_contact_the_submitter, (str, unicode))
+
+    import httplib, urllib
+    params = {'linux_skill': linux_skill}
+    if how_to_contact_the_submitter:
+        params['how_to_contact_the_submitter'] = how_to_contact_the_submitter
+    params = urllib.urlencode(params)
+    headers = {'Content-type': 'application/x-www-form-urlencoded',
+               'Accept': 'text/plain'}
+    connection = httplib.HTTPConnection('we-like-ailurus.appspot.com')
+    connection.request('POST', '/add_linuxskill', params)
+    response = connection.getresponse()
+    assert response.status == 200, response.status
+    connection.close()
+
+def add_suggestion(suggestion, how_to_contact_the_submitter=None):
+    assert isinstance(suggestion, (str, unicode)) and suggestion
+    assert how_to_contact_the_submitter is None or isinstance(how_to_contact_the_submitter, (str, unicode))
+    
+    import httplib, urllib
+    params = {'suggestion': suggestion}
+    if how_to_contact_the_submitter:
+        params['how_to_contact_the_submitter'] = how_to_contact_the_submitter
+    params = urllib.urlencode(params)
+    headers = {'Content-type': 'application/x-www-form-urlencoded',
+               'Accept': 'text/plain'}
+    connection = httplib.HTTPConnection('we-like-ailurus.appspot.com')
+    connection.request('POST', '/add_suggestion', params)
+    response = connection.getresponse()
+    assert response.status == 200, response.status
+    connection.close()
+
+def debian_installation_command(package_names):
+    return 'apt-get install ' + package_names
+
+def fedora_installation_command(package_names):
+    return 'yum install ' + package_names
+
+def archlinux_installation_command(package_names):
+    return 'pacman -S ' + package_names
 
 def get_ailurus_version():
     import os
@@ -1871,8 +1956,10 @@ atexit.register(KillWhenExit.kill_all)
 atexit.register(drop_priviledge)
 try:
     firefox.init()
-    atexit.register(firefox.save_user_prefs)
-except: print_traceback()
+    if firefox.support:
+        atexit.register(firefox.save_user_prefs)
+except:
+    print_traceback()
 
 try:
     import pynotify
@@ -1887,25 +1974,52 @@ YLMF = Config.is_YLMF()
 DEEPIN = Config.is_Deepin()
 FEDORA = Config.is_Fedora()
 ARCHLINUX = Config.is_ArchLinux()
+DEBIAN = Config.is_Debian()
 if UBUNTU:
+    DISTRIBUTION = 'ubuntu'
     VERSION = Config.get_Ubuntu_version()
+    BACKEND = APT
+    installation_command_backend = debian_installation_command
 elif MINT:
+    DISTRIBUTION = 'ubuntu'
     UBUNTU_DERIV = True
     VERSION = Config.get_Mint_version() # VERSION is in ['5', '6', '7', '8', '9', '10']
     VERSION = ['hardy', 'intrepid', 'jaunty', 'karmic', 'lucid', 'maverick'][int(VERSION)-5]
+    BACKEND = APT
+    installation_command_backend = debian_installation_command
 elif YLMF:
+    DISTRIBUTION = 'ubuntu'
     UBUNTU_DERIV = True
     VERSION = Config.get_YLMF_version()
+    BACKEND = APT
+    installation_command_backend = debian_installation_command
 elif DEEPIN:
+    DISTRIBUTION = 'ubuntu'
     UBUNTU_DERIV = True
     VERSION = Config.get_Deepin_version()
+    BACKEND = APT
+    installation_command_backend = debian_installation_command
 elif FEDORA:
+    DISTRIBUTION = 'fedora'
     VERSION = Config.get_Fedora_version()
+    BACKEND = RPM
+    installation_command_backend = fedora_installation_command
 elif ARCHLINUX:
+    DISTRIBUTION = 'archlinux'
     VERSION = '' # ArchLinux has no version -_-b
+    BACKEND = PACKMAN
+    installation_command_backend = archlinux_installation_command
+elif DEBIAN:
+    DISTRIBUTION = 'debian'
+    VERSION = Config.get_Debian_version()
+    BACKEND = APT
+    installation_command_backend = debian_installation_command
 else:
-    print _('Your Linux distribution is not supported. :(')
+    # This Linux distribution is not supported. :(
+    DISTRIBUTION = ''
     VERSION = ''
+    BACKEND = None
+    installation_command_backend = None
 
 GNOME = False
 KDE = False
@@ -1926,3 +2040,11 @@ else:
     GNOME = Config.is_GNOME()
     KDE = Config.is_KDE()
     XFCE = Config.is_XFCE()
+if GNOME:
+    DESKTOP = 'gnome'
+elif KDE:
+    DESKTOP = 'kde'
+elif XFCE:
+    DESKTOP = 'xfce'
+else:
+    DESKTOP = ''

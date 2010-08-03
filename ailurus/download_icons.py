@@ -1,9 +1,29 @@
+#coding: utf8
+#
+# Ailurus - a simple application installer and GNOME tweaker
+#
+# Copyright (C) 2009-2010, Ailurus developers and Ailurus contributors
+# Copyright (C) 2007-2010, Trusted Digital Technology Laboratory, Shanghai Jiao Tong University, China.
+#
+# Ailurus is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# Ailurus is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ailurus; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 import sys, os, urllib2, gtk, thread, time, re
 from lib import *
 from libu import *
 
-icons_pack_version = 5
+icons_pack_version = 6
 
 class DownloadIconsWindow(gtk.Window):
     url = 'http://ailurus.googlecode.com/files/appicons_v%s.tar.gz' % icons_pack_version
@@ -44,8 +64,11 @@ class DownloadIconsWindow(gtk.Window):
     
     def get_length_from_header(self, header_string):
         list = re.findall(r'Content-Length: ([0-9]+)', header_string)
-        value = int(list[0])
-        return value
+        try:
+            value = int(list[0])
+            return value
+        except: # not happen if download from googlecode. happens if download from file:// 
+            return 1
 
     def download_thread(self):
         try:
@@ -87,6 +110,7 @@ class DownloadIconsWindow(gtk.Window):
             gtk.main() # show exception dialog
         else:
             dialog = gtk.MessageDialog(buttons=gtk.BUTTONS_OK, message_format=_('Please press "OK" button to install icons. Authentication is required.'))
+            dialog.set_position(gtk.WIN_POS_CENTER)
             dialog.run()
             dialog.destroy()
             try:
@@ -113,9 +137,10 @@ if __name__ == '__main__':
     libc.prctl(15, 'ailurus_icon_downloader', 0, 0, 0)
     if get_output('pgrep -u $USER ailurus_icon_downloader', True): # detect_running_instances
         sys.exit(1) # another instance is running, therefore I exit
-    gtk.gdk.threads_init()
+
     window = DownloadIconsWindow()
     thread.start_new_thread(window.download_thread, ())
     gtk.gdk.threads_enter()
     window.main_thread()
     gtk.gdk.threads_leave()
+

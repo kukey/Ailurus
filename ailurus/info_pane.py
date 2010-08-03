@@ -24,9 +24,14 @@ import gtk, sys, os
 from lib import *
 from libu import *
 
+missing_files = [] # used only in get_information_pixbuf. do not continuously display error messages.
+
 def get_information_pixbuf(path, width, height):
     if not os.path.exists(path):
-        print path, 'is missing'
+        global missing_files
+        if path not in missing_files:
+            print path, 'is missing'
+            missing_files.append(path)
         path = D+'sora_icons/default_information_icon.png'
     return get_pixbuf(path, width, height)
 
@@ -47,8 +52,8 @@ class InfoPane(gtk.VBox):
             while child:
                 value1 = self.treestore.get_value(child, 1)
                 value2 = self.treestore.get_value(child, 2)
-                print >>f, '\t', value1
-                print >>f, '\t\t', value2
+                print >>f, '  ', value1
+                print >>f, '    ', value2
                 child = self.treestore.iter_next(child)
                 
             root = self.treestore.iter_next(root)

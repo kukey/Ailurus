@@ -35,52 +35,49 @@ class urls:
     alipay = 'http://blog.alipay.com/wp-content/2008/10/aliedit.tar.gz'
     amenace = 'http://www.viewizard.com/download/amenace12.tar.bz2'
     hittex = 'http://plutothesis.googlecode.com/files/PlutoThesis_UTF8_1.9.2.20090424.zip'
-    eioffice = 'http://evermoresw.com.cn/EverMore/EIOPersonal/EIOffice_Personal_Lin.tar.gz'
-    eioffice_clipart = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_Clipart.tar.gz'
-    eioffice_help = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_HelpFiles.tar.gz'
-    eioffice_scienceeditor = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_ScienceEditorImages.tar.gz'
-    eioffice_templates = 'http://evermoresw.com.cn/EverMore/EIOPersonal/Resource/EIOffice_Templates.tar.gz'
     nvidia_32 = 'ftp://download.nvidia.com/XFree86/Linux-x86/195.36.24/NVIDIA-Linux-x86-195.36.24-pkg1.run'
     nvidia_64 = 'ftp://download.nvidia.com/XFree86/Linux-x86_64/195.36.24/NVIDIA-Linux-x86_64-195.36.24-pkg2.run'
     adobeair = 'http://airdownload.adobe.com/air/lin/download/latest/adobeair.deb'
     picasa_32 = 'http://dl.google.com/linux/deb/pool/non-free/p/picasa/picasa_3.0-current_i386.deb'
     picasa_64 = 'http://dl.google.com/linux/deb/pool/non-free/p/picasa/picasa_3.0-current_amd64.deb'
+    truecrypt32 = 'http://www.truecrypt.org/download/truecrypt-7.0-linux-x86.tar.gz'
+    truecrypt64 = 'http://www.truecrypt.org/download/truecrypt-7.0-linux-x64.tar.gz'
 
-class Alice(_path_lists):
-    __doc__ = _('Alice: A new way to learn programming')
-    detail = _('A storytelling application, especially appropriate for middle school students.')
-    download_url = 'http://www.alice.org/' 
-    category = 'education'
-    def __init__(self):
-        self.dir = '/opt/Alice 2.2'
-        self.shortcut = '/usr/share/applications/alice.desktop'
-        self.paths = [ self.dir, self.shortcut ]
-    def install(self):
-        if is32():
-            f = R(
-['http://tdt.sjtu.edu.cn/S/Alice2.2b_i386.tar.bz2',],
-296544228, '0c6340a5b52d72abc12c394561d61c3ccba21ca7').download()
-        else:
-            f = R(
-['http://tdt.sjtu.edu.cn/S/Alice2.2b_x86_64.tar.bz2',],
-296519582, '7558fa7f22d13f8d18671b3efc44374541c5a506').download()
-
-        import os
-        if not os.path.exists('/opt'):
-            run_as_root('mkdir /opt')
-        own_by_user('/opt')
-        with Chdir('/opt'):
-            run('tar jxf '+f)
-            assert os.path.exists(self.dir)
-            create_file(self.shortcut, '''[Desktop Entry]
-Name=Alice
-Exec=bash "/opt/Alice 2.2/Required/alice.sh"
-Path=/opt/Alice 2.2/Required/
-Encoding=UTF-8
-StartupNotify=true
-Terminal=false
-Type=Application
-Categories=Education;Science; ''')
+#class Alice(_path_lists):
+#    __doc__ = _('Alice: A new way to learn programming')
+#    detail = _('A storytelling application, especially appropriate for middle school students.')
+#    download_url = 'http://www.alice.org/' 
+#    category = 'education'
+#    def __init__(self):
+#        self.dir = '/opt/Alice 2.2'
+#        self.shortcut = '/usr/share/applications/alice.desktop'
+#        self.paths = [ self.dir, self.shortcut ]
+#    def install(self):
+#        if is32():
+#            f = R(
+#['http://tdt.sjtu.edu.cn/S/Alice2.2b_i386.tar.bz2',],
+#296544228, '0c6340a5b52d72abc12c394561d61c3ccba21ca7').download()
+#        else:
+#            f = R(
+#['http://tdt.sjtu.edu.cn/S/Alice2.2b_x86_64.tar.bz2',],
+#296519582, '7558fa7f22d13f8d18671b3efc44374541c5a506').download()
+#
+#        import os
+#        if not os.path.exists('/opt'):
+#            run_as_root('mkdir /opt')
+#        own_by_user('/opt')
+#        with Chdir('/opt'):
+#            run('tar jxf '+f)
+#            assert os.path.exists(self.dir)
+#            create_file(self.shortcut, '''[Desktop Entry]
+#Name=Alice
+#Exec=bash "/opt/Alice 2.2/Required/alice.sh"
+#Path=/opt/Alice 2.2/Required/
+#Encoding=UTF-8
+#StartupNotify=true
+#Terminal=false
+#Type=Application
+#Categories=Education;Science; ''')
 
 class AliPayFirefoxPlugin(I):
     __doc__ = _('Alipay ( Zhi Fu Bao ) security plugin for Firefox')
@@ -267,7 +264,7 @@ class Google_Chrome(I):
         APT.remove('google-chrome-stable')
 
 class ESETNOD32(I):
-    __doc__ = _('ESET NOD32')
+    'ESET NOD32'
     detail = _('Anti virus and anti spyware')
     download_url = 'http://beta.eset.com/linux'
     category = 'antivirus'
@@ -306,7 +303,7 @@ class Repo_Oracle(_repo):
         _repo.__init__(self)
 
 class AdobeAIR(I):
-    __doc__ = 'Adobe AIR'
+    'Adobe AIR'
     detail = _('Use HTML, JavaScript and Flash to build desktop applications')
     download_url = 'http://get.adobe.com/air/'
     category = 'ide'
@@ -319,13 +316,13 @@ class AdobeAIR(I):
         APT.remove('adobeair')
 
 class Picasa(I):
-    __doc__ = 'Picasa'
+    'Picasa'
     detail = _('An image organizer and image viewer, plus photo-sharing function')
     if is32():
         download_url = urls.picasa_32
     else:
         download_url = urls.picasa_64
-    category = 'photo'
+    category = 'image'
     def install(self):
         f = R(self.download_url).download()
         APT.install_local(f)
@@ -335,7 +332,7 @@ class Picasa(I):
         APT.remove('picasa')
 
 class Mendeley(_apt_install):
-    __doc__ = 'Mendeley'
+    'Mendeley'
     detail = _('Organizes research paper collection and citations. It automatically generates bibliographies.')
     pkgs = 'mendeleydesktop'
     category = 'latex'
@@ -345,3 +342,26 @@ class Mendeley(_apt_install):
     if i%2 == 0: b = '04'
     else: b = '10'
     deb = 'deb http://www.mendeley.com/repositories/xUbuntu_%s.%s /' % (a, b)
+
+class TrueCrypt(I):
+    __doc__ = _('TrueCrypt: Open-Source disk encryption software')
+    detail = _('Create a virtual encrypted disk or encrypt an entire partition')
+    category = 'security'
+    def installed(self):
+        return os.path.exists('/usr/bin/truecrypt')
+    def remove(self):
+        run_as_root('/usr/bin/truecrypt-uninstall.sh')
+    def install(self):
+        if is32():
+            url = urls.truecrypt32
+            pattern = 'truecrypt-*-setup-x86'
+        else:
+            url = urls.truecrypt64
+            pattern = 'truecrypt-*-setup-x64'
+        f = R(url).download()
+        with Chdir('/tmp'):
+            run('tar xf "%s"' % f)
+            import glob
+            path = glob.glob(pattern)[0]
+            path = os.path.abspath(path)
+            run_as_root(path)

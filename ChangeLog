@@ -1,3 +1,64 @@
+2010-07-28 Homer Xing <homer.xing@gmail.com>
+
+    * Fix bug about SweetHome3D installing path, issue 1020.
+    * Fix bug about RemasterSys installing, issue 1023.
+    * Fix bug about a lot of third party repositories, issue 1022.
+    * Fix issue about gnomekeyring.cancellederror, issue 999.
+    * Fix bug about creating imagemagick icon, issue 1025.
+
+2010-07-27 CHEN Yangyang <skabyy@gmail.com>
+
+    * Optimize the repository configure pane
+    * Add "add third party repository area" to repository configure pane
+    * Fix some bugs
+
+2010-07-27 HAN Haofu <gtxx3600@gmail.com>
+
+	* Allow user to add new package-entry
+	* Allow user to modify package-detail
+	* Allow user to change package-icon
+	* Allow user to add/remove package to/from Favourite
+
+2010-07-27 Homer Xing <homer.xing@gmail.com>
+
+    * Terminal window grabs focus.
+    * Add KDevelop, an IDE similar to Visual Studio.
+    * Add Kile, a LaTeX editor.
+    * Add LyX, "what you see is what you mean" LaTeX editor.
+    * Add Pdftk, a command line tool which can split, merge, encrypt and uncompress PDF files.
+    * Add PDFedit, add marks and annotations on PDF files.
+    * Add GoldenDict, one of the best dictionary applications.
+    * Add Artha, looking up synonyms and antonyms.
+    * Add MyTourbook, excellent route planner, and GPS log analyser software.
+    * Do not store downloaded files in /var/cache/ailurus/ any more.
+    * Add RouteConverter, converts between different GPS track formats.
+    * Add Backintime, incremental backup tool supporting schedule.
+    * Add Geogebra, learning algebra and geometry.
+    * Add Celestia, 3D astronomy simulator.
+    * Add Kstars, planetarium software.
+    * Add Handbrake, video transformer.
+
+2010-07-26 Homer Xing <homer.xing@gmail.com>
+
+    * Use a proxy server if http_proxy environment variable is set
+
+2010-07-25 Homer Xing <homer.xing@gmail.com>
+
+    * Improve behaviour of agreement dialog.
+      When the user select "I agree." and press "No", then still show dialog next time.
+    * Add qcad-doc in qcad item
+    * Do not repeatly display error messages on same file from get_information_pixbuf()
+    * Synchronize online data in main process.
+    * Show software status as tick or cross.
+    * Change sort order of software items. Installed items are at bottom.
+    * Support for saving and loading installed software items.
+    * Display less indent in "print computer information" dialog.
+    * Improve the introduction text of /apps/update-notifier/auto_launch
+    * Support for disabling GNOME login sound
+    * Improve the introduction text of /apps/gdm/simple-greeter/disable_user_list
+    * Suggest to remove ubuntu-docs package to free 270M disk space.
+    * Improve code. Do not use string replacement for $version. Use VERSION inline.
+
 2010-07-23 Homer Xing <homer.xing@gmail.com>
 
     * Prompt to do synchronization if new icon pack is available.
@@ -54,6 +115,10 @@
     * Ignore FetchFailedException in apt_update()
     * Download icon pack using proxy server
     * Prompt syntax error in source configuration
+
+2010-07-10 CHEN Yangyang <skabyy@gmail.com>
+
+    * Add a feature to delay sending while the server can not be connected
 
 2010-07-10 CHEN Yangyang <skabyy@gmail.com>
 

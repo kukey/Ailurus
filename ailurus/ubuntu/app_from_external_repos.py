@@ -233,3 +233,17 @@ class Mobloquer(_apt_install):
     category = 'internet'
     ppa = 'jre-phoenix'
     pkgs = 'moblock mobloquer'
+
+class Backintime(_apt_install):
+    __doc__ = 'Back In Time'
+    detail = _('Incremental backup tool supporting schedule')
+    category = 'security'
+    ppa = 'bit-team/testing'
+    pkgs = 'backintime-gnome'
+
+class Handbrake(_apt_install):
+    'Handbrake'
+    detail = _('Convert video into other forms so they can be viewed on portable devices')
+    category = 'media_editor'
+    ppa = 'stebbins/handbrake-snapshots'
+    pkgs = 'handbrake-gtk'

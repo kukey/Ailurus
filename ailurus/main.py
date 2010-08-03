@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #coding: utf8
 #
 # Ailurus - a simple application installer and GNOME tweaker
@@ -25,6 +26,31 @@ from lib import *
 from libu import *
 from loader import *
 
+def detect_proxy_env():
+    if 'http_proxy' in os.environ and Config.get_use_proxy() == False:
+        proxy_string = os.environ['http_proxy']
+        message = _('You have set an environment variable <i>http_proxy=%s</i>.\n'
+                    'Would you like to let Ailurus use a proxy server?') % proxy_string
+        dialog = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION,
+                                   buttons=gtk.BUTTONS_YES_NO)
+        dialog.set_markup(message)
+        ret = dialog.run()
+        dialog.destroy()
+        if ret == gtk.RESPONSE_YES:
+            try:
+                set_proxy_string(proxy_string)
+                Config.set_use_proxy(True)
+            except:
+                print_traceback()
+            else:
+                dialog = gtk.MessageDialog(type=gtk.MESSAGE_INFO,
+                                           buttons=gtk.BUTTONS_OK,
+                                           message_format=_('Successfully adopted a proxy server'))
+                dialog.run()
+                dialog.destroy()
+        else:
+            os.unsetenv('http_proxy')
+
 def detect_running_instances():
     string = get_output('pgrep -u $USER ailurus', True)
     if string!='':
@@ -51,45 +77,56 @@ def with_same_content(file1, file2):
     return content1 == content2
 
 def check_required_packages():
+    debian_missing = []
     ubuntu_missing = []
     fedora_missing = []
     archlinux_missing = []
 
     try: import pynotify
     except: 
+        debian_missing.append('python-notify')
         ubuntu_missing.append('python-notify')
         fedora_missing.append('notify-python')
         archlinux_missing.append('python-notify')
     try: import vte
     except: 
+        debian_missing.append('python-vte')
         ubuntu_missing.append('python-vte')
         fedora_missing.append('vte')
         archlinux_missing.append('vte')
     try: import apt
     except: 
+        debian_missing.append('python-apt')
         ubuntu_missing.append('python-apt')
     try: import rpm
     except: 
         fedora_missing.append('rpm-python')
     try: import dbus
     except: 
+        debian_missing.append('python-dbus')
         ubuntu_missing.append('python-dbus')
         fedora_missing.append('dbus-python')
         archlinux_missing.append('dbus-python')
     try: import gnomekeyring
     except:
+        debian_missing.append('python-gnomekeyring')
         ubuntu_missing.append('python-gnomekeyring')
         fedora_missing.append('gnome-python2-gnomekeyring')
         archlinux_missing.append('python-gnomekeyring') # I am not sure. python-gnomekeyring is on AUR. get nothing from pacman -Ss python*keyring 
     if not os.path.exists('/usr/bin/unzip'):
+        debian_missing.append('unzip')
         ubuntu_missing.append('unzip')
         fedora_missing.append('unzip')
         archlinux_missing.append('unzip')
     if not os.path.exists('/usr/bin/wget'):
+        debian_missing.append('wget')
         ubuntu_missing.append('wget')
         fedora_missing.append('wget')
         archlinux_missing.append('wget')
-
+    if not os.path.exists('/usr/bin/gdebi-gtk'):
+        debian_missing.append('gdebi')
+        ubuntu_missing.append('gdebi')
+        
     try: # detect policykit version 0.9.x
         import dbus
         obj = dbus.SystemBus().get_object('org.freedesktop.PolicyKit', '/')
@@ -109,12 +146,18 @@ def check_required_packages():
     except:
         has_policykit_1 = False
     if not has_policykit_0 and not has_policykit_1:
+        debian_missing.append('policykit-1-gnome (or polkit-kde-1)')
         ubuntu_missing.append('policykit-gnome (or policykit-kde or policykit-1-gnome)') # FIXME: It is not good to list all these packages. Should be more precise.
         # FIXME: policykit-1-kde does not exist in Ubuntu.
         fedora_missing.append('polkit-gnome (or polkit-kde)')
         archlinux_missing.append('polkit-gnome (or polkit-kde)')
 
-    error = ((UBUNTU or UBUNTU_DERIV) and ubuntu_missing) or (FEDORA and fedora_missing) or (ARCHLINUX and archlinux_missing)
+    error = (
+             (DEBIAN and debian_missing)
+             or ((UBUNTU or UBUNTU_DERIV) and ubuntu_missing)
+             or (FEDORA and fedora_missing)
+             or (ARCHLINUX and archlinux_missing)
+            )
     if error:
         import StringIO
         message = StringIO.StringIO()
@@ -122,11 +165,13 @@ def check_required_packages():
         print >>message, ''
         print >>message, _('Please install these packages:')
         print >>message, ''
-        if UBUNTU or UBUNTU_DERIV:
+        if DEBIAN:
+            print >>message, '<span color="blue">', ', '.join(debian_missing), '</span>'
+        elif UBUNTU or UBUNTU_DERIV:
             print >>message, '<span color="blue">', ', '.join(ubuntu_missing), '</span>'
-        if FEDORA:
+        elif FEDORA:
             print >>message, '<span color="blue">', ', '.join(fedora_missing), '</span>'
-        if ARCHLINUX:
+        elif ARCHLINUX:
             print >>message, '<span color="blue">', ', '.join(archlinux_missing), '</span>'
         dialog = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons=gtk.BUTTONS_OK)
         dialog.set_title('Ailurus ' + AILURUS_VERSION)
@@ -278,9 +323,8 @@ class PaneLoader:
         if self.pane_object is None:
             if self.content_function: arg = [self.content_function()] # has argument
             else: arg = [] # no argument
-            TimeStat.begin(self.pane_class.__name__)
-            self.pane_object = self.pane_class(self.main_view, *arg)
-            TimeStat.end(self.pane_class.__name__)
+            with TimeStat(self.pane_class.__name__):
+                self.pane_object = self.pane_class(self.main_view, *arg)
         return self.pane_object
     def need_to_load(self):
         return self.pane_object is None
@@ -497,7 +541,7 @@ class MainView:
         if UBUNTU or UBUNTU_DERIV:
             self.register(UbuntuAPTRecoveryPane)
             self.register(UbuntuFastestMirrorPane)
-#            self.register(ReposConfigPane)
+            self.register(ReposConfigPane)
         if FEDORA:
             self.register(FedoraRPMRecoveryPane)
             self.register(FedoraFastestMirrorPane)
@@ -528,7 +572,6 @@ def show_agreement():
     label = gtk.Label(_('Do you agree?'))
     checkbox = gtk.CheckButton(_('I agree. Do not ask me again.'))
     checkbox.set_active(not Config.get_show_agreement())
-    checkbox.connect('toggled', lambda w: Config.set_show_agreement(not w.get_active()))
     dialog = gtk.MessageDialog(buttons=gtk.BUTTONS_YES_NO, type=gtk.MESSAGE_WARNING)
     dialog.set_markup(message)
     dialog.set_title(_('Warning'))
@@ -537,24 +580,25 @@ def show_agreement():
     dialog.vbox.show_all()
     ret = dialog.run()
     dialog.destroy()
+    if ret == gtk.RESPONSE_YES:
+        active = checkbox.get_active()
+        Config.set_show_agreement(not active)
     if ret != gtk.RESPONSE_YES:
         sys.exit()
 
 if Config.get_show_agreement():
     show_agreement()
 
-TimeStat.begin(_('start up'))
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-change_task_name()
-set_default_window_icon()
-check_required_packages()
-check_dbus_daemon_status()
-#from support.clientlib import try_send_delayed_data
-#try_send_delayed_data()
-
-while gtk.events_pending(): gtk.main_iteration()
-main_view = MainView()
-TimeStat.end(_('start up'))
+with TimeStat(_('start up')):
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    change_task_name()
+    set_default_window_icon()
+    detect_proxy_env()
+    check_required_packages()
+    check_dbus_daemon_status()
+    
+    while gtk.events_pending(): gtk.main_iteration()
+    main_view = MainView()
 
 gtk.gdk.threads_init()
 gtk.gdk.threads_enter()
