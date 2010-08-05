@@ -25,6 +25,7 @@ import sys, os
 from lib import *
 from libu import *
 from libsetting import *
+from samba import *
 
 def __change_kernel_swappiness():
     vbox = gtk.VBox()
@@ -104,7 +105,35 @@ def __restart_network():
      vbox.set_border_width(10)
      vbox.pack_start(align_bfm, False)
      return Setting(vbox, _('Restart network'), ['network'])
- 
+
+def __config_samba():
+    
+     button_config_samba=gtk.Button(_('Config samba').center(30))
+     button_config_samba.connect('clicked',confisamba)
+     button_config_samba.set_tooltip_text(_('This will start system-config-samba as root'))
+     
+     button_start_samba=gtk.Button(_('start samba').center(30))
+     button_start_samba.connect('clicked',runsamba)
+     button_start_samba.set_tooltip_text(_('These commands will be executed:\n'
+     		'/etc/init.d/smb start'))
+     		
+     button_stop_samba=gtk.Button(_('stop samba').center(30))
+     button_stop_samba.connect('clicked',stopsamba)
+     button_stop_samba.set_tooltip_text(_('These commands will be executed:\n'
+     		'/etc/init.d/smb stop'))
+     
+     hbox=gtk.HBox()
+     hbox.add(button_config_samba)
+     hbox.add(button_start_samba)
+     hbox.add(button_stop_samba)
+     
+     align_bfm=gtk.Alignment(0,0.5)
+     align_bfm.add(hbox)
+     vbox=gtk.VBox()
+     vbox.set_border_width(10)
+     vbox.pack_start(align_bfm,False)
+     return Setting(vbox,_('config samba'),['network'])
+     
 def __change_hostname(): 
 #   I have to use the class, to resolve problem of these codes:
 #        def __value_changed(button):
@@ -318,7 +347,8 @@ def get():
             __change_kernel_swappiness,
             __change_hostname,
             __configure_firefox,
-            __restart_network ]:
+            __restart_network,
+            __config_samba ]:
         try:
             a = f()
             if a: ret.append(a) # if such function is not supported, f() returns None.
