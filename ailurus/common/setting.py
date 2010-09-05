@@ -112,20 +112,20 @@ def __config_samba():
      button_config_samba.connect('clicked',confisamba)
      button_config_samba.set_tooltip_text(_('This will start system-config-samba as root'))
      
-     button_start_samba=gtk.Button(_('start samba').center(30))
-     button_start_samba.connect('clicked',runsamba)
-     button_start_samba.set_tooltip_text(_('These commands will be executed:\n'
-     		'/etc/init.d/smb start'))
+#     button_start_samba=gtk.Button(_('start samba').center(20))
+#    button_start_samba.connect('clicked',runsamba)
+#     button_start_samba.set_tooltip_text(_('These commands will be executed:\n'
+#     		'/etc/init.d/smb start and /etc/init.d/nmb start'))
      		
-     button_stop_samba=gtk.Button(_('stop samba').center(30))
-     button_stop_samba.connect('clicked',stopsamba)
-     button_stop_samba.set_tooltip_text(_('These commands will be executed:\n'
-     		'/etc/init.d/smb stop'))
+#     button_stop_samba=gtk.Button(_('stop samba').center(20))
+#     button_stop_samba.connect('clicked',stopsamba)
+#     button_stop_samba.set_tooltip_text(_('These commands will be executed:\n'
+#     		'/etc/init.d/smb stop and /etc/init.d/nmb stop'))
      
      hbox=gtk.HBox()
      hbox.add(button_config_samba)
-     hbox.add(button_start_samba)
-     hbox.add(button_stop_samba)
+#     hbox.add(button_start_samba)
+#     hbox.add(button_stop_samba)
      
      align_bfm=gtk.Alignment(0,0.5)
      align_bfm.add(hbox)

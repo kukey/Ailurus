@@ -19,46 +19,33 @@
 # along with Ailurus; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 
-from lib import * 
-import platform 
+from lib import *
+import platform
 
-#class software(self):
-#	name=platform.dist()[0:1]
-#	if name==('fedora')
-#		self=RPM()
-#	else name==('ubuntu')
-#		self=APT()
-#	else name==('debain')
-#		pass
 
-#def backup():
-#	try:
-#		t=open("/etc/samba/smb.conf","r").read()
-#		n=open("smbbackup","w")
-#		n.write(t)
-#	except IOError:
-#		notify('intall samba','ailurus found you not install samba and will heip you install it')
-#		RPM.install('samba')
-#		return scanandbankup()
-#	finally:
-#		n.close()
-		
+def backup():
+	try:
+		t=open("/etc/samba/smb.conf","r").read()
+		n=open("smbbackup","w")
+		n.write(t)
+	except IOError:
+		notify('please install samba')
+	finally:
+		n.close()
+        t.close()
+
 def confisamba(string):
 	string='system-config-samba'
-	RPM.installed('samba')
-	if False:
-		RPM.install('samba')
-	RPM.installed(string)
-	if False:
-		notify('intall config tools','airlurus will help you install this')
-		RPM.install('system-config-samba')
-	run_as_root('system-config-samba')
-	
-def runsamba(string):
-	string='/etc/init.d/smb start'
 	run_as_root(string)
+    if CommandFailError:
+        notify('please install system-config-samba.')
 
-def stopsamba(string):
-	string='/etc/init.d/smb stop'
-	run_as_root(string)
+#def runsamba(string):
+#	string='/etc/init.d/smb start;/etc/init.d/nmb start'
+#	run_as_root_in_terminal(string)
+#   this will touch off AVC
 
+#def stopsamba(string):
+#	string='/etc/init.d/smb stop;/etc/inti.d/nmb stop'
+#	run_as_root_in_terminal(string)
+#   this always touch off commandfailerror?
